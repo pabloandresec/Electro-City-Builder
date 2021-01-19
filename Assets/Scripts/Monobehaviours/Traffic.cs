@@ -18,7 +18,7 @@ public class Traffic : MonoBehaviour
 
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.T) && !calculatingPath)
+        if(Input.GetKeyDown(KeyCode.T) && !calculatingPath && !hasPath)
         {
             calculatingPath = true;
             RequestPath();
@@ -62,6 +62,8 @@ public class Traffic : MonoBehaviour
     private void ClearPath()
     {
         Debug.Log("Path complete");
+        currentIndex = -1;
+        calculatingPath = false;
         hasPath = false;
         path = null;
         correctPath = null;

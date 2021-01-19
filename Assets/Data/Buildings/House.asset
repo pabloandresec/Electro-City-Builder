@@ -12,14 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a9ee7b04dbb52845954c35bdf20f974, type: 3}
   m_Name: House
   m_EditorClassIdentifier: 
-  north: {fileID: 0}
-  east: {fileID: 0}
-  south: {fileID: 21300000, guid: 0b084dd61b42c334fbac6024d7b4b369, type: 3}
-  west: {fileID: 0}
-  interior: {fileID: 0}
-  description: 
+  sprite: {fileID: 21300000, guid: 0b084dd61b42c334fbac6024d7b4b369, type: 3}
+  description: "Peque\xF1a casa humana"
   buildingCost: 2000
-  buildingTime: 60
   upgradeCost: 1500
-  upgradeTime: 60
   upgradeBuildingName: 

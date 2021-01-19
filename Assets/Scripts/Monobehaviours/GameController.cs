@@ -22,31 +22,8 @@ public class GameController : MonoBehaviour
     void Start()
     {
         map = new int[width, height];
-        for (int x = 0; x < width; x++)
-        {
-            for (int y = 0; y < height; y++)
-            {
-                map[x, y] = buildTilemap.HasTile(new Vector3Int(x,y,0)) ? 1 : 0;
-            }
-        }
-        /*
-        map[0, 0] = 1;
-        map[1, 0] = 1;
-        map[2, 0] = 1;
-        map[3, 0] = 1;
-        map[2, 1] = 1;
-        map[2, 2] = 1;
-        map[3, 2] = 1;
-        map[3, 3] = 1;
-        map[3, 4] = 1;
-        map[2, 4] = 1;
-        map[1, 4] = 1;
-        map[0, 4] = 1;
-        map[0, 3] = 1;
-        */
-        Debug.Log("map init");
-
-        GetComponent<PGrid>().InitGrid();
+        Debug.Log("Map Init Empty");
+        //GetComponent<PGrid>().InitGrid(); PATHFINDING DESHABILITADO
         InputController.OnTap += SelectTile;
     }
 
