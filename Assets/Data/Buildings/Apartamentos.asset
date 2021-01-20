@@ -10,10 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6a9ee7b04dbb52845954c35bdf20f974, type: 3}
-  m_Name: House
+  m_Name: Apartamentos
   m_EditorClassIdentifier: 
   sprite: {fileID: 21300000, guid: 0b084dd61b42c334fbac6024d7b4b369, type: 3}
-  description: "Peque\xF1a casa humana"
+  description: "Peque\xF1o edifico de apartamentos\n"
   buildingCost: 2000
   upgradeCost: 1500
   upgradeBuildingName: 
+  components:
+  - {fileID: 11400000, guid: 21c10ded71521cd43a2247db726c60d1, type: 2}

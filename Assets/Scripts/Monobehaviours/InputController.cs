@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class InputController : MonoBehaviour
 {
@@ -18,8 +19,11 @@ public class InputController : MonoBehaviour
     private Vector2 lastTouchPos = Vector2.zero;
     private Vector2 endTouchPos;
     private float touchTime = 0;
+
+    private bool overUI = false;
     private bool dragginScreen = false;
-    private bool pinch = false;
+    private bool zooming = false;
+    private bool noInput = true;
 
     public static Action<Vector3> OnTap;
 
@@ -30,20 +34,45 @@ public class InputController : MonoBehaviour
 
     private void HandleInput()
     {
-        
-        if (Input.touchCount == 1 && !pinch)
+        if(Input.touchCount > 0)
         {
+            foreach (Touch touch in Input.touches)
+            {
+                int id = touch.fingerId;
+                if (EventSystem.current.IsPointerOverGameObject(id))
+                {
+                    Debug.Log("UI touched");
+                    overUI = true;
+                }
+            }
+        }
+
+        if (Input.touchCount == 2 && !dragginScreen && !overUI)
+        {
+            noInput = false;
+            zooming = true;
+            Touch touchA = Input.GetTouch(0);
+            Touch touchB = Input.GetTouch(1);
+            Vector2 touchAPreviousPosition = touchA.position - touchA.deltaPosition;
+            Vector2 touchBPreviousPosition = touchB.position - touchB.deltaPosition;
+            float prevMag = (touchAPreviousPosition - touchBPreviousPosition).magnitude;
+            float currentMag = (touchA.position - touchB.position).magnitude;
+            float diff = currentMag - prevMag;
+            ZoomCamera(diff * zoomMult);
+        }
+        if (Input.touchCount == 1 && !zooming && !overUI)
+        {
+            noInput = false;
             Touch t = Input.GetTouch(0);
             switch (t.phase)
             {
                 case TouchPhase.Began:
-                    dragginScreen = false;
                     startingTouchPos = mainCam.ScreenToWorldPoint(t.position);
                     touchTime = 0;
                     break;
                 case TouchPhase.Moved:
                     dragginScreen = true;
-                    if(!pinch)
+                    if(!zooming)
                     {
                         fingerMotion = startingTouchPos - (Vector2)mainCam.ScreenToWorldPoint(t.position);
                         mainCam.transform.position += (new Vector3(fingerMotion.x, fingerMotion.y, 0) * camSpeed) * Time.deltaTime;
@@ -54,7 +83,7 @@ public class InputController : MonoBehaviour
                     break;
                 case TouchPhase.Ended:
                     endTouchPos = mainCam.ScreenToWorldPoint(t.position);
-                    if (touchTime < maxTapTime && !dragginScreen && !pinch)
+                    if (touchTime < maxTapTime && !dragginScreen && !zooming)
                     {
                         OnTap?.Invoke(endTouchPos);
                     }
@@ -63,38 +92,26 @@ public class InputController : MonoBehaviour
                     break;
             }
         }
-        else if(Input.touchCount == 2)
+        if (Input.touchCount == 0)
         {
-            pinch = true;
-            Touch touchA = Input.GetTouch(0);
-            Touch touchB = Input.GetTouch(1);
-            Vector2 touchAPreviousPosition = touchA.position - touchA.deltaPosition;
-            Vector2 touchBPreviousPosition = touchB.position - touchB.deltaPosition;
-            float prevMag = (touchAPreviousPosition - touchBPreviousPosition).magnitude;
-            float currentMag = (touchA.position - touchB.position).magnitude;
-            float diff = currentMag - prevMag;
-
-            ZoomCamera(diff*zoomMult);
+            overUI = false;
+            noInput = true;
+            zooming = false;
+            dragginScreen = false;
         }
-        else if(Input.touchCount == 0)
-        {
-            if(pinch)
-            {
-                pinch = false;
-            }
-        }
-        MouseMovement();
-        ZoomCamera(Input.GetAxis("Mouse ScrollWheel"));
     }
 
     private void MouseMovement()
     {
-        if(Input.GetMouseButtonDown(0))
+        noInput = false;
+        
+        if (Input.GetMouseButtonDown(2))
         {
             startingTouchPos = mainCam.ScreenToWorldPoint(Input.mousePosition);
         }
-        else if(Input.GetMouseButton(0))
+        else if(Input.GetMouseButton(2))
         {
+            dragginScreen = true;
             fingerMotion = startingTouchPos - (Vector2)mainCam.ScreenToWorldPoint(Input.mousePosition);
             mainCam.transform.position += (new Vector3(fingerMotion.x, fingerMotion.y, 0) * camSpeed) * Time.deltaTime;
         }

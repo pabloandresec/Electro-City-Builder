@@ -14,4 +14,6 @@ public class BuildingData : ScriptableObject
     [Header("Upgrade Settings")]
     [SerializeField] private int upgradeCost;
     [SerializeField] private string upgradeBuildingName;
+    [Header("Components")]
+    [SerializeField] private List<ComponentData> components;
 }
