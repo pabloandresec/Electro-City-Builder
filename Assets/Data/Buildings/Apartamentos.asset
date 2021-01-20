@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a9ee7b04dbb52845954c35bdf20f974, type: 3}
   m_Name: Apartamentos
   m_EditorClassIdentifier: 
-  sprite: {fileID: 21300000, guid: 0b084dd61b42c334fbac6024d7b4b369, type: 3}
+  sprite: {fileID: 21300000, guid: 35f71e97d2bcd2a46916d1f59ca57e06, type: 3}
   description: "Peque\xF1o edifico de apartamentos\n"
   buildingCost: 2000
   upgradeCost: 1500

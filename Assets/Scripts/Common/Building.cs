@@ -6,6 +6,11 @@ public class Building
 {
     int totalPowerConsumption;
     public List<BuildingComponent> components;
+
+    public void CalculateTotalPowerComsumption(BuildingData data)
+    {
+
+    }
 }
 
 public class BuildingComponent
