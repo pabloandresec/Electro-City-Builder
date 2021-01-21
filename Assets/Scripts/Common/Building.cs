@@ -9,11 +9,10 @@ public class Building
     int listIndex; //indica el indice de donde se encuentra en la lista de datos de edificios
     int positionIndex; //indica la posicion en el mapa
     public List<BuildingComponent> components; //componentes que posee este edificio
-    int totalPowerConsumption; //Poder que consumio este edificio
+    public int totalPowerConsumption; //Poder que consumio este edificio
 
     public int ListIndex { get => listIndex; set => listIndex = value; }
     public int PositionIndex { get => positionIndex; set => positionIndex = value; }
-    public int TotalPowerConsumption { get => totalPowerConsumption; set => totalPowerConsumption = value; }
 
     #region Constructors
 

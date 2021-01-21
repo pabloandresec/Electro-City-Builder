@@ -18,6 +18,7 @@ public class GameController : MonoBehaviour
     [SerializeField] private Tilemap overlayTilemap;
     [SerializeField] private Tilemap buildTilemap;
     [SerializeField] private Tilemap groundTilemap;
+    [SerializeField] private UIController ui;
     [SerializeField] private List<BuildingData> buildings;
     [SerializeField] private List<ComponentData> components;
     [Header("Edificios Activos")]
@@ -27,6 +28,7 @@ public class GameController : MonoBehaviour
     [SerializeField] private int testIndex = 17;
     [SerializeField] private Vector3Int selectedTile = Vector3Int.zero;
 
+    private bool selected = false;
     private int[] map;
     private float tPassed = 0;
 
@@ -66,9 +68,8 @@ public class GameController : MonoBehaviour
 
         RefreshMap();
 
-        Debug.Log("Map Init Empty");
         //GetComponent<PGrid>().InitGrid(); PATHFINDING DESHABILITADO
-        InputController.OnTap += SelectTile;
+        InputController.OnTap += TileTapped;
     }
 
     private void RefreshMap()
@@ -80,6 +81,29 @@ public class GameController : MonoBehaviour
                 buildTilemap.SetTile(new Vector3Int(x, y, 0), buildings[map[TilePosToIndex(x, y)]].tile);
             }
         }
+    }
+
+    public void TileTapped(Vector3 worldPos)
+    {
+        if(selected)
+        {
+            DeselectTile();
+            ui.SetSelectedTileMenu(false, null);
+        }
+        else
+        {
+            SelectTile(worldPos);
+            int selectedBuilding = activeBuildings[TilePosToIndex(selectedTile.x, selectedTile.y)].ListIndex;
+            ui.SetSelectedTileMenu(true, buildings[selectedBuilding]);
+        }
+    }
+
+    private void DeselectTile()
+    {
+        //Clear previous selection
+        overlayTilemap.SetTile(selectedTile, null);
+        overlayTilemap.RefreshTile(selectedTile);
+        selected = false;
     }
 
     private void Update()
@@ -111,9 +135,7 @@ public class GameController : MonoBehaviour
 
     private void SelectTile(Vector3 worldPos)
     {
-        //Clear previous selection
-        overlayTilemap.SetTile(selectedTile, null);
-        overlayTilemap.RefreshTile(selectedTile);
+        
         //Calculate new selected pos
         Vector3Int newSelectedPos = overlayTilemap.WorldToCell(new Vector3(worldPos.x, worldPos.y, 0));
         //Clamping the new selected pos;
@@ -125,11 +147,12 @@ public class GameController : MonoBehaviour
         selectedTile = newSelectedPos;
         testIndex = TilePosToIndex(selectedTile.x, selectedTile.y);
         Debug.Log("Buildings index = " + testIndex);
+        selected = true;
     }
 
     private void OnDestroy()
     {
-        InputController.OnTap -= SelectTile;
+        InputController.OnTap -= TileTapped;
         Debug.Log("Cleaned Events");
     }
 
