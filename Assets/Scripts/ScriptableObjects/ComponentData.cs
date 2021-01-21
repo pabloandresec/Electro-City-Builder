@@ -5,17 +5,26 @@ using System;
 [CreateAssetMenu(fileName = "ComponentData", menuName = "City Builder Data/Component")]
 public class ComponentData : ScriptableObject
 {
+    [SerializeField] string displayName;
     [SerializeField] private Sprite icon;
+    [SerializeField] private ComponentCategory category;
     [SerializeField] private string description;
-    [SerializeField] private ComponentLevel[] levels;
+    [SerializeField] public int cost;
+    [SerializeField] public int durability;
+    [SerializeField] public int powerConsumption;
+    private int index;
+
+    public int Index { get => index; }
+
+    public void SetIndex(int i)
+    {
+        this.index = i;
+    }
 }
-[Serializable]
-public struct ComponentLevel
+
+public enum ComponentCategory
 {
-    public string name;
-    public Sprite icon;
-    public string description;
-    public int cost;
-    public string durability;
-    public string powerConsumption;
+    ILUMINACION,
+    CABLEADO,
+    TOMAS_DE_ELECTRICIDAD
 }

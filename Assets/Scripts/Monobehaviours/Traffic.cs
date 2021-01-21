@@ -16,6 +16,7 @@ public class Traffic : MonoBehaviour
     private bool calculatingPath = false;
     private int currentIndex = -1;
 
+    /*
     private void Update()
     {
         if(Input.GetKeyDown(KeyCode.T) && !calculatingPath && !hasPath)
@@ -24,6 +25,7 @@ public class Traffic : MonoBehaviour
             RequestPath();
         }
     }
+    */
 
     private void RequestPath()
     {

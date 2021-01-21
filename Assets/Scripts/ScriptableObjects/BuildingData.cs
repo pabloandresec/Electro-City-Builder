@@ -1,19 +1,27 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 [CreateAssetMenu(fileName = "BuildingData",menuName = "City Builder Data/Building")]
 public class BuildingData : ScriptableObject
 {
     [Header("Sprites")]
-    [SerializeField] private Sprite sprite;
+    public Sprite icon;
+    public Tile tile;
     [TextArea()]
-    [SerializeField] private string description;
+    public string description;
     [Header("Build Settings")]
-    [SerializeField] private int buildingCost;
+    public int buildingCost;
     [Header("Upgrade Settings")]
-    [SerializeField] private int upgradeCost;
-    [SerializeField] private string upgradeBuildingName;
-    [Header("Components")]
-    [SerializeField] private List<ComponentData> components;
+    public int upgradeCost;
+    public string upgradeBuildingName;
+    private int index;
+
+    public int Index { get => index; }
+
+    public void SetIndex(int i)
+    {
+        this.index = i;
+    }
 }

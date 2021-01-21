@@ -47,7 +47,7 @@ public class PGrid : MonoBehaviour {
             for (int y = 0; y < gameController.Height; y++)
             {
                 Vector2 worldPoint = tileGrid.CellToWorld(new Vector3Int(x, y, 0)) + gridOffset;
-                bool walkable = gameController.Map[x, y] == roadIndex ? true : false;
+                bool walkable = false;//gameController.Map[x, y] == roadIndex ? true : false;
                 grid[x, y] = new Node(walkable, worldPoint, x, y);
             }
         }

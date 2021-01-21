@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1300c813b95687c4fb23167cc54d443d, type: 3}
+  m_Name: FocoD
+  m_EditorClassIdentifier: 
+  displayName: Foco Schneider
+  icon: {fileID: -1049042450504685129, guid: 5e4c7092c343db747b9760c6d74c7bf5, type: 3}
+  category: 0
+  description: El Foco de los Focos
+  cost: 25
+  durability: 120
+  powerConsumption: 10
