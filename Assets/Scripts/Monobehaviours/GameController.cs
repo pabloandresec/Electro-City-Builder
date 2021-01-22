@@ -12,7 +12,7 @@ public class GameController : MonoBehaviour
     [Header("Game Settings")]
     [Range(0.2f,10)]
     [SerializeField] private float refreshRate;
-    [SerializeField] private GameSession currentGame;
+    [SerializeField] private GameSession currentGameSessionData;
     [Header("References")]
     [SerializeField] private Tile highlightTile;
     [SerializeField] private Tilemap overlayTilemap;
@@ -21,12 +21,12 @@ public class GameController : MonoBehaviour
     [SerializeField] private UIController ui;
     [SerializeField] private List<BuildingData> buildings;
     [SerializeField] private List<ComponentData> components;
-    [Header("Edificios Activos")]
+    [Header("Juego Activo")]
     [SerializeField] private Building[] activeBuildings;
-
+    [SerializeField] private PlayerState state = PlayerState.GAME;
     [Header("DEBUG")]
     [SerializeField] private int testIndex = 17;
-    [SerializeField] private Vector3Int selectedTile = Vector3Int.zero;
+    [SerializeField] private Vector3Int selectedTile = -Vector3Int.one;
 
     private bool selected = false;
     private int[] map;
@@ -40,6 +40,13 @@ public class GameController : MonoBehaviour
 
     void Start()
     {
+        ui.buyButton.onClick.AddListener(() =>
+        {
+            Debug.Log("Buy button pressed");
+            Build(selectedTile, 1);
+        });
+
+
         map = new int[width * height];
         for (int i = 0; i < buildings.Count; i++)
         {
@@ -50,6 +57,15 @@ public class GameController : MonoBehaviour
             components[i].SetIndex(i);
         }
         activeBuildings = new Building[width * height];
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                int posIndex = TilePosToIndex(x, y);
+                activeBuildings[posIndex] = new Building(buildings[0], posIndex);
+            }
+        }
+
 
         map[TilePosToIndex(7, 6)] = buildings[2].Index;
         map[TilePosToIndex(8, 6)] = buildings[2].Index;
@@ -72,6 +88,52 @@ public class GameController : MonoBehaviour
         InputController.OnTap += TileTapped;
     }
 
+    internal void TryAddBuildingComponent(int index)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void TryBuild(int index)
+    {
+        if(selected)
+        {
+            if(currentGameSessionData != null)
+            {
+                if(currentGameSessionData.money >= buildings[index].buildingCost)
+                {
+                    Build(selectedTile, index);
+                    currentGameSessionData.money -= buildings[index].buildingCost;
+                }
+                else
+                {
+                    Debug.Log(" NA MANEY !!");
+                }
+            }
+            else
+            {
+                Debug.LogError("No session Data!!");
+            }
+        }
+        else
+        {
+            Debug.Log("No tile selected");
+        }
+    }
+
+    public void Build(Vector3Int tilePos, int buildingIndex)
+    {
+        map[TilePosToIndex(tilePos.x, tilePos.y)] = buildingIndex;
+        activeBuildings[TilePosToIndex(tilePos.x, tilePos.y)] = new Building(buildings[buildingIndex], TilePosToIndex(tilePos.x, tilePos.y));
+        ui.UpdateUI(currentGameSessionData.money, 0);
+        RefreshMap();
+        Debug.Log("Building constructed");
+    }
+
+    private int CalculateAvailablePower()
+    {
+        throw new NotImplementedException();
+    }
+
     private void RefreshMap()
     {
         for (int x = 0; x < width; x++)
@@ -85,6 +147,10 @@ public class GameController : MonoBehaviour
 
     public void TileTapped(Vector3 worldPos)
     {
+        if(state == PlayerState.MENUS)
+        {
+            return;
+        }
         if(selected)
         {
             DeselectTile();
@@ -93,9 +159,23 @@ public class GameController : MonoBehaviour
         else
         {
             SelectTile(worldPos);
+            Debug.Log("Sending info of " + selectedTile + " index " +TilePosToIndex(selectedTile.x, selectedTile.y));
             int selectedBuilding = activeBuildings[TilePosToIndex(selectedTile.x, selectedTile.y)].ListIndex;
             ui.SetSelectedTileMenu(true, buildings[selectedBuilding]);
         }
+    }
+
+    public void SwitchState(int newState)
+    {
+        PlayerState s = (PlayerState)newState;
+        SwitchState(s);
+    }
+
+    public void SwitchState(PlayerState newState)
+    {
+        //Logica
+
+        state = newState;
     }
 
     private void DeselectTile()

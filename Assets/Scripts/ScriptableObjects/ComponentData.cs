@@ -5,13 +5,14 @@ using System;
 [CreateAssetMenu(fileName = "ComponentData", menuName = "City Builder Data/Component")]
 public class ComponentData : ScriptableObject
 {
-    [SerializeField] string displayName;
-    [SerializeField] private Sprite icon;
-    [SerializeField] private ComponentCategory category;
-    [SerializeField] private string description;
-    [SerializeField] public int cost;
-    [SerializeField] public int durability;
-    [SerializeField] public int powerConsumption;
+    public string displayName;
+    public Sprite icon;
+    public ComponentCategory category;
+    public string description;
+    public int cost;
+    public int durability;
+    public int powerConsumption;
+    public bool premium;
     private int index;
 
     public int Index { get => index; }

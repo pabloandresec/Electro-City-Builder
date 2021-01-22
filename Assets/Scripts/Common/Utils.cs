@@ -101,5 +101,11 @@ public enum Orientation
     VERTICAL
 }
 
+public enum PlayerState
+{
+    GAME = 0,
+    MENUS = 1
+}
+
 
 

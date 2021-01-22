@@ -14,6 +14,9 @@ TextureImporter:
   - first:
       213: 1821209049913759115
     second: control1_3
+  - first:
+      213: 7223029854710977674
+    second: CircleA
   externalObjects: {}
   serializedVersion: 11
   mipmaps:
@@ -192,6 +195,27 @@ TextureImporter:
       bones: []
       spriteID: b8516d15bfb364910800000000000000
       internalID: 1821209049913759115
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CircleA
+      rect:
+        serializedVersion: 2
+        x: 65
+        y: 129
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 6, y: 7, z: 7, w: 6}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a84d614326b5d3460800000000000000
+      internalID: 7223029854710977674
       vertices: []
       indices: 
       edges: []

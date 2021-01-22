@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a9ee7b04dbb52845954c35bdf20f974, type: 3}
   m_Name: Construction
   m_EditorClassIdentifier: 
-  icon: {fileID: 0}
-  tile: {fileID: 0}
-  description: Parcela vacia
+  icon: {fileID: 21300000, guid: 26c48c5cada11f944a654e74dc0ba4ce, type: 3}
+  tile: {fileID: 11400000, guid: bf64b2f6cf0de004fb8bc9ab01590db9, type: 2}
+  description: Listo para construir...
   buildingCost: 0
+  premium: 0
   upgradeCost: 0
   upgradeBuildingName: 

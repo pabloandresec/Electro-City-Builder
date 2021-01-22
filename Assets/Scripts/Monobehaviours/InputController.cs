@@ -41,7 +41,6 @@ public class InputController : MonoBehaviour
                 int id = touch.fingerId;
                 if (EventSystem.current.IsPointerOverGameObject(id))
                 {
-                    Debug.Log("UI touched");
                     overUI = true;
                 }
             }
