@@ -70,7 +70,8 @@ public class GameController : MonoBehaviour
         activeBuildings[TilePosToIndex(8, 7)].AddBuildingComponent(components[0]);
 
         RefreshMap();
-        ui.UpdateUI(currentGameSessionData.money, 0);
+        RefreshGame();
+        ui.UpdateUI(currentGameSessionData.money, CalculateAvailablePower());
 
         //GetComponent<PGrid>().InitGrid(); PATHFINDING DESHABILITADO
         InputController.OnTap += TileTapped;
@@ -119,10 +120,15 @@ public class GameController : MonoBehaviour
         {
             if (currentGameSessionData != null)
             {
-                Building b = activeBuildings[TilePosToIndex(selectedTile.x, selectedTile.y)]; //Edificio a modificar
-                BuildingData d = buildings[b.ListIndex]; //Data para referencias del edificio
-                int currentDeviceAmount = b.currentCompAmounts.Find(val => val.category == components[index].category).val;
-                int maxDeviceAllowed = -1;
+                Building b = activeBuildings[TilePosToIndex(selectedTile.x, selectedTile.y)]; // Edificio a modificar
+                BuildingData d = buildings[b.ListIndex]; // Data para referencias del edificio
+                ComponentLimit currentAount = b.currentCompAmounts.Find(val => val.category == components[index].category);// Trata de obtener la cantidad de esos dispositivos
+                int currentDeviceAmount = 0;
+                if (currentAount != null)
+                {
+                    currentDeviceAmount = currentAount.val;
+                } 
+                int maxDeviceAllowed = -1; // Trata de obtener la cantidad maxima permitida de esos dispositivos
                 foreach (ComponentLimit c in d.limits)
                 {
                     if (c.category == components[index].category)
@@ -205,14 +211,19 @@ public class GameController : MonoBehaviour
     {
         map[tilePos.x, tilePos.y] = buildingIndex;
         activeBuildings[TilePosToIndex(tilePos.x, tilePos.y)] = new Building(buildings[buildingIndex], TilePosToIndex(tilePos.x, tilePos.y));
-        ui.UpdateUI(currentGameSessionData.money, 0);
+        ui.UpdateUI(currentGameSessionData.money, CalculateAvailablePower());
         RefreshMap();
         Debug.Log("Building constructed");
     }
 
     private int CalculateAvailablePower()
     {
-        throw new NotImplementedException();
+        int total = 0;
+        foreach(Building b in activeBuildings)
+        {
+            total += b.totalPowerConsumption;
+        }
+        return total;
     }
 
     private void RefreshMap()
@@ -285,10 +296,13 @@ public class GameController : MonoBehaviour
     private void UpdateBuildings()
     {
         Debug.Log("Refreshing buildings");
+        int totalPow = 0;
         for (int i = 0; i < activeBuildings.Length; i++)
         {
             activeBuildings[i].UpdateComponentsLife(components);
+            totalPow += activeBuildings[i].totalPowerConsumption;
         }
+        ui.UpdateUI(currentGameSessionData.money, totalPow);
     }
 
     private void SelectTile(Vector3 worldPos)

@@ -55,7 +55,7 @@ public class UIController : MonoBehaviour
     public void UpdateUI(int currentMoney, int powerAvailable)
     {
         money.text = currentMoney.ToString();
-        power.text = powerAvailable.ToString();
+        power.text = powerAvailable.ToString() + " / 1000";
     }
 
     public void SetComponentsAmounts(Transform list)
@@ -68,7 +68,6 @@ public class UIController : MonoBehaviour
         }
         BuildingData data = game.Buildings[building.ListIndex];
         ComponentCategory[] values = (ComponentCategory[])Enum.GetValues(typeof(ComponentCategory));
-        int[] amounts = new int[values.Length];
         foreach(ComponentCategory cat in values)
         {
             List<BuildingComponent> bc = building.components.FindAll(comp => game.Components[comp.index].category.ToString() == cat.ToString());
