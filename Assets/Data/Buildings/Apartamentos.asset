@@ -18,3 +18,12 @@ MonoBehaviour:
   buildingCost: 2000
   upgradeCost: 1500
   upgradeBuildingName: 
+  limits:
+  - category: 0
+    val: 20
+  - category: 1
+    val: 20
+  - category: 2
+    val: 20
+  - category: 3
+    val: 20

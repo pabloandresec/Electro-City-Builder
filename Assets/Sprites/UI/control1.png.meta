@@ -17,6 +17,9 @@ TextureImporter:
   - first:
       213: 7223029854710977674
     second: CircleA
+  - first:
+      213: -7625161664147367859
+    second: Splitter
   externalObjects: {}
   serializedVersion: 11
   mipmaps:
@@ -208,7 +211,7 @@ TextureImporter:
         width: 14
         height: 14
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 6, y: 7, z: 7, w: 6}
       outline: []
       physicsShape: []
@@ -216,6 +219,27 @@ TextureImporter:
       bones: []
       spriteID: a84d614326b5d3460800000000000000
       internalID: 7223029854710977674
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Splitter
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 26
+        width: 17
+        height: 6
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 4, y: 3, z: 5, w: 2}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d48d195cddbfd2690800000000000000
+      internalID: -7625161664147367859
       vertices: []
       indices: 
       edges: []

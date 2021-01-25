@@ -19,3 +19,5 @@ MonoBehaviour:
   cost: 20
   durability: 80
   powerConsumption: 10
+  premium: 0
+  color: {r: 1, g: 1, b: 1, a: 1}

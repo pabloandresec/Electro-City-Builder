@@ -13,6 +13,7 @@ public class ComponentData : ScriptableObject
     public int durability;
     public int powerConsumption;
     public bool premium;
+    public Color color;
     private int index;
 
     public int Index { get => index; }
@@ -25,7 +26,8 @@ public class ComponentData : ScriptableObject
 
 public enum ComponentCategory
 {
-    ILUMINACION,
-    CABLEADO,
-    TOMAS_DE_ELECTRICIDAD
+    ILUMINACION = 0,
+    CABLEADO = 1,
+    TOMAS_DE_ELECTRICIDAD = 2,
+    TERMICAS = 3
 }

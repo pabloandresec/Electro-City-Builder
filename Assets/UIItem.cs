@@ -24,6 +24,7 @@ public class UIItem : MonoBehaviour
         bar.gameObject.SetActive(false);
         icon.sprite = data.icon;
         index = data.Index;
+        premium.SetActive(false);
     }
 
     public void FillData(ComponentData data)
@@ -34,5 +35,15 @@ public class UIItem : MonoBehaviour
         bar.gameObject.SetActive(false);
         icon.sprite = data.icon;
         index = data.Index;
+        premium.SetActive(data.premium);
+
+        Image[] images = gameObject.GetComponentsInChildren<Image>();
+        foreach(Image g in images)
+        {
+            if(g != icon)
+            {
+                g.color = data.color;
+            }
+        }
     }
 }

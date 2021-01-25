@@ -28,34 +28,68 @@ public class GameController : MonoBehaviour
     [SerializeField] private int testIndex = 17;
     [SerializeField] private Vector3Int selectedTile = -Vector3Int.one;
 
+    private Building selectedBuilding;
     private bool selected = false;
-    private int[] map;
+    private int[,] map; //For pathfinding & map draw
     private float tPassed = 0;
 
     public int Width { get => width; }
     public int Height { get => height; }
-    public int[] Map { get => map;}
+    public int[,] Map { get => map;}
     public List<BuildingData> Buildings { get => buildings; set => buildings = value; }
     public List<ComponentData> Components { get => components; set => components = value; }
 
     void Start()
     {
+        //Debug test Button que establece la funcion del boton comprar en una casilla vacia
         ui.buyButton.onClick.AddListener(() =>
         {
             Debug.Log("Buy button pressed");
             Build(selectedTile, 1);
+            DeselectTile();
         });
+        // End debug test Button
 
+        map = new int[width, height];
+        InitDataIndexation(); //Indexa los datos para facilitar su acceso y ahorrar memoria
+        PopulatingActiveBuildings(); //Crear los datos de edificios activos en los que se 
 
-        map = new int[width * height];
-        for (int i = 0; i < buildings.Count; i++)
+        map[7, 6] = buildings[2].Index;
+        map[8, 6] = buildings[2].Index;
+        map[7, 7] = buildings[2].Index;
+        map[8, 7] = buildings[2].Index;
+
+        activeBuildings[TilePosToIndex(7, 6)] = new Building(buildings[2], TilePosToIndex(7, 6));
+        activeBuildings[TilePosToIndex(8, 6)] = new Building(buildings[2], TilePosToIndex(8, 6));
+        activeBuildings[TilePosToIndex(7, 7)] = new Building(buildings[2], TilePosToIndex(7, 7));
+        activeBuildings[TilePosToIndex(8, 7)] = new Building(buildings[2], TilePosToIndex(8, 7));
+
+        activeBuildings[TilePosToIndex(7, 6)].AddBuildingComponent(components[0]);
+        activeBuildings[TilePosToIndex(8, 6)].AddBuildingComponent(components[0]);
+        activeBuildings[TilePosToIndex(7, 7)].AddBuildingComponent(components[0]);
+        activeBuildings[TilePosToIndex(8, 7)].AddBuildingComponent(components[0]);
+
+        RefreshMap();
+        ui.UpdateUI(currentGameSessionData.money, 0);
+
+        //GetComponent<PGrid>().InitGrid(); PATHFINDING DESHABILITADO
+        InputController.OnTap += TileTapped;
+    }
+
+    public Building GetSelectedBuildingData()
+    {
+        if(selected)
         {
-            buildings[i].SetIndex(i);
+            return activeBuildings[TilePosToIndex(selectedTile.x, selectedTile.y)];
         }
-        for (int i = 0; i < components.Count; i++)
+        else
         {
-            components[i].SetIndex(i);
+            return null;
         }
+    }
+
+    private void PopulatingActiveBuildings()
+    {
         activeBuildings = new Building[width * height];
         for (int x = 0; x < width; x++)
         {
@@ -65,32 +99,78 @@ public class GameController : MonoBehaviour
                 activeBuildings[posIndex] = new Building(buildings[0], posIndex);
             }
         }
-
-
-        map[TilePosToIndex(7, 6)] = buildings[2].Index;
-        map[TilePosToIndex(8, 6)] = buildings[2].Index;
-        map[TilePosToIndex(7, 7)] = buildings[2].Index;
-        map[TilePosToIndex(8, 7)] = buildings[2].Index;
-
-        activeBuildings[TilePosToIndex(7, 6)] = new Building(buildings[2], TilePosToIndex(7, 6));
-        activeBuildings[TilePosToIndex(8, 6)] = new Building(buildings[2], TilePosToIndex(8, 6));
-        activeBuildings[TilePosToIndex(7, 7)] = new Building(buildings[2], TilePosToIndex(7, 7));
-        activeBuildings[TilePosToIndex(8, 7)] = new Building(buildings[2], TilePosToIndex(8, 7));
-
-        activeBuildings[TilePosToIndex(7, 6)].AddBuildingComponent(components[0], 20);
-        activeBuildings[TilePosToIndex(8, 6)].AddBuildingComponent(components[0], 20);
-        activeBuildings[TilePosToIndex(7, 7)].AddBuildingComponent(components[0], 20);
-        activeBuildings[TilePosToIndex(8, 7)].AddBuildingComponent(components[0], 20);
-
-        RefreshMap();
-
-        //GetComponent<PGrid>().InitGrid(); PATHFINDING DESHABILITADO
-        InputController.OnTap += TileTapped;
     }
 
-    internal void TryAddBuildingComponent(int index)
+    private void InitDataIndexation()
     {
-        throw new NotImplementedException();
+        for (int i = 0; i < buildings.Count; i++)
+        {
+            buildings[i].SetIndex(i);
+        }
+        for (int i = 0; i < components.Count; i++)
+        {
+            components[i].SetIndex(i);
+        }
+    }
+
+    public void TryAddBuildingComponent(int index)
+    {
+        if (selected)
+        {
+            if (currentGameSessionData != null)
+            {
+                Building b = activeBuildings[TilePosToIndex(selectedTile.x, selectedTile.y)]; //Edificio a modificar
+                BuildingData d = buildings[b.ListIndex]; //Data para referencias del edificio
+                int currentDeviceAmount = b.currentCompAmounts.Find(val => val.category == components[index].category).val;
+                int maxDeviceAllowed = -1;
+                foreach (ComponentLimit c in d.limits)
+                {
+                    if (c.category == components[index].category)
+                    {
+                        maxDeviceAllowed = c.val;
+                        break;
+                    }
+                }
+                if(maxDeviceAllowed > 0)
+                {
+                    if(currentDeviceAmount >= maxDeviceAllowed)
+                    {
+                        Debug.Log("No more slots available");
+                        return;
+                    }
+                    if (currentGameSessionData.money >= components[index].cost)
+                    {
+                        activeBuildings[TilePosToIndex(selectedTile.x, selectedTile.y)].AddBuildingComponent(components[index]);
+                        currentGameSessionData.money -= components[index].cost;
+                    }
+                    else
+                    {
+                        Debug.Log(" NA MANEY !!");
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning(" No Limit set for "+ components[index].displayName);
+                    if (currentGameSessionData.money >= components[index].cost)
+                    {
+                        activeBuildings[TilePosToIndex(selectedTile.x, selectedTile.y)].AddBuildingComponent(components[index]);
+                        currentGameSessionData.money -= components[index].cost;
+                    }
+                    else
+                    {
+                        Debug.Log(" NA MANEY !!");
+                    }
+                }
+            }
+            else
+            {
+                Debug.LogError("No session Data!!");
+            }
+        }
+        else
+        {
+            Debug.Log("No tile selected");
+        }
     }
 
     public void TryBuild(int index)
@@ -103,6 +183,7 @@ public class GameController : MonoBehaviour
                 {
                     Build(selectedTile, index);
                     currentGameSessionData.money -= buildings[index].buildingCost;
+                    DeselectTile();
                 }
                 else
                 {
@@ -122,7 +203,7 @@ public class GameController : MonoBehaviour
 
     public void Build(Vector3Int tilePos, int buildingIndex)
     {
-        map[TilePosToIndex(tilePos.x, tilePos.y)] = buildingIndex;
+        map[tilePos.x, tilePos.y] = buildingIndex;
         activeBuildings[TilePosToIndex(tilePos.x, tilePos.y)] = new Building(buildings[buildingIndex], TilePosToIndex(tilePos.x, tilePos.y));
         ui.UpdateUI(currentGameSessionData.money, 0);
         RefreshMap();
@@ -140,7 +221,7 @@ public class GameController : MonoBehaviour
         {
             for (int y = 0; y < height; y++)
             {
-                buildTilemap.SetTile(new Vector3Int(x, y, 0), buildings[map[TilePosToIndex(x, y)]].tile);
+                buildTilemap.SetTile(new Vector3Int(x, y, 0), buildings[map[x, y]].tile);
             }
         }
     }
@@ -154,7 +235,6 @@ public class GameController : MonoBehaviour
         if(selected)
         {
             DeselectTile();
-            ui.SetSelectedTileMenu(false, null);
         }
         else
         {
@@ -178,12 +258,13 @@ public class GameController : MonoBehaviour
         state = newState;
     }
 
-    private void DeselectTile()
+    public void DeselectTile()
     {
         //Clear previous selection
         overlayTilemap.SetTile(selectedTile, null);
         overlayTilemap.RefreshTile(selectedTile);
         selected = false;
+        ui.SetSelectedTileMenu(false, null);
     }
 
     private void Update()
@@ -203,13 +284,10 @@ public class GameController : MonoBehaviour
 
     private void UpdateBuildings()
     {
-        foreach(Building b in activeBuildings)
+        Debug.Log("Refreshing buildings");
+        for (int i = 0; i < activeBuildings.Length; i++)
         {
-            if(b != null)
-            {
-                Debug.Log("Updating " + buildings[b.ListIndex].name + " at " + IndexToTilePos(b.PositionIndex));
-                b.UpdateComponentsLife(components);
-            }
+            activeBuildings[i].UpdateComponentsLife(components);
         }
     }
 

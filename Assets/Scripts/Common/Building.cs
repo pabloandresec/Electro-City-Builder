@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using System.Linq;
 
 [Serializable]
 public class Building
@@ -9,6 +10,7 @@ public class Building
     int listIndex; //indica el indice de donde se encuentra en la lista de datos de edificios
     int positionIndex; //indica la posicion en el mapa
     public List<BuildingComponent> components; //componentes que posee este edificio
+    public List<ComponentLimit> currentCompAmounts;
     public int totalPowerConsumption; //Poder que consumio este edificio
 
     public int ListIndex { get => listIndex; set => listIndex = value; }
@@ -27,24 +29,60 @@ public class Building
 
     public void UpdateComponentsLife(List<ComponentData> referenceData)
     {
+        totalPowerConsumption = 0;
         if(components != null && components.Count > 0)
         {
-            foreach (BuildingComponent bc in components)
+            for (int i = 0; i < components.Count; i++)
             {
-                totalPowerConsumption += referenceData[bc.index].powerConsumption;
-                bc.life = bc.life - 1;
+                totalPowerConsumption += referenceData[components[i].index].powerConsumption;
+                components[i].life--;
+
+                if(components[i].life <= 0)
+                {
+                    RemoveBuildingComponent(i, referenceData);
+                }
             }
         }
     }
 
-    public void AddBuildingComponent(ComponentData componentData, int quant)
+    public void RemoveBuildingComponent(int i, List<ComponentData> referenceData)
+    {
+        currentCompAmounts.Find(val => val.category == referenceData[components[i].index].category).val--;
+        components.RemoveAt(i);
+    }
+
+    public void AddBuildingComponent(ComponentData componentData)
     {
         BuildingComponent bc = new BuildingComponent(componentData);
-        for (int i = 0; i < quant; i++)
+        components.Add(bc);
+        Debug.Log("Added " + componentData.name + " to " + ListIndex + " at " + PositionIndex);
+        UpdateComponentCounts(componentData.category);
+    }
+
+    private void UpdateComponentCounts(ComponentCategory _category)
+    {
+        if(currentCompAmounts == null)
         {
-            components.Add(bc);
+            currentCompAmounts = new List<ComponentLimit>();
+            currentCompAmounts.Add(new ComponentLimit(_category, 1));
         }
-        Debug.Log("Added " + quant + " " + componentData.name + " to " + listIndex);
+        else
+        {
+            bool found = false;
+            for (int i = 0; i < currentCompAmounts.Count; i++)
+            {
+                if(currentCompAmounts[i].category == _category)
+                {
+                    currentCompAmounts[i].val += 1;
+                    found = true;
+                    break;
+                }
+            }
+            if(!found)
+            {
+                currentCompAmounts.Add(new ComponentLimit(_category, 1));
+            }
+        }
     }
 }
 [Serializable]

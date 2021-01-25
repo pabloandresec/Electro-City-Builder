@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -17,11 +18,25 @@ public class BuildingData : ScriptableObject
     public int upgradeCost;
     public string upgradeBuildingName;
     private int index;
+    [Header("Components")]
+    public ComponentLimit[] limits;
 
     public int Index { get => index; }
 
     public void SetIndex(int i)
     {
         this.index = i;
+    }
+}
+[Serializable]
+public class ComponentLimit
+{
+    public ComponentCategory category;
+    public int val;
+
+    public ComponentLimit(ComponentCategory category, int val)
+    {
+        this.category = category;
+        this.val = val;
     }
 }
