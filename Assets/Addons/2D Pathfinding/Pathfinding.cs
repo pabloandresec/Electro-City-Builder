@@ -132,15 +132,8 @@ public class Pathfinding : MonoBehaviour {
 			currentNode = currentNode.parent;
 		}
         Vector2[] waypoints;
-        if (grid.diagonals)
-        {
-            waypoints = SimplifyPath(path);
-        }
-        else
-        {
-            waypoints = PathToVectorArray(path);
-        }
-		Array.Reverse(waypoints);
+        waypoints = PathToVectorArray(path);
+        Array.Reverse(waypoints);
 		return waypoints;
 		
 	}

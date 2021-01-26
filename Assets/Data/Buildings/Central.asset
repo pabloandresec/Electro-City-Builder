@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6a9ee7b04dbb52845954c35bdf20f974, type: 3}
-  m_Name: Empty
+  m_Name: Central
   m_EditorClassIdentifier: 
-  icon: {fileID: 0}
-  tile: {fileID: 0}
-  description: Parcela vacia
-  buildingCost: 3000
-  essential: 0
-  upgradeCost: 0
+  icon: {fileID: 21300000, guid: e2bcbfd319ba7e14b890c58af38e4ea7, type: 3}
+  tile: {fileID: 11400000, guid: 0b8422714e84a5e408752bc963cc477e, type: 2}
+  description: Provee de energia a la ciudad
+  buildingCost: 999999
+  essential: 1
+  upgradeCost: 999999
   upgradeBuildingName: 
   hasComponents: 0
   limits: []

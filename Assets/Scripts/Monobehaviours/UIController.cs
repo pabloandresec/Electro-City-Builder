@@ -101,7 +101,7 @@ public class UIController : MonoBehaviour
             Destroy(holderList.GetChild(i).gameObject);
         }
 
-        for (int i = 2; i < game.Buildings.Count; i++)
+        for (int i = 3; i < game.Buildings.Count; i++)
         {
             GameObject itemInstantiated = Instantiate(buyItemPrefab, holderList, false);
             UIItem uiItem = itemInstantiated.GetComponent<UIItem>();
@@ -111,6 +111,7 @@ public class UIController : MonoBehaviour
                 Debug.Log("Trying to build " + uiItem.Index);
                 game.TryBuild(uiItem.Index);
                 uiItem.transform.parent.parent.gameObject.SetActive(false);
+                //GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(2);
             });
         }
         Debug.Log(holderList.name + " filled with buildings!");
@@ -138,6 +139,7 @@ public class UIController : MonoBehaviour
             {
                 Debug.Log("Trying to add " + categorizedComponents[uiItem.Index].displayName);
                 game.TryAddBuildingComponent(uiItem.Index);
+                //GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(2);
             });
         }
         Debug.Log(holderList.name + " filled with components!");
@@ -154,23 +156,20 @@ public class UIController : MonoBehaviour
             {
                 case 0:
                     tileSelectedMenu.transform.GetChild(2).GetChild(0).gameObject.SetActive(true);
-                    tileSelectedMenu.transform.GetChild(2).GetChild(1).gameObject.SetActive(false);
-                    tileSelectedMenu.transform.GetChild(2).GetChild(2).gameObject.SetActive(false);
                     tileSelectedMenu.transform.GetChild(2).GetChild(3).gameObject.SetActive(false);
                 break;
                 case 1:
                     tileSelectedMenu.transform.GetChild(2).GetChild(0).gameObject.SetActive(false);
-                    tileSelectedMenu.transform.GetChild(2).GetChild(1).gameObject.SetActive(false);
-                    tileSelectedMenu.transform.GetChild(2).GetChild(2).gameObject.SetActive(false);
                     tileSelectedMenu.transform.GetChild(2).GetChild(3).gameObject.SetActive(true);
                 break;
                 default:
                     tileSelectedMenu.transform.GetChild(2).GetChild(0).gameObject.SetActive(false);
-                    tileSelectedMenu.transform.GetChild(2).GetChild(1).gameObject.SetActive(true);
-                    tileSelectedMenu.transform.GetChild(2).GetChild(2).gameObject.SetActive(true);
                     tileSelectedMenu.transform.GetChild(2).GetChild(3).gameObject.SetActive(false);
                 break;
             }
+            bool upgradeAvailable = buildingData.upgradeBuildingName == "" ? false : true;
+            tileSelectedMenu.transform.GetChild(2).GetChild(1).gameObject.SetActive(upgradeAvailable);
+            tileSelectedMenu.transform.GetChild(2).GetChild(2).gameObject.SetActive(buildingData.hasComponents);
         }
         else
         {

@@ -9,16 +9,18 @@ public class BuildingData : ScriptableObject
 {
     [Header("Sprites")]
     public Sprite icon;
-    public Tile tile;
+    public TileBase tile;
     [TextArea()]
     public string description;
     [Header("Build Settings")]
     public int buildingCost;
+    public bool essential = false;
     [Header("Upgrade Settings")]
     public int upgradeCost;
     public string upgradeBuildingName;
     private int index;
     [Header("Components")]
+    public bool hasComponents = true;
     public ComponentLimit[] limits;
 
     public int Index { get => index; }

@@ -23,6 +23,7 @@ public class Building
         this.listIndex = data.Index;
         this.positionIndex = posInd; 
         this.components = new List<BuildingComponent>();
+        this.currentCompAmounts = new List<ComponentLimit>();
     }
 
     #endregion
@@ -53,6 +54,10 @@ public class Building
 
     public void AddBuildingComponent(ComponentData componentData)
     {
+        if(components == null)
+        {
+            components = new List<BuildingComponent>();
+        }
         BuildingComponent bc = new BuildingComponent(componentData);
         components.Add(bc);
         Debug.Log("Added " + componentData.name + " to " + ListIndex + " at " + PositionIndex);
