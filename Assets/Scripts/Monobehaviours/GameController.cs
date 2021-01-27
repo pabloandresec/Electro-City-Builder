@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Random = UnityEngine.Random;
 using UnityEngine.Tilemaps;
 using System.Collections.Generic;
 using System;
@@ -36,18 +37,23 @@ public class GameController : MonoBehaviour
     public int Width { get => width; }
     public int Height { get => height; }
     public int[,] Map { get => map;}
-    public List<BuildingData> Buildings { get => buildings; set => buildings = value; }
-    public List<ComponentData> Components { get => components; set => components = value; }
+    public List<BuildingData> Buildings { get => buildings; }
+    public List<ComponentData> Components { get => components; }
+    public Building[] ActiveBuildings { get => activeBuildings; }
+    public List<Vector2Int> roads;
+    public GameObject trafficPrefab;
 
     void Start()
     {
         map = new int[width, height];
+        roads = new List<Vector2Int>();
         InitDataIndexation(); //Indexa los datos para facilitar su acceso y ahorrar memoria
         PopulatingActiveBuildings(); //Crear los datos de edificios activos en los que se 
 
         map[8, 8] = buildings[2].Index; //Central
         for (int x = 0; x < 16; x++)//Roads down the middle
         {
+            roads.Add(new Vector2Int(x,7));
             map[x, 7] = buildings[3].Index;
             activeBuildings[TilePosToIndex(x, 7)] = new Building(buildings[3], TilePosToIndex(x, 7));
         }
@@ -60,6 +66,13 @@ public class GameController : MonoBehaviour
 
         activeBuildings[TilePosToIndex(7, 6)].AddBuildingComponent(components[0]);
         activeBuildings[TilePosToIndex(8, 6)].AddBuildingComponent(components[0]);
+
+        for(int i = 0;i < 10; i++)
+        {
+            Vector3 r = RequestRandomRoadWorldPos();
+            GameObject g = Instantiate(trafficPrefab, new Vector3(r.x,r.y,0), Quaternion.identity) as GameObject;
+            g.name = "Traffico "+i.ToString();
+        }
 
         RefreshMap();
         RefreshGame();
@@ -94,6 +107,14 @@ public class GameController : MonoBehaviour
         }
     }
 
+    public Vector3 RequestRandomRoadWorldPos()
+    {
+        return buildTilemap.CellToWorld((Vector3Int)roads[Random.Range(0,roads.Count)]);
+    }
+    public Vector2Int RequestRandomRoadCellPos()
+    {
+        return roads[Random.Range(0,roads.Count)];
+    }
     private void InitDataIndexation()
     {
         for (int i = 0; i < buildings.Count; i++)
@@ -136,6 +157,7 @@ public class GameController : MonoBehaviour
                     if(currentDeviceAmount >= maxDeviceAllowed)
                     {
                         Debug.Log("No more slots available");
+                        GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(6);
                         return;
                     }
                     if (currentGameSessionData.money >= components[index].cost)
@@ -169,11 +191,13 @@ public class GameController : MonoBehaviour
             else
             {
                 Debug.LogError("No session Data!!");
+                GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(6);
             }
         }
         else
         {
             Debug.Log("No tile selected");
+            GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(6);
         }
     }
 
@@ -267,7 +291,6 @@ public class GameController : MonoBehaviour
     public void SwitchState(PlayerState newState)
     {
         //Logica
-
         state = newState;
     }
 
@@ -283,6 +306,10 @@ public class GameController : MonoBehaviour
     private void Update()
     {
         RefreshGame();
+        if(Input.GetKeyDown(KeyCode.T))
+        {
+            TileTapped(new Vector3(0.999f, 3.209f, 0));
+        }
     }
 
     private void RefreshGame()
@@ -330,7 +357,7 @@ public class GameController : MonoBehaviour
         Debug.Log("Cleaned Events");
     }
 
-    private int TilePosToIndex(int x,int y)
+    private int TilePosToIndex(int x, int y)
     {
         int index = x + y * width;
         return index;

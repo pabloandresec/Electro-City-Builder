@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class Traffic : MonoBehaviour
 {
@@ -16,20 +17,19 @@ public class Traffic : MonoBehaviour
     private bool calculatingPath = false;
     private int currentIndex = -1;
 
-    /*
-    private void Update()
+    private void Start()
     {
-        if(Input.GetKeyDown(KeyCode.T) && !calculatingPath && !hasPath)
-        {
-            calculatingPath = true;
-            RequestPath();
-        }
+        dest = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>().RequestRandomRoadCellPos();
+        RequestPath();
     }
-    */
 
     private void RequestPath()
     {
         path = Pathfinding.RequestPathToTile(transform.position, dest);
+        if(path != null && path.Length < 5)
+        {
+            Destroy(gameObject);
+        }
         OffsetPath();
         LTSpline s = new LTSpline(correctPath);
         calculatingPath = false;
@@ -69,6 +69,7 @@ public class Traffic : MonoBehaviour
         hasPath = false;
         path = null;
         correctPath = null;
+        RequestPath();
     }
 
     private void OffsetPath()
