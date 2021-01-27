@@ -20,19 +20,37 @@ public class UIController : MonoBehaviour
     [SerializeField] private GameObject selectedDeviceComponentsMenu;
     [Header("Prefabs")]
     [SerializeField] private GameObject buyItemPrefab;
-    
+    [Header("Settings")]
+    [SerializeField] private float fadeTime = 0.1f;
 
     [Space(5)]
     [Header("DEBUG!")]
     public Button buyButton;
 
+    private int directionToFadeFrom = 0;
+    private Dictionary<string, Vector2> menusPos;
+    public static bool tweening = false;
+
+    private void Awake()
+    {
+        menusPos = new Dictionary<string, Vector2>();
+        CanvasGroup[] canvases = GetComponentsInChildren<CanvasGroup>(true);
+        string s = "canvases found : " + canvases.Length + "\n";
+        foreach (CanvasGroup c in canvases)
+        {
+            s += c.transform.name + "\n";
+            menusPos.Add(c.transform.name, c.GetComponent<RectTransform>().anchoredPosition);
+        }
+        Debug.Log(s);
+    }
+
     public void SwitchMenu(int i)
     {
-        if(i < 0 || i >= mainMenus.Length)
+        if (i < 0 || i >= mainMenus.Length)
         {
             Debug.LogError("Out of index error in menus array");
         }
-        foreach(GameObject m in mainMenus)
+        foreach (GameObject m in mainMenus)
         {
             m.SetActive(false);
         }
@@ -42,7 +60,7 @@ public class UIController : MonoBehaviour
     public void SetMenuVisibility(string path, bool s)
     {
         Transform t = transform.Find(path);
-        if(t != null)
+        if (t != null)
         {
             t.gameObject.SetActive(s);
         }
@@ -58,24 +76,26 @@ public class UIController : MonoBehaviour
         power.text = powerAvailable.ToString() + " / 1000";
     }
 
+
+
     public void SetComponentsAmounts(Transform list)
     {
         Building building = game.GetSelectedBuildingData();
-        if(building == null)
+        if (building == null)
         {
             Debug.Log("Error! nothing selected");
             return;
         }
         BuildingData data = game.Buildings[building.ListIndex];
         ComponentCategory[] values = (ComponentCategory[])Enum.GetValues(typeof(ComponentCategory));
-        foreach(ComponentCategory cat in values)
+        foreach (ComponentCategory cat in values)
         {
             List<BuildingComponent> bc = building.components.FindAll(comp => game.Components[comp.index].category.ToString() == cat.ToString());
             bool limitFound = false;
             ComponentLimit cl = null;
-            foreach(ComponentLimit c in data.limits)
+            foreach (ComponentLimit c in data.limits)
             {
-                if(c.category == cat)
+                if (c.category == cat)
                 {
                     cl = c;
                     limitFound = true;
@@ -83,10 +103,10 @@ public class UIController : MonoBehaviour
                 }
             }
             Transform it = list.Find(cat.ToString());
-            if(it != null)
+            if (it != null)
             {
                 it.GetChild(3).GetChild(0).GetComponent<TextMeshProUGUI>().text = bc.Count.ToString();
-                if(limitFound)
+                if (limitFound)
                 {
                     it.GetChild(3).GetChild(1).GetComponent<TextMeshProUGUI>().text = cl.val.ToString();
                 }
@@ -101,7 +121,7 @@ public class UIController : MonoBehaviour
             Destroy(holderList.GetChild(i).gameObject);
         }
 
-        for (int i = 3; i < game.Buildings.Count; i++)
+        for (int i = 4; i < game.Buildings.Count; i++)
         {
             GameObject itemInstantiated = Instantiate(buyItemPrefab, holderList, false);
             UIItem uiItem = itemInstantiated.GetComponent<UIItem>();
@@ -110,8 +130,8 @@ public class UIController : MonoBehaviour
             {
                 Debug.Log("Trying to build " + uiItem.Index);
                 game.TryBuild(uiItem.Index);
-                uiItem.transform.parent.parent.gameObject.SetActive(false);
-                //GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(2);
+                game.SwitchState(0);
+                FadeOutMenu(uiItem.transform.parent.parent.gameObject);
             });
         }
         Debug.Log(holderList.name + " filled with buildings!");
@@ -139,7 +159,6 @@ public class UIController : MonoBehaviour
             {
                 Debug.Log("Trying to add " + categorizedComponents[uiItem.Index].displayName);
                 game.TryAddBuildingComponent(uiItem.Index);
-                //GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(2);
             });
         }
         Debug.Log(holderList.name + " filled with components!");
@@ -147,25 +166,27 @@ public class UIController : MonoBehaviour
 
     public void SetSelectedTileMenu(bool v, BuildingData buildingData)
     {
-        if(v)
+        if (v)
         {
-            tileSelectedMenu.SetActive(v);
+            SetDirectionOfFade(2);
+            FadeInMenu(tileSelectedMenu);
+
             tileSelectedMenu.transform.GetChild(0).GetChild(0).GetComponent<TextMeshProUGUI>().text = buildingData.name;
             tileSelectedMenu.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = buildingData.description;
-            switch(buildingData.Index)
+            switch (buildingData.Index)
             {
                 case 0:
                     tileSelectedMenu.transform.GetChild(2).GetChild(0).gameObject.SetActive(true);
                     tileSelectedMenu.transform.GetChild(2).GetChild(3).gameObject.SetActive(false);
-                break;
+                    break;
                 case 1:
                     tileSelectedMenu.transform.GetChild(2).GetChild(0).gameObject.SetActive(false);
                     tileSelectedMenu.transform.GetChild(2).GetChild(3).gameObject.SetActive(true);
-                break;
+                    break;
                 default:
                     tileSelectedMenu.transform.GetChild(2).GetChild(0).gameObject.SetActive(false);
                     tileSelectedMenu.transform.GetChild(2).GetChild(3).gameObject.SetActive(false);
-                break;
+                    break;
             }
             bool upgradeAvailable = buildingData.upgradeBuildingName == "" ? false : true;
             tileSelectedMenu.transform.GetChild(2).GetChild(1).gameObject.SetActive(upgradeAvailable);
@@ -173,7 +194,93 @@ public class UIController : MonoBehaviour
         }
         else
         {
-            tileSelectedMenu.SetActive(v);
+            FadeOutMenu(tileSelectedMenu);
         }
     }
+
+    #region FadeMenu
+    public void FadeInMenu(GameObject menu)
+    {
+        tweening = true;
+
+        RectTransform menuRect = menu.GetComponent<RectTransform>();
+        Vector2 intialPos = menuRect.anchoredPosition + GetTGTPos(menuRect);
+        menuRect.anchoredPosition = intialPos;
+        Debug.Log("getting " + menu.transform.name + " og pos");
+        Vector2 tgtPos = menusPos[menu.transform.name];
+
+        SetAlpha(menu, 0, 1);
+        menu.SetActive(true);
+        LeanTween.value(menu, (vec) =>
+        {
+            menuRect.anchoredPosition = vec;
+        }, intialPos, tgtPos, fadeTime).setOnComplete(() =>
+        {
+            tweening = false;
+            Debug.Log("TweenFade IN of " + menu.transform.name + " complete!");
+        });
+    }
+
+    public void FadeOutMenu(GameObject menu)
+    {
+        tweening = true;
+
+        RectTransform menuRect = menu.GetComponent<RectTransform>();
+        Vector2 intialPos = menuRect.anchoredPosition;
+        Vector2 tgtPos = menuRect.anchoredPosition + GetTGTPos(menuRect);
+
+        SetAlpha(menu, 1, 0);
+        LeanTween.value(menu, (vec) =>
+        {
+            menuRect.anchoredPosition = vec;
+        }, intialPos, tgtPos, fadeTime).setOnComplete(() =>
+        {
+            tweening = false;
+            Debug.Log("TweenFade OUT of " + menu.transform.name + " complete!");
+            menu.SetActive(false);
+        });
+    }
+
+    private void SetAlpha(GameObject nextMenu, float from, float to)
+    {
+        CanvasGroup canvas = nextMenu.GetComponent<CanvasGroup>();
+        canvas.interactable = false;
+        canvas.alpha = from;
+        LeanTween.value(nextMenu, (v) => { canvas.alpha = v; }, from, to, fadeTime).setOnComplete(()=> 
+        {
+            if(canvas.alpha == 1)
+            {
+                canvas.interactable = true;
+            }
+        });
+    }
+
+    private Vector2 GetTGTPos(RectTransform rt)
+    {
+        Vector2 t = Vector2.zero;
+        switch (directionToFadeFrom)
+        {
+            case 0: //North
+                t += new Vector2(0, rt.rect.size.y);
+                break;
+            case 1: //East
+                t += new Vector2(rt.rect.size.x, 0);
+                break;
+            case 2: //South
+                t -= new Vector2(0, rt.rect.size.y);
+                break;
+            case 3: //West
+                t -= new Vector2(rt.rect.size.x, 0);
+                break;
+        }
+
+        return t;
+    }
+
+    public void SetDirectionOfFade(int direction)
+    {
+        directionToFadeFrom = Mathf.Clamp(direction, 0, 3);
+    }
+    #endregion
+
 }

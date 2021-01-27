@@ -142,10 +142,11 @@ public class GameController : MonoBehaviour
                     {
                         activeBuildings[TilePosToIndex(selectedTile.x, selectedTile.y)].AddBuildingComponent(components[index]);
                         currentGameSessionData.money -= components[index].cost;
-                        GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(2);
+                        GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(5);
                     }
                     else
                     {
+                        GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(6);
                         Debug.Log(" NA MANEY !!");
                     }
                 }
@@ -156,10 +157,11 @@ public class GameController : MonoBehaviour
                     {
                         activeBuildings[TilePosToIndex(selectedTile.x, selectedTile.y)].AddBuildingComponent(components[index]);
                         currentGameSessionData.money -= components[index].cost;
-                        GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(2);
+                        GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(5);
                     }
                     else
                     {
+                        GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(6);
                         Debug.Log(" NA MANEY !!");
                     }
                 }
@@ -186,10 +188,12 @@ public class GameController : MonoBehaviour
                     Build(selectedTile, index);
                     currentGameSessionData.money -= buildings[index].buildingCost;
                     DeselectTile();
+                    GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(5);
                 }
                 else
                 {
                     Debug.Log(" NA MANEY !!");
+                    GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(6);
                 }
             }
             else
@@ -236,8 +240,9 @@ public class GameController : MonoBehaviour
 
     public void TileTapped(Vector3 worldPos)
     {
-        if(state == PlayerState.MENUS)
+        if(state == PlayerState.MENUS || UIController.tweening)
         {
+            Debug.Log("Using Menus!!");
             return;
         }
         if(selected)

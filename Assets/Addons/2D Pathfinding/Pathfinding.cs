@@ -106,20 +106,8 @@ public class Pathfinding : MonoBehaviour {
 	}
 
 	
-	int TurningCost(Node from, Node to) {
-		/*
-		Vector2 dirOld = new Vector2(from.gridX - from.parent.gridX, from.gridY - from.parent.gridY);
-		Vector2 dirNew = new Vector2(to.gridX - from.gridX, to.gridY - from.gridY);
-		if (dirNew == dirOld)
-			return 0;
-		else if (dirOld.x != 0 && dirOld.y != 0 && dirNew.x != 0 && dirNew.y != 0) {
-			return 5;
-		}
-		else {
-			return 10;
-		}
-		*/
-
+	int TurningCost(Node from, Node to)
+    {
 		return 0;
 	}
 	
