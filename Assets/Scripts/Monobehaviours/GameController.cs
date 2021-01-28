@@ -11,13 +11,16 @@ public class GameController : MonoBehaviour
     [SerializeField] private int width = 16;
     [SerializeField] private int height = 16;
     [Header("Game Settings")]
-    [Range(0.2f,10)]
-    [SerializeField] private float refreshRate;
+    [Range(0.5f, 4)]
+    [SerializeField] private float gameTimeSpeedMult = 1;
+    [Range(0.2f,30)]
+    [SerializeField] private float buildingRefreshRate = 10;
     [SerializeField] private GameSession currentGameSessionData;
     [Header("References")]
     [SerializeField] private Tile highlightTile;
     [SerializeField] private Tilemap overlayTilemap;
     [SerializeField] private Tilemap buildTilemap;
+    [SerializeField] private Tilemap roadTilemap;
     [SerializeField] private Tilemap groundTilemap;
     [SerializeField] private UIController ui;
     [SerializeField] private List<BuildingData> buildings;
@@ -31,52 +34,42 @@ public class GameController : MonoBehaviour
 
     private Building selectedBuilding;
     private bool selected = false;
-    private int[,] map; //For pathfinding & map draw
     private float tPassed = 0;
 
     public int Width { get => width; }
     public int Height { get => height; }
-    public int[,] Map { get => map;}
     public List<BuildingData> Buildings { get => buildings; }
     public List<ComponentData> Components { get => components; }
     public Building[] ActiveBuildings { get => activeBuildings; }
-    public List<Vector2Int> roads;
     public GameObject trafficPrefab;
 
     void Start()
     {
-        map = new int[width, height];
-        roads = new List<Vector2Int>();
         InitDataIndexation(); //Indexa los datos para facilitar su acceso y ahorrar memoria
         PopulatingActiveBuildings(); //Crear los datos de edificios activos en los que se 
 
-        map[8, 8] = buildings[2].Index; //Central
-        for (int x = 0; x < 16; x++)//Roads down the middle
+        //Scan Roads
+        for (int y = 0; y < height; y++)
         {
-            roads.Add(new Vector2Int(x,7));
-            map[x, 7] = buildings[3].Index;
-            activeBuildings[TilePosToIndex(x, 7)] = new Building(buildings[3], TilePosToIndex(x, 7));
+            for (int x = 0; x < width; x++)
+            {
+                if(roadTilemap.HasTile(new Vector3Int(x,y,0)))
+                {
+                    activeBuildings[TilePosToIndex(x, y)] = new Building(buildings[3], TilePosToIndex(x, y));
+                }
+            }
         }
-        map[7, 6] = buildings[4].Index; // starter building
-        map[8, 6] = buildings[4].Index; // another starter building
 
         activeBuildings[TilePosToIndex(8, 8)] = new Building(buildings[2], TilePosToIndex(8, 8));
-        activeBuildings[TilePosToIndex(7, 6)] = new Building(buildings[4], TilePosToIndex(7, 6));
-        activeBuildings[TilePosToIndex(8, 6)] = new Building(buildings[4], TilePosToIndex(8, 6));
+        activeBuildings[TilePosToIndex(7, 5)] = new Building(buildings[4], TilePosToIndex(7, 6));
+        activeBuildings[TilePosToIndex(8, 5)] = new Building(buildings[4], TilePosToIndex(8, 6));
 
-        activeBuildings[TilePosToIndex(7, 6)].AddBuildingComponent(components[0]);
-        activeBuildings[TilePosToIndex(8, 6)].AddBuildingComponent(components[0]);
-
-        for(int i = 0;i < 10; i++)
-        {
-            Vector3 r = RequestRandomRoadWorldPos();
-            GameObject g = Instantiate(trafficPrefab, new Vector3(r.x,r.y,0), Quaternion.identity) as GameObject;
-            g.name = "Traffico "+i.ToString();
-        }
+        activeBuildings[TilePosToIndex(7, 5)].AddBuildingComponent(components[0]);
+        activeBuildings[TilePosToIndex(8, 5)].AddBuildingComponent(components[0]);
 
         RefreshMap();
         RefreshGame();
-        ui.UpdateUI(currentGameSessionData.money, CalculateAvailablePower());
+        ui.UpdateUI(currentGameSessionData.money, CalculatePowerUsage(), 1000);
 
         GetComponent<PGrid>().InitGrid(); //Comentar para PATHFINDING DESHABILITADO
         InputController.OnTap += TileTapped;
@@ -107,14 +100,7 @@ public class GameController : MonoBehaviour
         }
     }
 
-    public Vector3 RequestRandomRoadWorldPos()
-    {
-        return buildTilemap.CellToWorld((Vector3Int)roads[Random.Range(0,roads.Count)]);
-    }
-    public Vector2Int RequestRandomRoadCellPos()
-    {
-        return roads[Random.Range(0,roads.Count)];
-    }
+    
     private void InitDataIndexation()
     {
         for (int i = 0; i < buildings.Count; i++)
@@ -233,15 +219,13 @@ public class GameController : MonoBehaviour
 
     public void Build(Vector3Int tilePos, int buildingIndex)
     {
-        map[tilePos.x, tilePos.y] = buildingIndex;
         activeBuildings[TilePosToIndex(tilePos.x, tilePos.y)] = new Building(buildings[buildingIndex], TilePosToIndex(tilePos.x, tilePos.y));
-        ui.UpdateUI(currentGameSessionData.money, CalculateAvailablePower());
+        ui.UpdateUI(currentGameSessionData.money, CalculatePowerUsage(), 1000);
         RefreshMap();
-        GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(2);
         Debug.Log("Building constructed");
     }
 
-    private int CalculateAvailablePower()
+    private int CalculatePowerUsage()
     {
         int total = 0;
         foreach(Building b in activeBuildings)
@@ -257,7 +241,13 @@ public class GameController : MonoBehaviour
         {
             for (int y = 0; y < height; y++)
             {
-                buildTilemap.SetTile(new Vector3Int(x, y, 0), buildings[map[x, y]].tile);
+                Building b = activeBuildings[TilePosToIndex(x, y)];
+                BuildingData bd = buildings[b.ListIndex];
+                if(bd.Index != 3)
+                {
+                    buildTilemap.SetTile(new Vector3Int(x, y, 0), bd.tile);
+                }
+                //buildTilemap.SetTile(new Vector3Int(x, y, 0), bd.tile);
             }
         }
     }
@@ -314,8 +304,8 @@ public class GameController : MonoBehaviour
 
     private void RefreshGame()
     {
-        tPassed += Time.deltaTime;
-        if(tPassed >= refreshRate)
+        tPassed += Time.deltaTime * gameTimeSpeedMult;
+        if(tPassed >= buildingRefreshRate)
         {
             tPassed = 0;
             UpdateBuildings();
@@ -331,7 +321,7 @@ public class GameController : MonoBehaviour
             activeBuildings[i].UpdateComponentsLife(components);
             totalPow += activeBuildings[i].totalPowerConsumption;
         }
-        ui.UpdateUI(currentGameSessionData.money, totalPow);
+        ui.UpdateUI(currentGameSessionData.money, totalPow, 1000);
     }
 
     private void SelectTile(Vector3 worldPos)
@@ -357,12 +347,12 @@ public class GameController : MonoBehaviour
         Debug.Log("Cleaned Events");
     }
 
-    private int TilePosToIndex(int x, int y)
+    public int TilePosToIndex(int x, int y)
     {
         int index = x + y * width;
         return index;
     }
-    private Vector3Int IndexToTilePos(int indx)
+    public Vector3Int IndexToTilePos(int indx)
     {
         int y = (int)(indx / width);
         int x = indx - (y * width);

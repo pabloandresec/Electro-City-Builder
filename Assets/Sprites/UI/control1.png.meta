@@ -13,13 +13,16 @@ TextureImporter:
     second: control1_2
   - first:
       213: 1821209049913759115
-    second: control1_3
+    second: UI_Fill_Back
   - first:
       213: 7223029854710977674
     second: CircleA
   - first:
       213: -7625161664147367859
     second: Splitter
+  - first:
+      213: 4707207734379650471
+    second: UI_Fill_Front
   externalObjects: {}
   serializedVersion: 11
   mipmaps:
@@ -182,7 +185,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: control1_3
+      name: UI_Fill_Back
       rect:
         serializedVersion: 2
         x: 0
@@ -191,7 +194,7 @@ TextureImporter:
         height: 44
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 16, y: 17, z: 22, w: 17}
+      border: {x: 18, y: 17, z: 21, w: 17}
       outline: []
       physicsShape: []
       tessellationDetail: 0
@@ -240,6 +243,27 @@ TextureImporter:
       bones: []
       spriteID: d48d195cddbfd2690800000000000000
       internalID: -7625161664147367859
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UI_Fill_Front
+      rect:
+        serializedVersion: 2
+        x: 110
+        y: 230
+        width: 110
+        height: 44
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 18, y: 17, z: 21, w: 17}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7ad9bab9e7c535140800000000000000
+      internalID: 4707207734379650471
       vertices: []
       indices: 
       edges: []

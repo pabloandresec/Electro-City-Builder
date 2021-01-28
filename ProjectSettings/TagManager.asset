@@ -44,3 +44,15 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Ground
+    uniqueID: 3727202839
+    locked: 0
+  - name: Road
+    uniqueID: 632963307
+    locked: 0
+  - name: Overlay
+    uniqueID: 2471814471
+    locked: 0
+  - name: Building
+    uniqueID: 3840540649
+    locked: 0

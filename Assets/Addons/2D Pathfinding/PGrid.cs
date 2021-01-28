@@ -3,40 +3,54 @@ using UnityEngine.Tilemaps;
 using System.Collections;
 using System.Collections.Generic;
 
+
+//Esta clase 
 public class PGrid : MonoBehaviour {
 
-	public bool displayGridGizmos;
-    public GameController gameController;
+	[SerializeField] private bool displayGridGizmos;
+    [SerializeField] private GameController gameController;
 
-    public int roadIndex;
-	public Vector2 gridWorldSize;
-	public float nodeRadius;
+    [SerializeField] private Tilemap roadTilemap;
+    [SerializeField] private int roadIndex;
+    [SerializeField] private Vector2 gridWorldSize;
+    [SerializeField] private float nodeRadius;
 
-    public Grid tileGrid;
-    public Vector3 gridOffset;
-    Node[,] grid;
-    bool gridInit = false;
+    [SerializeField] private Vector3 gridOffset;
+    [SerializeField] private GameObject trafficPrefab;
+
+    private List<Vector2Int> roads;
+    private Node[,] grid;
+    private bool gridInit = false;
 
 	float nodeDiameter;
 
 	void Awake()
     {
-        if(tileGrid == null)
+        roads = new List<Vector2Int>();
+        if (roadTilemap == null)
         {
-            tileGrid = GetComponent<Grid>();
+            roadTilemap = GetComponent<Tilemap>();
         }
         if(gameController == null)
         {
             gameController = GetComponent<GameController>();
         }
-	}
+    }
 
     public void InitGrid()
     {
         Debug.Log("start pGrid");
         grid = new Node[gameController.Width, gameController.Height];
         ScanRoadTiles();
+        for (int i = 0; i < 10; i++)
+        {
+            Vector3 r = RequestRandomRoadWorldPos();
+            GameObject g = Instantiate(trafficPrefab, new Vector3(r.x, r.y, 0), Quaternion.identity) as GameObject;
+            g.name = "Traffico " + i.ToString();
+        }
     }
+
+
 
     private void ScanRoadTiles()
     {
@@ -44,8 +58,10 @@ public class PGrid : MonoBehaviour {
         {
             for (int y = 0; y < gameController.Height; y++)
             {
-                Vector2 worldPoint = tileGrid.CellToWorld(new Vector3Int(x, y, 0)) + gridOffset;
-                bool walkable = gameController.Map[x, y] == roadIndex ? true : false;
+                Vector2 worldPoint = roadTilemap.CellToWorld(new Vector3Int(x, y, 0)) + gridOffset;
+                //bool walkable = gameController.Map[x, y] == roadIndex ? true : false;
+                bool walkable = gameController.ActiveBuildings[gameController.TilePosToIndex(x, y)].ListIndex == 3;
+                if (walkable) roads.Add(new Vector2Int(x, y));
                 grid[x, y] = new Node(walkable, worldPoint, x, y);
             }
         }
@@ -100,7 +116,7 @@ public class PGrid : MonoBehaviour {
 	
     public Node NodeFromWorldPoint(Vector3 _worldPosition)
     {
-        Vector3Int pos = tileGrid.WorldToCell(_worldPosition);
+        Vector3Int pos = roadTilemap.WorldToCell(_worldPosition);
         pos.x = Mathf.Clamp(pos.x, 0, gameController.Width);
         pos.y = Mathf.Clamp(pos.y, 0, gameController.Height);
         return grid[pos.x, pos.y];
@@ -179,4 +195,12 @@ public class PGrid : MonoBehaviour {
 		}
 	}
 
+    public Vector3 RequestRandomRoadWorldPos()
+    {
+        return roadTilemap.CellToWorld((Vector3Int)roads[Random.Range(0, roads.Count)]);
+    }
+    public Vector2Int RequestRandomRoadCellPos()
+    {
+        return roads[Random.Range(0, roads.Count)];
+    }
 }

@@ -70,7 +70,7 @@ public class Utils
         return new Vector2(randX, randY);
     }
 }
-
+[Serializable]
 public struct IntRange
 {
     public int min;
@@ -82,7 +82,7 @@ public struct IntRange
         this.max = max;
     }
 }
-
+[Serializable]
 public struct FloatRange
 {
     public float min;

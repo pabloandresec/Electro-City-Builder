@@ -13,6 +13,7 @@ public class UIController : MonoBehaviour
     [SerializeField] private GameController game;
     [Space(5)]
     [Header("Game UI")]
+    [SerializeField] private Slider powerSlider;
     [SerializeField] private TextMeshProUGUI power;
     [SerializeField] private TextMeshProUGUI money;
     [Header("Tile manipulation menus")]
@@ -70,10 +71,12 @@ public class UIController : MonoBehaviour
         }
     }
 
-    public void UpdateUI(int currentMoney, int powerAvailable)
+    public void UpdateUI(int currentMoney, int powerInUse, int powerAvailable)
     {
         money.text = currentMoney.ToString();
-        power.text = powerAvailable.ToString() + " / 1000";
+        power.text = powerInUse.ToString() + " / "+ powerAvailable.ToString();
+        powerSlider.maxValue = powerAvailable;
+        powerSlider.value = powerInUse;
     }
 
 
@@ -112,6 +115,12 @@ public class UIController : MonoBehaviour
                 }
             }
         }
+    }
+
+    public void ShakeMenu(GameObject menu)
+    {
+        RectTransform menuRect = menu.GetComponent<RectTransform>();
+
     }
 
     public void FillListWithAvailableBuildings(Transform holderList)
@@ -183,6 +192,12 @@ public class UIController : MonoBehaviour
                     tileSelectedMenu.transform.GetChild(2).GetChild(0).gameObject.SetActive(false);
                     tileSelectedMenu.transform.GetChild(2).GetChild(3).gameObject.SetActive(true);
                     break;
+                case 2: // Central
+                    SetDirectionOfFade(0);
+                    FadeInMenu(powerSlider.gameObject);
+                    tileSelectedMenu.transform.GetChild(2).GetChild(0).gameObject.SetActive(false);
+                    tileSelectedMenu.transform.GetChild(2).GetChild(3).gameObject.SetActive(false);
+                    break;
                 default:
                     tileSelectedMenu.transform.GetChild(2).GetChild(0).gameObject.SetActive(false);
                     tileSelectedMenu.transform.GetChild(2).GetChild(3).gameObject.SetActive(false);
@@ -194,6 +209,11 @@ public class UIController : MonoBehaviour
         }
         else
         {
+            if(powerSlider.gameObject.activeSelf)
+            {
+                SetDirectionOfFade(2);
+                FadeOutMenu(powerSlider.gameObject);
+            }
             FadeOutMenu(tileSelectedMenu);
         }
     }

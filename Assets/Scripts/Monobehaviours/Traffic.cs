@@ -3,14 +3,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using Random = UnityEngine.Random;
 
 public class Traffic : MonoBehaviour
 {
     [SerializeField] private Vector2Int dest;
     [SerializeField] private TrafficType type;
+    [Header("People")]
     [SerializeField] private float peopleOffset;
+    [SerializeField] private FloatRange peopleSpeeds;
+    [Header("Car")]
     [SerializeField] private float carOffset;
-    [SerializeField] private float speed = 2f;
+    [SerializeField] private FloatRange carSpeeds;
+
+    private float speed = 0;
     private Vector2[] path;
     private Vector3[] correctPath;
     private bool hasPath = false;
@@ -19,27 +25,32 @@ public class Traffic : MonoBehaviour
 
     private void Start()
     {
-        dest = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>().RequestRandomRoadCellPos();
+        type = Random.value < 0.5f ? TrafficType.CAR : TrafficType.PEOPLE;
+        if(type == TrafficType.PEOPLE)
+        {
+            GetComponent<SpriteRenderer>().color = Color.blue;
+            speed = Random.Range(peopleSpeeds.min, peopleSpeeds.max);
+        }
+        else
+        {
+            GetComponent<SpriteRenderer>().color = Color.red;
+            speed = Random.Range(carSpeeds.min, carSpeeds.max);
+        }
         RequestPath();
     }
 
     private void RequestPath()
     {
+        dest = GameObject.FindGameObjectWithTag("GameController").GetComponent<PGrid>().RequestRandomRoadCellPos();
         path = Pathfinding.RequestPathToTile(transform.position, dest);
-        if(path != null && path.Length < 5)
-        {
-            Destroy(gameObject);
-        }
         OffsetPath();
-        LTSpline s = new LTSpline(correctPath);
         calculatingPath = false;
         MoveAlongPath();
-        //LeanTween.moveSpline(gameObject, s, 60);
     }
 
     private void MoveAlongPath()
     {
-        if(currentIndex >= correctPath.Length)
+        if(correctPath == null || currentIndex >= correctPath.Length)
         {
             ClearPath();
         }
@@ -74,6 +85,10 @@ public class Traffic : MonoBehaviour
 
     private void OffsetPath()
     {
+        if(path == null || path.Length == 0)
+        {
+            return;
+        }
         correctPath = new Vector3[path.Length];
         Vector2[] directions = new Vector2[path.Length];
         correctPath[0] = path[0];
