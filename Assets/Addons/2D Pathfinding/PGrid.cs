@@ -27,11 +27,16 @@ public class PGrid : MonoBehaviour {
 	void Awake()
     {
         roads = new List<Vector2Int>();
+        CheckReferences();
+    }
+
+    private void CheckReferences()
+    {
         if (roadTilemap == null)
         {
             roadTilemap = GetComponent<Tilemap>();
         }
-        if(gameController == null)
+        if (gameController == null)
         {
             gameController = GetComponent<GameController>();
         }
@@ -59,7 +64,6 @@ public class PGrid : MonoBehaviour {
             for (int y = 0; y < gameController.Height; y++)
             {
                 Vector2 worldPoint = roadTilemap.CellToWorld(new Vector3Int(x, y, 0)) + gridOffset;
-                //bool walkable = gameController.Map[x, y] == roadIndex ? true : false;
                 bool walkable = gameController.ActiveBuildings[gameController.TilePosToIndex(x, y)].ListIndex == 3;
                 if (walkable) roads.Add(new Vector2Int(x, y));
                 grid[x, y] = new Node(walkable, worldPoint, x, y);
@@ -76,13 +80,23 @@ public class PGrid : MonoBehaviour {
 
 	public List<Node> GetNeighbours(Node node, int depth = 1) {
 		List<Node> neighbours = new List<Node>();
-
+        foreach (Vector2Int dir in Utils.cardinalDirections)
+        {
+            Vector2Int checkTile = new Vector2Int(node.gridX, node.gridY) + dir;
+            if(InBounds(checkTile.x,checkTile.y))
+            {
+                neighbours.Add(grid[checkTile.x, checkTile.y]);
+            }
+        }
+        return neighbours;
+        #region OldFunction
+        /*
         int checkX, checkY;
         //Check Top
         checkX = node.gridX;
         checkY = node.gridY + 1;
-
-        if (checkX >= 0 && checkX < gameController.Width && checkY >= 0 && checkY < gameController.Height)
+        
+        if (InBounds(checkX,checkY))
         {
             neighbours.Add(grid[checkX, checkY]);
         }
@@ -90,7 +104,7 @@ public class PGrid : MonoBehaviour {
         checkX = node.gridX;
         checkY = node.gridY - 1;
 
-        if (checkX >= 0 && checkX < gameController.Width && checkY >= 0 && checkY < gameController.Height)
+        if (InBounds(checkX, checkY))
         {
             neighbours.Add(grid[checkX, checkY]);
         }
@@ -98,7 +112,7 @@ public class PGrid : MonoBehaviour {
         checkX = node.gridX - 1;
         checkY = node.gridY;
 
-        if (checkX >= 0 && checkX < gameController.Width && checkY >= 0 && checkY < gameController.Height)
+        if (InBounds(checkX, checkY))
         {
             neighbours.Add(grid[checkX, checkY]);
         }
@@ -106,13 +120,15 @@ public class PGrid : MonoBehaviour {
         checkX = node.gridX + 1;
         checkY = node.gridY;
 
-        if (checkX >= 0 && checkX < gameController.Width && checkY >= 0 && checkY < gameController.Height)
+        if (InBounds(checkX, checkY))
         {
             neighbours.Add(grid[checkX, checkY]);
         }
 
         return neighbours;
-	}
+        */ 
+        #endregion
+    }
 	
     public Node NodeFromWorldPoint(Vector3 _worldPosition)
     {

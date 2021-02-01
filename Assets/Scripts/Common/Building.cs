@@ -28,7 +28,7 @@ public class Building
 
     #endregion
 
-    public void UpdateComponentsLife(List<ComponentData> referenceData)
+    public void UpdateComponentsLife(List<ComponentData> referenceData, float timePassed)
     {
         totalPowerConsumption = 0;
         if(components != null && components.Count > 0)
@@ -36,7 +36,7 @@ public class Building
             for (int i = 0; i < components.Count; i++)
             {
                 totalPowerConsumption += referenceData[components[i].index].powerConsumption;
-                components[i].life--;
+                components[i].life -= (int)timePassed;
 
                 if(components[i].life <= 0)
                 {

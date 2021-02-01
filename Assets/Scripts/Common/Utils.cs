@@ -69,6 +69,18 @@ public class Utils
         int randY = Random.Range((int)bounds.min.y, (int)bounds.max.y);
         return new Vector2(randX, randY);
     }
+
+    public static int TilePosToIndex(int x, int y, int width)
+    {
+        int index = x + y * width;
+        return index;
+    }
+    public static Vector3Int IndexToTilePos(int indx, int width)
+    {
+        int y = (int)(indx / width);
+        int x = indx - (y * width);
+        return new Vector3Int(x, y, 0);
+    }
 }
 [Serializable]
 public struct IntRange

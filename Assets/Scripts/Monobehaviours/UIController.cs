@@ -10,6 +10,8 @@ public class UIController : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private GameObject[] mainMenus;
+    [SerializeField] private Transform categoryListHolder;
+    [SerializeField] private Transform buildingListHolder;
     [SerializeField] private GameController game;
     [Space(5)]
     [Header("Game UI")]
@@ -21,8 +23,12 @@ public class UIController : MonoBehaviour
     [SerializeField] private GameObject selectedDeviceComponentsMenu;
     [Header("Prefabs")]
     [SerializeField] private GameObject buyItemPrefab;
+    [SerializeField] private GameObject popUpPrefab;
+    [SerializeField] private Transform popUpHolder;
+    private List<GameObject> activeBubbles;
     [Header("Settings")]
     [SerializeField] private float fadeTime = 0.1f;
+    [SerializeField] private TileMenuMode tileMenuMode = TileMenuMode.MENU;
 
     [Space(5)]
     [Header("DEBUG!")]
@@ -34,6 +40,7 @@ public class UIController : MonoBehaviour
 
     private void Awake()
     {
+        activeBubbles = new List<GameObject>();
         menusPos = new Dictionary<string, Vector2>();
         CanvasGroup[] canvases = GetComponentsInChildren<CanvasGroup>(true);
         string s = "canvases found : " + canvases.Length + "\n";
@@ -78,8 +85,6 @@ public class UIController : MonoBehaviour
         powerSlider.maxValue = powerAvailable;
         powerSlider.value = powerInUse;
     }
-
-
 
     public void SetComponentsAmounts(Transform list)
     {
@@ -177,45 +182,88 @@ public class UIController : MonoBehaviour
     {
         if (v)
         {
-            SetDirectionOfFade(2);
-            FadeInMenu(tileSelectedMenu);
-
-            tileSelectedMenu.transform.GetChild(0).GetChild(0).GetComponent<TextMeshProUGUI>().text = buildingData.name;
-            tileSelectedMenu.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = buildingData.description;
-            switch (buildingData.Index)
+            Debug.Log("Showing tile menu");
+            if (tileMenuMode == TileMenuMode.BUBBLE)
             {
-                case 0:
-                    tileSelectedMenu.transform.GetChild(2).GetChild(0).gameObject.SetActive(true);
-                    tileSelectedMenu.transform.GetChild(2).GetChild(3).gameObject.SetActive(false);
-                    break;
-                case 1:
-                    tileSelectedMenu.transform.GetChild(2).GetChild(0).gameObject.SetActive(false);
-                    tileSelectedMenu.transform.GetChild(2).GetChild(3).gameObject.SetActive(true);
-                    break;
-                case 2: // Central
-                    SetDirectionOfFade(0);
-                    FadeInMenu(powerSlider.gameObject);
-                    tileSelectedMenu.transform.GetChild(2).GetChild(0).gameObject.SetActive(false);
-                    tileSelectedMenu.transform.GetChild(2).GetChild(3).gameObject.SetActive(false);
-                    break;
-                default:
-                    tileSelectedMenu.transform.GetChild(2).GetChild(0).gameObject.SetActive(false);
-                    tileSelectedMenu.transform.GetChild(2).GetChild(3).gameObject.SetActive(false);
-                    break;
+                SpawnSelectionBubble(buildingData);
             }
-            bool upgradeAvailable = buildingData.upgradeBuildingName == "" ? false : true;
-            tileSelectedMenu.transform.GetChild(2).GetChild(1).gameObject.SetActive(upgradeAvailable);
-            tileSelectedMenu.transform.GetChild(2).GetChild(2).gameObject.SetActive(buildingData.hasComponents);
+            else
+            {
+                SpawnTileSelectionMenu(buildingData);
+            }
         }
         else
         {
-            if(powerSlider.gameObject.activeSelf)
+            Debug.Log("Disabling Tile menu");
+            if (powerSlider.gameObject.activeSelf)
             {
                 SetDirectionOfFade(2);
                 FadeOutMenu(powerSlider.gameObject);
             }
-            FadeOutMenu(tileSelectedMenu);
+            if (tileMenuMode == TileMenuMode.BUBBLE)
+            {
+                DespawnTileSelectionBubble();
+            }
+            else
+            {
+                FadeOutMenu(tileSelectedMenu);
+            }  
         }
+    }
+
+    private void SpawnTileSelectionMenu(BuildingData buildingData)
+    {
+        SetDirectionOfFade(2);
+        FadeInMenu(tileSelectedMenu);
+
+        tileSelectedMenu.transform.GetChild(0).GetChild(0).GetComponent<TextMeshProUGUI>().text = buildingData.name;
+        tileSelectedMenu.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = buildingData.description;
+        switch (buildingData.Index)
+        {
+            case 0:
+                tileSelectedMenu.transform.GetChild(2).GetChild(0).gameObject.SetActive(true);
+                tileSelectedMenu.transform.GetChild(2).GetChild(3).gameObject.SetActive(false);
+                break;
+            case 1:
+                tileSelectedMenu.transform.GetChild(2).GetChild(0).gameObject.SetActive(false);
+                tileSelectedMenu.transform.GetChild(2).GetChild(3).gameObject.SetActive(true);
+                break;
+            case 2: // Central
+                SetDirectionOfFade(0);
+                FadeInMenu(powerSlider.gameObject);
+                tileSelectedMenu.transform.GetChild(2).GetChild(0).gameObject.SetActive(false);
+                tileSelectedMenu.transform.GetChild(2).GetChild(3).gameObject.SetActive(false);
+                break;
+            default:
+                tileSelectedMenu.transform.GetChild(2).GetChild(0).gameObject.SetActive(false);
+                tileSelectedMenu.transform.GetChild(2).GetChild(3).gameObject.SetActive(false);
+                break;
+        }
+        bool upgradeAvailable = buildingData.upgradeBuildingName == "" ? false : true;
+        tileSelectedMenu.transform.GetChild(2).GetChild(1).gameObject.SetActive(upgradeAvailable);
+        tileSelectedMenu.transform.GetChild(2).GetChild(2).gameObject.SetActive(buildingData.hasComponents);
+    }
+
+    private void DespawnTileSelectionBubble()
+    {
+        Debug.Log("disabling " + game.SelectedTile.ToString() + " bubble");
+        GameObject b = activeBubbles.Find(bub => bub.name == game.SelectedTile.ToString());
+        menusPos.Remove(game.SelectedTile.ToString());
+        activeBubbles.Remove(b);
+        FadeOutWorldMenu(b);
+    }
+
+    private void SpawnSelectionBubble(BuildingData buildingData)
+    {
+        GameObject bubbleGO = Instantiate(popUpPrefab, game.SelectedToWorldPosition() + new Vector3(0, 0.75f, 0), Quaternion.identity);
+        bubbleGO.transform.SetParent(popUpHolder);
+        bubbleGO.name = game.SelectedTile.ToString();
+        menusPos.Add(bubbleGO.name, bubbleGO.GetComponent<RectTransform>().position);
+
+        Bubble bubble = bubbleGO.GetComponent<Bubble>();
+        activeBubbles.Add(bubbleGO);
+        SetDirectionOfFade(2);
+        FadeInWorldMenu(bubbleGO);
     }
 
     #region FadeMenu
@@ -260,7 +308,48 @@ public class UIController : MonoBehaviour
             menu.SetActive(false);
         });
     }
+    public void FadeInWorldMenu(GameObject menu)
+    {
+        tweening = true;
 
+        RectTransform menuRect = menu.GetComponent<RectTransform>();
+        Vector2 intialPos = (Vector2)menuRect.transform.position + GetTGTPos(menuRect);
+        menuRect.transform.position = intialPos;
+        Debug.Log("getting " + menu.transform.name + " og pos");
+        Vector2 tgtPos = menusPos[menu.name];
+
+        SetAlpha(menu, 0, 1);
+        menu.SetActive(true);
+        LeanTween.value(menu, (vec) =>
+        {
+            menuRect.transform.position = vec;
+        }, intialPos, tgtPos, fadeTime).setOnComplete(() =>
+        {
+            tweening = false;
+            Debug.Log("TweenFade IN of " + menu.name + " complete!");
+        });
+    }
+
+    public void FadeOutWorldMenu(GameObject menu)
+    {
+        tweening = true;
+
+        RectTransform menuRect = menu.GetComponent<RectTransform>();
+        Vector2 intialPos = menuRect.transform.position;
+        Vector2 tgtPos = (Vector2)menuRect.transform.position + GetTGTPos(menuRect);
+
+        SetAlpha(menu, 1, 0);
+        LeanTween.value(menu, (vec) =>
+        {
+            menuRect.transform.position = vec;
+        }, intialPos, tgtPos, fadeTime).setOnComplete(() =>
+        {
+            tweening = false;
+            Debug.Log("TweenFade OUT of " + menu.name + " complete!");
+            menu.SetActive(false);
+            Destroy(menu);
+        });
+    }
     private void SetAlpha(GameObject nextMenu, float from, float to)
     {
         CanvasGroup canvas = nextMenu.GetComponent<CanvasGroup>();
@@ -303,4 +392,34 @@ public class UIController : MonoBehaviour
     }
     #endregion
 
+    #region ButtonFuctions
+    public void BuyButtonFunction() // Va a tratar de comprar la parcela
+    {
+        game.TryBuild(1); //Intenta comprar parcela
+    }
+    public void UpgradeButtonFunction()
+    {
+        game.SwitchState(1); // cambia al modo menu
+    }
+    public void ComponentButtonFunction()
+    {
+        DespawnTileSelectionBubble(); //Despawn menu
+        game.SwitchState(1); // cambia al modo menu
+        SetComponentsAmounts(categoryListHolder);
+        FadeInMenu(categoryListHolder.gameObject);
+    }
+    public void BuildButtonFunction()
+    {
+        DespawnTileSelectionBubble(); //Despawn menu
+        game.SwitchState(1); // cambia al modo menu
+        FillListWithAvailableBuildings(buildingListHolder);
+        FadeInMenu(buildingListHolder.gameObject);
+    } 
+    #endregion
+}
+
+public enum TileMenuMode
+{
+    BUBBLE,
+    MENU
 }

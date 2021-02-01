@@ -41,6 +41,8 @@ public class GameController : MonoBehaviour
     public List<BuildingData> Buildings { get => buildings; }
     public List<ComponentData> Components { get => components; }
     public Building[] ActiveBuildings { get => activeBuildings; }
+    public Vector3Int SelectedTile { get => selectedTile; }
+
     public GameObject trafficPrefab;
 
     void Start()
@@ -252,25 +254,7 @@ public class GameController : MonoBehaviour
         }
     }
 
-    public void TileTapped(Vector3 worldPos)
-    {
-        if(state == PlayerState.MENUS || UIController.tweening)
-        {
-            Debug.Log("Using Menus!!");
-            return;
-        }
-        if(selected)
-        {
-            DeselectTile();
-        }
-        else
-        {
-            SelectTile(worldPos);
-            Debug.Log("Sending info of " + selectedTile + " index " +TilePosToIndex(selectedTile.x, selectedTile.y));
-            int selectedBuilding = activeBuildings[TilePosToIndex(selectedTile.x, selectedTile.y)].ListIndex;
-            ui.SetSelectedTileMenu(true, buildings[selectedBuilding]);
-        }
-    }
+    
 
     public void SwitchState(int newState)
     {
@@ -282,6 +266,43 @@ public class GameController : MonoBehaviour
     {
         //Logica
         state = newState;
+    }
+
+    public void TileTapped(Vector3 worldPos)
+    {
+        if (state == PlayerState.MENUS || UIController.tweening)
+        {
+            Debug.Log("Using Menus!!");
+            return;
+        }
+        if (selected)
+        {
+            DeselectTile();
+        }
+        else
+        {
+            SelectTile(worldPos);
+            Debug.Log("Sending info of " + selectedTile + " index " + TilePosToIndex(selectedTile.x, selectedTile.y));
+            int selectedBuilding = activeBuildings[TilePosToIndex(selectedTile.x, selectedTile.y)].ListIndex;
+            ui.SetSelectedTileMenu(true, buildings[selectedBuilding]);
+        }
+    }
+
+    private void SelectTile(Vector3 worldPos)
+    {
+
+        //Calculate new selected pos
+        Vector3Int newSelectedPos = overlayTilemap.WorldToCell(new Vector3(worldPos.x, worldPos.y, 0));
+        //Clamping the new selected pos;
+        newSelectedPos = new Vector3Int(Mathf.Clamp(newSelectedPos.x, 0, width - 1), Mathf.Clamp(newSelectedPos.y, 0, height - 1), 0);
+        //Updating view;
+        overlayTilemap.SetTile(newSelectedPos, highlightTile);
+        overlayTilemap.RefreshTile(newSelectedPos);
+        //Set selected tile;
+        selectedTile = newSelectedPos;
+        testIndex = TilePosToIndex(selectedTile.x, selectedTile.y);
+        Debug.Log("Buildings index = " + testIndex);
+        selected = true;
     }
 
     public void DeselectTile()
@@ -308,38 +329,23 @@ public class GameController : MonoBehaviour
         if(tPassed >= buildingRefreshRate)
         {
             tPassed = 0;
-            UpdateBuildings();
+            UpdateBuildings(buildingRefreshRate);
         }
     }
 
-    private void UpdateBuildings()
+    private void UpdateBuildings(float timePassed)
     {
         Debug.Log("Refreshing buildings");
         int totalPow = 0;
         for (int i = 0; i < activeBuildings.Length; i++)
         {
-            activeBuildings[i].UpdateComponentsLife(components);
+            activeBuildings[i].UpdateComponentsLife(components, timePassed);
             totalPow += activeBuildings[i].totalPowerConsumption;
         }
         ui.UpdateUI(currentGameSessionData.money, totalPow, 1000);
     }
 
-    private void SelectTile(Vector3 worldPos)
-    {
-        
-        //Calculate new selected pos
-        Vector3Int newSelectedPos = overlayTilemap.WorldToCell(new Vector3(worldPos.x, worldPos.y, 0));
-        //Clamping the new selected pos;
-        newSelectedPos = new Vector3Int(Mathf.Clamp(newSelectedPos.x, 0, width-1), Mathf.Clamp(newSelectedPos.y, 0, height-1), 0);
-        //Updating view;
-        overlayTilemap.SetTile(newSelectedPos, highlightTile);
-        overlayTilemap.RefreshTile(newSelectedPos);
-        //Set selected tile;
-        selectedTile = newSelectedPos;
-        testIndex = TilePosToIndex(selectedTile.x, selectedTile.y);
-        Debug.Log("Buildings index = " + testIndex);
-        selected = true;
-    }
+    
 
     private void OnDestroy()
     {
@@ -358,6 +364,18 @@ public class GameController : MonoBehaviour
         int x = indx - (y * width);
         return new Vector3Int(x, y, 0);
     }
+
+    public Vector3 SelectedToWorldPosition()
+    {
+        return groundTilemap.CellToWorld(selectedTile);
+    }
+
+    public Vector3 CellToWorldPosition(Vector3Int cell)
+    {
+        return groundTilemap.CellToWorld(cell);
+    }
+
+
 
     public void TestIndex()
     {

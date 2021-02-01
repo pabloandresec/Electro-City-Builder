@@ -17,7 +17,7 @@ MonoBehaviour:
   category: 0
   description: El Foco de los Focos
   cost: 25
-  durability: 120
+  durability: 7200
   powerConsumption: 10
   premium: 1
   color: {r: 0.45399487, g: 0.8490566, b: 0.41251338, a: 1}
