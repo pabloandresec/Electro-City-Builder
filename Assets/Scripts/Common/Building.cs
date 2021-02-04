@@ -41,6 +41,7 @@ public class Building
                 if(components[i].life <= 0)
                 {
                     RemoveBuildingComponent(i, referenceData);
+                    GameObject.FindGameObjectWithTag("UI").GetComponent<UIController>().AddAttentionBubble(positionIndex.ToString(), Utils.IndexToTilePos(positionIndex, GameController.currentWidth));
                 }
             }
         }
@@ -58,6 +59,7 @@ public class Building
         {
             components = new List<BuildingComponent>();
         }
+        GameObject.FindGameObjectWithTag("UI").GetComponent<UIController>().AddAddedBubble(positionIndex.ToString(), Utils.IndexToTilePos(positionIndex, GameController.currentWidth), 0.5f);
         BuildingComponent bc = new BuildingComponent(componentData);
         components.Add(bc);
         Debug.Log("Added " + componentData.name + " to " + ListIndex + " at " + PositionIndex);

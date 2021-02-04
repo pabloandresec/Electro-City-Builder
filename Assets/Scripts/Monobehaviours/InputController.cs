@@ -8,7 +8,7 @@ using Cinemachine;
 public class InputController : MonoBehaviour
 {
     [SerializeField] private Camera mainCam;
-    [SerializeField] private CinemachineVirtualCamera cam;
+    [SerializeField] private CinemachineVirtualCamera vcam;
     [SerializeField] private float camSpeed = 10f;
     [SerializeField] private float maxTapTime = 0.2f;
     [Header("Zoom")]
@@ -72,6 +72,7 @@ public class InputController : MonoBehaviour
             {
                 case TouchPhase.Began:
                     startingTouchPos = mainCam.ScreenToWorldPoint(t.position);
+                    //cam.transform.position = mainCam.transform.position;
                     touchTime = 0;
                     break;
                 case TouchPhase.Moved:
@@ -79,7 +80,7 @@ public class InputController : MonoBehaviour
                     if (!zooming)
                     {
                         fingerMotion = startingTouchPos - (Vector2)mainCam.ScreenToWorldPoint(t.position);
-                        cam.transform.position += (new Vector3(fingerMotion.x, fingerMotion.y, 0) * camSpeed) * Time.deltaTime;
+                        vcam.transform.position += (new Vector3(fingerMotion.x, fingerMotion.y, 0) * camSpeed) * Time.deltaTime;
                     }
                     break;
                 case TouchPhase.Stationary:
@@ -87,6 +88,7 @@ public class InputController : MonoBehaviour
                     break;
                 case TouchPhase.Ended:
                     endTouchPos = mainCam.ScreenToWorldPoint(t.position);
+                    vcam.transform.position = mainCam.transform.position;
                     if (touchTime < maxTapTime && !dragginScreen && !zooming)
                     {
                         OnTap?.Invoke(endTouchPos);
@@ -110,7 +112,7 @@ public class InputController : MonoBehaviour
     {
         float xPos = Mathf.Clamp(mainCam.transform.position.x, xClampRange.min, xClampRange.max);
         float yPos = Mathf.Clamp(mainCam.transform.position.y, yClampRange.min, yClampRange.max);
-        float zPos = cam.transform.position.z;
+        float zPos = vcam.transform.position.z;
         mainCam.transform.position = new Vector3(xPos, yPos, zPos);
     }
 
@@ -132,6 +134,6 @@ public class InputController : MonoBehaviour
 
     private void ZoomCamera(float incrementValue)
     {
-        cam.m_Lens.OrthographicSize = Mathf.Clamp(cam.m_Lens.OrthographicSize - incrementValue, zoomMin, zoomMax);
+        vcam.m_Lens.OrthographicSize = Mathf.Clamp(vcam.m_Lens.OrthographicSize - incrementValue, zoomMin, zoomMax);
     }
 }

@@ -28,7 +28,7 @@ public class Pathfinding : MonoBehaviour {
     {
         Grid g = GameObject.FindGameObjectWithTag("GameController").GetComponent<Grid>();
         Vector3 dest = g.CellToWorld((Vector3Int)tilePosDest) + new Vector3(0, 0.20f, 0);
-        Debug.Log("Requesting path from " + worldPos + " to " + dest);
+        //Debug.Log("Requesting path from " + worldPos + " to " + dest);
         return instance.FindPath(worldPos, dest);
     }
 
@@ -43,7 +43,7 @@ public class Pathfinding : MonoBehaviour {
 		Node startNode = grid.NodeFromWorldPoint(from);
 		Node targetNode = grid.NodeFromWorldPoint(to);
 
-        Debug.Log("Processing " + startNode.gridX+ "," + startNode.gridX + " to " + targetNode.gridX + "," + targetNode.gridX);
+        //Debug.Log("Processing " + startNode.gridX+ "," + startNode.gridX + " to " + targetNode.gridX + "," + targetNode.gridX);
 
         if(startNode == targetNode)
         {
@@ -72,7 +72,7 @@ public class Pathfinding : MonoBehaviour {
 				
 				if (currentNode == targetNode) {
 					sw.Stop();
-					print ("Path found: " + sw.ElapsedMilliseconds + " ms");
+					//print ("Path found: " + sw.ElapsedMilliseconds + " ms");
 					pathSuccess = true;
 					break;
 				}

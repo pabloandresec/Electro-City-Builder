@@ -17,7 +17,7 @@ MonoBehaviour:
   category: 0
   description: Ilumina la oscuridad
   cost: 15
-  durability: 4500
+  durability: 20
   powerConsumption: 5
   premium: 0
   color: {r: 1, g: 1, b: 1, a: 1}

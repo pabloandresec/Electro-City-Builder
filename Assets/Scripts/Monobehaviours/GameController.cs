@@ -36,14 +36,14 @@ public class GameController : MonoBehaviour
     private bool selected = false;
     private float tPassed = 0;
 
-    public int Width { get => width; }
-    public int Height { get => height; }
+    public static int currentWidth { get => GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>().width; }
+    public static int currentHeight { get => GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>().height; }
     public List<BuildingData> Buildings { get => buildings; }
     public List<ComponentData> Components { get => components; }
     public Building[] ActiveBuildings { get => activeBuildings; }
     public Vector3Int SelectedTile { get => selectedTile; }
-
-    public GameObject trafficPrefab;
+    public int Width { get => width; }
+    public int Height { get => height; }
 
     void Start()
     {
@@ -63,8 +63,8 @@ public class GameController : MonoBehaviour
         }
 
         activeBuildings[TilePosToIndex(8, 8)] = new Building(buildings[2], TilePosToIndex(8, 8));
-        activeBuildings[TilePosToIndex(7, 5)] = new Building(buildings[4], TilePosToIndex(7, 6));
-        activeBuildings[TilePosToIndex(8, 5)] = new Building(buildings[4], TilePosToIndex(8, 6));
+        activeBuildings[TilePosToIndex(7, 5)] = new Building(buildings[4], TilePosToIndex(7, 5));
+        activeBuildings[TilePosToIndex(8, 5)] = new Building(buildings[4], TilePosToIndex(8, 5));
 
         activeBuildings[TilePosToIndex(7, 5)].AddBuildingComponent(components[0]);
         activeBuildings[TilePosToIndex(8, 5)].AddBuildingComponent(components[0]);
