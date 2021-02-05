@@ -17,6 +17,8 @@ public class PGrid : MonoBehaviour {
 
     [SerializeField] private Vector3 gridOffset;
     [SerializeField] private GameObject trafficPrefab;
+    [Min(0)]
+    [SerializeField] private int trafficAmount;
 
     private List<Vector2Int> roads;
     private Node[,] grid;
@@ -47,7 +49,7 @@ public class PGrid : MonoBehaviour {
         Debug.Log("start pGrid");
         grid = new Node[gameController.Width, gameController.Height];
         ScanRoadTiles();
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < trafficAmount; i++)
         {
             Vector3 r = RequestRandomRoadWorldPos();
             GameObject g = Instantiate(trafficPrefab, new Vector3(r.x, r.y, 0), Quaternion.identity) as GameObject;

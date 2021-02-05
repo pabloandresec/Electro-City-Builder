@@ -13,6 +13,7 @@ public class UIController : MonoBehaviour
     [SerializeField] private Transform categoryListHolder;
     [SerializeField] private Transform buildingListHolder;
     [SerializeField] private GameController game;
+    [SerializeField] private CharController c;
     [Space(5)]
     [Header("Game UI")]
     [SerializeField] private Slider powerSlider;
@@ -26,6 +27,7 @@ public class UIController : MonoBehaviour
     [SerializeField] private GameObject newCategoriesListMenu;
     [SerializeField] private GameObject newComponentsListMenu;
     [SerializeField] private GameObject newBuildingListHolder;
+    [SerializeField] private GameObject characterMenu;
     [Header("Prefabs")]
     [SerializeField] private GameObject buyItemPrefab;
     [SerializeField] private GameObject popUpPrefab;
@@ -44,6 +46,7 @@ public class UIController : MonoBehaviour
     private bool tileBubbleActive = false;
     private int directionToFadeFrom = 0;
     private Dictionary<string, Vector2> menusPos;
+    private bool dialog = false;
     public static bool tweening = false;
 
     private void Awake()
@@ -65,6 +68,22 @@ public class UIController : MonoBehaviour
         if(Input.GetKeyDown(KeyCode.M))
         {
             DebugActiveMenuPositions();
+        }
+        if (Input.GetKeyDown(KeyCode.L) && !dialog)
+        {
+            dialog = true;
+            game.SwitchState(1);
+            FadeInMenu(characterMenu);
+            InputController ic = GameObject.FindGameObjectWithTag("Input").GetComponent<InputController>();
+            c.DebugADialogFromACharacter(0, Emotion.HAPPY, "Hola Soy INSERT NAME! Ahora voy a decir incoherencias y luego centrare la camara en la central electrica" +
+                "svgggage asdasdadavndskuhrnbekjvybskjvhyrbvkjsvnbkjnbvrknjbvksvyrnbvkvnfjvhnvnkg Centracion!!", ()=> {
+                    Debug.Log("Moving camera to position");
+                    ic.MoveCameraToWorldPosition(game.TryGetActiveBuildingWorldPos(game.Buildings[2]), ()=>
+                    {
+                        game.SwitchState(0);
+                        dialog = false;
+                    });
+                });
         }
     }
 
@@ -161,9 +180,11 @@ public class UIController : MonoBehaviour
             Destroy(holderList.GetChild(i).gameObject); //
         }                                               //Limpia la lista!
 
+        float contentSize = 0;
         for (int i = 4; i < game.Buildings.Count; i++)
         {
             GameObject itemInstantiated = Instantiate(buyItemPrefab, holderList, false);
+
             UIItem uiItem = itemInstantiated.GetComponent<UIItem>();
             uiItem.FillData(game.Buildings[i]);
             uiItem.GetComponent<Button>().onClick.AddListener(() =>
@@ -175,6 +196,7 @@ public class UIController : MonoBehaviour
             });
         }
         Debug.Log(holderList.name + " filled with buildings!");
+        
     }
 
     public void FillNewListWithAvailableComponents(int category)
@@ -216,16 +238,16 @@ public class UIController : MonoBehaviour
         {                                               //
             Destroy(holderList.GetChild(i).gameObject); //
         }                                               //Limpia la lista!
-
+        float contentSize = 0;
         for (int i = 4; i < game.Buildings.Count; i++)
         {
             GameObject item = Instantiate(buyNewItemPrefab, holderList, false);
             item.transform.name = game.Buildings[i].Index.ToString();
-
+            contentSize += item.GetComponent<RectTransform>().sizeDelta.x - 100;
+            //contentSize += item.GetComponent<RectTransform>().rect.size.x;
             item.transform.Find("Img_Icon").GetComponent<Image>().sprite = game.Buildings[i].icon;
             item.transform.Find("Img_Icon/Img_Label/Txt_Cost").GetComponent<TextMeshProUGUI>().text = "$ " + game.Buildings[i].buildingCost.ToString();
             item.transform.Find("Txt_Label").GetComponent<TextMeshProUGUI>().text = game.Buildings[i].name;
-
             item.GetComponent<Button>().onClick.AddListener(() =>
             {
                 int pint = int.Parse(item.transform.name);
@@ -235,6 +257,8 @@ public class UIController : MonoBehaviour
                 FadeOutMenu(newBuildingListHolder);
             });
         }
+        RectTransform holderSize = holderList.GetComponent<RectTransform>();
+        holderSize.sizeDelta = new Vector2(contentSize, holderSize.sizeDelta.y);
         Debug.Log(holderList.name + " filled with buildings!");
     }
 
@@ -339,7 +363,7 @@ public class UIController : MonoBehaviour
         string n = id + " - added a component";
         if (menusPos.ContainsKey(n))
         {
-            Debug.Log("Menu already existed");
+            //Debug.Log("Menu already existed");
             return;
         }
         GameObject bubbleGO = Instantiate(popUpPrefab, game.CellToWorldPosition(tilePos) + new Vector3(0, 0.75f, 0), Quaternion.identity); //Crea la burbuja
@@ -429,7 +453,7 @@ public class UIController : MonoBehaviour
         RectTransform menuRect = menu.GetComponent<RectTransform>();
         Vector2 intialPos = menuRect.anchoredPosition + GetTGTPos(menuRect);
         menuRect.anchoredPosition = intialPos;
-        Debug.Log("getting " + menu.transform.name + " og pos");
+        //Debug.Log("getting " + menu.transform.name + " og pos");
         Vector2 tgtPos = menusPos[menu.transform.name];
 
         SetAlpha(menu, 0, 1);
@@ -440,7 +464,7 @@ public class UIController : MonoBehaviour
         }, intialPos, tgtPos, fadeTime).setOnComplete(() =>
         {
             tweening = false;
-            Debug.Log("TweenFade IN of " + menu.transform.name + " complete!");
+            //Debug.Log("TweenFade IN of " + menu.transform.name + " complete!");
         });
     }
 
@@ -459,7 +483,7 @@ public class UIController : MonoBehaviour
         }, intialPos, tgtPos, fadeTime).setOnComplete(() =>
         {
             tweening = false;
-            Debug.Log("TweenFade OUT of " + menu.transform.name + " complete!");
+            //Debug.Log("TweenFade OUT of " + menu.transform.name + " complete!");
             menu.SetActive(false);
         });
     }
@@ -470,7 +494,7 @@ public class UIController : MonoBehaviour
         RectTransform menuRect = menu.GetComponent<RectTransform>();
         Vector2 intialPos = (Vector2)menuRect.transform.position + GetTGTPos(menuRect);
         menuRect.transform.position = intialPos;
-        Debug.Log("getting " + menu.transform.name + " og pos");
+        //Debug.Log("getting " + menu.transform.name + " og pos");
         Vector2 tgtPos = menusPos[menu.name];
 
         SetAlpha(menu, 0, 1);
@@ -481,7 +505,7 @@ public class UIController : MonoBehaviour
         }, intialPos, tgtPos, fadeTime).setOnComplete(() =>
         {
             tweening = false;
-            Debug.Log("TweenFade IN of " + menu.name + " complete!");
+            //Debug.Log("TweenFade IN of " + menu.name + " complete!");
             onFadeInEnd?.Invoke();
         });
     }
@@ -501,7 +525,7 @@ public class UIController : MonoBehaviour
         }, intialPos, tgtPos, fadeTime).setOnComplete(() =>
         {
             tweening = false;
-            Debug.Log("TweenFade OUT of " + menu.name + " complete!");
+            //Debug.Log("TweenFade OUT of " + menu.name + " complete!");
             menu.SetActive(false);
             Destroy(menu);
         });

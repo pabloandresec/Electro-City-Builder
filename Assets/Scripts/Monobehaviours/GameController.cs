@@ -3,7 +3,7 @@ using System.Collections;
 using Random = UnityEngine.Random;
 using UnityEngine.Tilemaps;
 using System.Collections.Generic;
-using System;
+using System.Linq;
 
 public class GameController : MonoBehaviour
 {
@@ -75,6 +75,33 @@ public class GameController : MonoBehaviour
 
         GetComponent<PGrid>().InitGrid(); //Comentar para PATHFINDING DESHABILITADO
         InputController.OnTap += TileTapped;
+    }
+
+    public Vector3 TryGetActiveBuildingWorldPos(BuildingData buildingData)
+    {
+        Building b = activeBuildings.First(val => val.ListIndex == buildingData.Index);
+        if(b != null)
+        {
+            Vector3Int cell = Utils.IndexToTilePos(b.PositionIndex, width);
+            return groundTilemap.CellToWorld(cell);
+        }
+        else
+        {
+            return -Vector3.one;
+        }
+    }
+
+    public bool HasActiveBuilding(BuildingData buildingData)
+    {
+        Building b = activeBuildings.First(val => val.ListIndex == buildingData.Index);
+        if (b != null)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     public Building GetSelectedBuildingData()

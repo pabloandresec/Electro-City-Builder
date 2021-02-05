@@ -12,10 +12,14 @@ public class Traffic : MonoBehaviour
     [Header("People")]
     [SerializeField] private float peopleOffset;
     [SerializeField] private FloatRange peopleSpeeds;
+    [SerializeField] private Sprite[] carSprites;
     [Header("Car")]
     [SerializeField] private float carOffset;
     [SerializeField] private FloatRange carSpeeds;
+    [SerializeField] private Sprite[] peopleSprites;
 
+
+    private SpriteRenderer sr;
     private float speed = 0;
     private Vector2[] path;
     private Vector3[] correctPath;
@@ -30,12 +34,18 @@ public class Traffic : MonoBehaviour
         {
             GetComponent<SpriteRenderer>().color = Color.blue;
             speed = Random.Range(peopleSpeeds.min, peopleSpeeds.max);
+            transform.GetChild(1).gameObject.SetActive(true);
+            sr = transform.GetChild(1).GetComponent<SpriteRenderer>();
         }
         else
         {
             GetComponent<SpriteRenderer>().color = Color.red;
             speed = Random.Range(carSpeeds.min, carSpeeds.max);
+            transform.GetChild(0).gameObject.SetActive(true);
+            sr = transform.GetChild(0).GetComponent<SpriteRenderer>();
         }
+        sr.color = Utils.GenerateRandomColor();
+        transform.name = type.ToString() + Utils.GenerateRandomString(2);
         RequestPath();
     }
 
@@ -57,12 +67,14 @@ public class Traffic : MonoBehaviour
         else
         {
             int nextIndx = currentIndex + 1;
+            
             if(nextIndx >= correctPath.Length)
             {
                 ClearPath();
             }
             else
             {
+                SetSprite(correctPath[nextIndx] - transform.position);
                 LeanTween.move(gameObject, correctPath[nextIndx], 1 / speed).setOnComplete(() =>
                 {
                     currentIndex = nextIndx;
@@ -72,9 +84,36 @@ public class Traffic : MonoBehaviour
         }
     }
 
+    private void SetSprite(Vector2 direction)
+    {
+        float angle = Vector2.SignedAngle(Vector2.left, direction);
+        if(type == TrafficType.CAR)
+        {
+            sr.sprite = angle < 0 ? carSprites[0] : carSprites[1];
+        }
+        
+        if(angle > 0 && angle < 90)
+        {
+            sr.flipX = true;
+        }
+        else if (angle > 90 && angle < 180)
+        {
+            sr.flipX = false;
+        }
+        else if (angle < -90 && angle > -180)
+        {
+            sr.flipX = false;
+        }
+        else if (angle < 0 && angle > -90)
+        {
+            sr.flipX = true;
+        }
+        //Debug.Log("Angle " + angle);
+    }
+
     private void ClearPath()
     {
-        Debug.Log("Path complete");
+        //Debug.Log("Path complete");
         currentIndex = -1;
         calculatingPath = false;
         hasPath = false;

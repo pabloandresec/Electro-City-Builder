@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a9ee7b04dbb52845954c35bdf20f974, type: 3}
+  m_Name: Apartamentos C
+  m_EditorClassIdentifier: 
+  icon: {fileID: 21300000, guid: a9745691f193be94aa16ffe6e471f660, type: 3}
+  tile: {fileID: 11400000, guid: ad2c348f04837ea48b8e1e45d44e7729, type: 2}
+  description: "Peque\xF1o edifico de apartamentos\n"
+  buildingCost: 2000
+  essential: 0
+  upgradeCost: 1500
+  upgradeBuildingName: 
+  hasComponents: 1
+  limits:
+  - category: 0
+    val: 20
+  - category: 1
+    val: 20
+  - category: 2
+    val: 20
+  - category: 3
+    val: 20

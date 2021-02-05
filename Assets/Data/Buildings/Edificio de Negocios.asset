@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a9ee7b04dbb52845954c35bdf20f974, type: 3}
+  m_Name: Edificio de Negocios
+  m_EditorClassIdentifier: 
+  icon: {fileID: 21300000, guid: cf68d4253ef46534aa0028bca6bfcbd7, type: 3}
+  tile: {fileID: 11400000, guid: c603e82a5599f4a46a595f3b46fe0abf, type: 2}
+  description: Prueba
+  buildingCost: 10000
+  essential: 0
+  upgradeCost: 1500
+  upgradeBuildingName: 
+  hasComponents: 1
+  limits:
+  - category: 0
+    val: 20
+  - category: 1
+    val: 20
+  - category: 2
+    val: 20
+  - category: 3
+    val: 20

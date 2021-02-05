@@ -108,6 +108,16 @@ public class InputController : MonoBehaviour
         //ClampCameraPosition();
     }
 
+    public void MoveCameraToWorldPosition(Vector3 worldPos,Action onMoveEnd)
+    {
+        Debug.Log("moving Camera");
+        worldPos.z = vcam.transform.position.z;
+        LeanTween.move(vcam.gameObject, worldPos, 1f).setOnComplete(() => {
+            Debug.Log("Camera moved!");
+            onMoveEnd?.Invoke();
+        });
+    }
+
     private void ClampCameraPosition()
     {
         float xPos = Mathf.Clamp(mainCam.transform.position.x, xClampRange.min, xClampRange.max);

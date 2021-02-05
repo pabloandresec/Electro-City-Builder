@@ -10,14 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6a9ee7b04dbb52845954c35bdf20f974, type: 3}
-  m_Name: Apartamentos
+  m_Name: Apartamentos A
   m_EditorClassIdentifier: 
-  icon: {fileID: 21300000, guid: 35f71e97d2bcd2a46916d1f59ca57e06, type: 3}
-  tile: {fileID: 11400000, guid: 4d1a2fb0767c6d84986d2887fb25263f, type: 2}
+  icon: {fileID: 21300000, guid: 761d1b1242f77ae4c9fbc4af3dc55142, type: 3}
+  tile: {fileID: 11400000, guid: 8ea397cf782c9994fa461440e04142e6, type: 2}
   description: "Peque\xF1o edifico de apartamentos\n"
   buildingCost: 2000
+  essential: 0
   upgradeCost: 1500
   upgradeBuildingName: 
+  hasComponents: 1
   limits:
   - category: 0
     val: 20
