@@ -20,4 +20,4 @@ MonoBehaviour:
   durability: 7200
   powerConsumption: 10
   premium: 1
-  color: {r: 0.45399487, g: 0.8490566, b: 0.41251338, a: 1}
+  color: {r: 0.09821415, g: 1, b: 0, a: 1}

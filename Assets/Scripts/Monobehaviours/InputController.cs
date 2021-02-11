@@ -15,9 +15,9 @@ public class InputController : MonoBehaviour
     [SerializeField] private float zoomMult = 0.01f;
     [SerializeField] private float zoomMin = 3f;
     [SerializeField] private float zoomMax = 8f;
-    [Header("Clamp")]
-    [SerializeField] private FloatRange yClampRange = new FloatRange(0, 8);
-    [SerializeField] private FloatRange xClampRange = new FloatRange(-8, 8);
+    [Header("References")]
+    [SerializeField] private UIController ui;
+    [SerializeField] private GameController game;
 
     private Vector2 fingerMotion;
     private Vector2 startingTouchPos;
@@ -30,7 +30,13 @@ public class InputController : MonoBehaviour
     private bool zooming = false;
     private bool noInput = true;
 
+    private bool lockMovement = false;
+    private bool lockZoom = false;
+    private bool lockTap = false;
+
     public static Action<Vector3> OnTap;
+    public static Action<Vector2> OnCameraMoved;
+    public static Action<float> OnCameraZoom;
 
     private void Update()
     {
@@ -39,6 +45,10 @@ public class InputController : MonoBehaviour
 
     private void HandleInput()
     {
+        if(game.State == PlayerState.MENUS)
+        {
+            return;
+        }
         if (Input.touchCount > 0)
         {
             foreach (Touch touch in Input.touches)
@@ -51,7 +61,7 @@ public class InputController : MonoBehaviour
             }
         }
 
-        if (Input.touchCount == 2 && !dragginScreen && !overUI)
+        if (Input.touchCount == 2 && !dragginScreen && !overUI && !lockZoom)
         {
             noInput = false;
             zooming = true;
@@ -77,9 +87,10 @@ public class InputController : MonoBehaviour
                     break;
                 case TouchPhase.Moved:
                     dragginScreen = true;
-                    if (!zooming)
+                    if (!zooming && !lockMovement)
                     {
                         fingerMotion = startingTouchPos - (Vector2)mainCam.ScreenToWorldPoint(t.position);
+                        OnCameraMoved?.Invoke(fingerMotion);
                         vcam.transform.position += (new Vector3(fingerMotion.x, fingerMotion.y, 0) * camSpeed) * Time.deltaTime;
                     }
                     break;
@@ -89,7 +100,7 @@ public class InputController : MonoBehaviour
                 case TouchPhase.Ended:
                     endTouchPos = mainCam.ScreenToWorldPoint(t.position);
                     vcam.transform.position = mainCam.transform.position;
-                    if (touchTime < maxTapTime && !dragginScreen && !zooming)
+                    if (touchTime < maxTapTime && !dragginScreen && !zooming && !lockTap)
                     {
                         OnTap?.Invoke(endTouchPos);
                     }
@@ -108,42 +119,27 @@ public class InputController : MonoBehaviour
         //ClampCameraPosition();
     }
 
-    public void MoveCameraToWorldPosition(Vector3 worldPos,Action onMoveEnd)
+    public void LockInput(bool mov, bool zoom, bool tap)
+    {
+        lockMovement = mov;
+        lockZoom = zoom;
+        lockTap = tap;
+    }
+
+    public void MoveCameraToWorldPosition(Vector3 worldPos, float ortographicSize, Action onMoveEnd)
     {
         Debug.Log("moving Camera");
         worldPos.z = vcam.transform.position.z;
+        LeanTween.value(vcam.gameObject, (newVal) => { vcam.m_Lens.OrthographicSize = newVal; }, vcam.m_Lens.OrthographicSize, ortographicSize, 0.9f);
         LeanTween.move(vcam.gameObject, worldPos, 1f).setOnComplete(() => {
             Debug.Log("Camera moved!");
             onMoveEnd?.Invoke();
         });
     }
 
-    private void ClampCameraPosition()
-    {
-        float xPos = Mathf.Clamp(mainCam.transform.position.x, xClampRange.min, xClampRange.max);
-        float yPos = Mathf.Clamp(mainCam.transform.position.y, yClampRange.min, yClampRange.max);
-        float zPos = vcam.transform.position.z;
-        mainCam.transform.position = new Vector3(xPos, yPos, zPos);
-    }
-
-    private void MouseMovement()
-    {
-        noInput = false;
-        
-        if (Input.GetMouseButtonDown(2))
-        {
-            startingTouchPos = mainCam.ScreenToWorldPoint(Input.mousePosition);
-        }
-        else if(Input.GetMouseButton(2))
-        {
-            dragginScreen = true;
-            fingerMotion = startingTouchPos - (Vector2)mainCam.ScreenToWorldPoint(Input.mousePosition);
-            mainCam.transform.position += (new Vector3(fingerMotion.x, fingerMotion.y, 0) * camSpeed) * Time.deltaTime;
-        }
-    }
-
     private void ZoomCamera(float incrementValue)
     {
         vcam.m_Lens.OrthographicSize = Mathf.Clamp(vcam.m_Lens.OrthographicSize - incrementValue, zoomMin, zoomMax);
+        OnCameraZoom?.Invoke(vcam.m_Lens.OrthographicSize);
     }
 }

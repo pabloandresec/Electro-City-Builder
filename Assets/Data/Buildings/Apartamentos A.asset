@@ -22,10 +22,10 @@ MonoBehaviour:
   hasComponents: 1
   limits:
   - category: 0
-    val: 20
+    val: 5
   - category: 1
-    val: 20
+    val: 5
   - category: 2
-    val: 20
-  - category: 3
-    val: 20
+    val: 5
+  - category: 5
+    val: 5

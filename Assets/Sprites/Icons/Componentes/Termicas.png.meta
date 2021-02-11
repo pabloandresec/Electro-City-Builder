@@ -1,31 +1,22 @@
 fileFormatVersion: 2
-guid: 506e3e411e4a2064e892be00168f408c
+guid: 2f07a6943c2e89c43843c71e54550908
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -4428358740908299492
-    second: control1_0
+      213: -2870216838162600270
+    second: Termicas_0
   - first:
-      213: -3141764151432306552
-    second: control1_1
+      213: -7141548536298220901
+    second: Termicas_1
   - first:
-      213: -4491789478741278673
-    second: control1_2
+      213: -4805663576989249906
+    second: Termicas_2
   - first:
-      213: 1821209049913759115
-    second: UI_Fill_Back
+      213: -8699049981977870300
+    second: Termicas_3
   - first:
-      213: 7223029854710977674
-    second: CircleA
-  - first:
-      213: -7625161664147367859
-    second: Splitter
-  - first:
-      213: 4707207734379650471
-    second: UI_Fill_Front
-  - first:
-      213: 2195830940296667031
-    second: Mask
+      213: 8406761474588315751
+    second: Termicas_4
   externalObjects: {}
   serializedVersion: 11
   mipmaps:
@@ -125,13 +116,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: control1_0
+      name: Termicas_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 402
-        width: 110
-        height: 110
+        x: 19
+        y: 258
+        width: 211
+        height: 250
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -139,155 +130,71 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: c1b2a26003f4b82c0800000000000000
-      internalID: -4428358740908299492
+      spriteID: 2be29f42ef0fa28d0800000000000000
+      internalID: -2870216838162600270
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: control1_1
+      name: Termicas_1
       rect:
         serializedVersion: 2
-        x: 0
-        y: 338
-        width: 110
-        height: 64
+        x: 273
+        y: 262
+        width: 225
+        height: 248
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 16, y: 22, z: 22, w: 18}
+      border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 88022d966263664d0800000000000000
-      internalID: -3141764151432306552
+      spriteID: b92dbbb917f14ec90800000000000000
+      internalID: -7141548536298220901
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: control1_2
+      name: Termicas_3
       rect:
         serializedVersion: 2
-        x: 0
-        y: 274
-        width: 110
-        height: 64
+        x: 14
+        y: 4
+        width: 218
+        height: 246
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 15, y: 22, z: 21, w: 17}
+      border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: f200ac18445f9a1c0800000000000000
-      internalID: -4491789478741278673
+      spriteID: 42047d48124c64780800000000000000
+      internalID: -8699049981977870300
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: UI_Fill_Back
+      name: Termicas_4
       rect:
         serializedVersion: 2
-        x: 0
-        y: 230
-        width: 110
-        height: 44
+        x: 263
+        y: 8
+        width: 227
+        height: 247
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 18, y: 17, z: 21, w: 17}
+      border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: b8516d15bfb364910800000000000000
-      internalID: 1821209049913759115
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: CircleA
-      rect:
-        serializedVersion: 2
-        x: 65
-        y: 129
-        width: 14
-        height: 14
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 6, y: 7, z: 7, w: 6}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: a84d614326b5d3460800000000000000
-      internalID: 7223029854710977674
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Splitter
-      rect:
-        serializedVersion: 2
-        x: 192
-        y: 26
-        width: 17
-        height: 6
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 4, y: 3, z: 5, w: 2}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: d48d195cddbfd2690800000000000000
-      internalID: -7625161664147367859
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: UI_Fill_Front
-      rect:
-        serializedVersion: 2
-        x: 110
-        y: 230
-        width: 110
-        height: 44
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 18, y: 17, z: 21, w: 17}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 7ad9bab9e7c535140800000000000000
-      internalID: 4707207734379650471
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Mask
-      rect:
-        serializedVersion: 2
-        x: 265
-        y: 339
-        width: 111
-        height: 59
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 17, y: 19, z: 20, w: 16}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 79fd13f2b98297e10800000000000000
-      internalID: 2195830940296667031
+      spriteID: 760964c2501daa470800000000000000
+      internalID: 8406761474588315751
       vertices: []
       indices: 
       edges: []

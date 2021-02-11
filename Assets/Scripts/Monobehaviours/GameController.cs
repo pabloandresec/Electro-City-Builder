@@ -4,16 +4,18 @@ using Random = UnityEngine.Random;
 using UnityEngine.Tilemaps;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 public class GameController : MonoBehaviour
 {
+    #region Variables
     [Header("Map Settings")]
     [SerializeField] private int width = 16;
     [SerializeField] private int height = 16;
     [Header("Game Settings")]
-    [Range(0.5f, 4)]
+    [Range(0.5f, 10)]
     [SerializeField] private float gameTimeSpeedMult = 1;
-    [Range(0.2f,30)]
+    [Range(0.2f, 30)]
     [SerializeField] private float buildingRefreshRate = 10;
     [SerializeField] private GameSession currentGameSessionData;
     [Header("References")]
@@ -31,6 +33,10 @@ public class GameController : MonoBehaviour
     [Header("DEBUG")]
     [SerializeField] private int testIndex = 17;
     [SerializeField] private Vector3Int selectedTile = -Vector3Int.one;
+    [Header("Limits")]
+    private bool limited = false;
+    private Vector3Int limitedToTile = -Vector3Int.one;
+    private Action OnLimitedCleared;
 
     private Building selectedBuilding;
     private bool selected = false;
@@ -44,6 +50,13 @@ public class GameController : MonoBehaviour
     public Vector3Int SelectedTile { get => selectedTile; }
     public int Width { get => width; }
     public int Height { get => height; }
+    public PlayerState State { get => state; }
+    #endregion
+
+    #region Eventos
+    public static Action<BuildActionInfo> BuildingContructed;
+    public static Action<ComponentData> ComponentAdded;
+    #endregion
 
     void Start()
     {
@@ -55,7 +68,7 @@ public class GameController : MonoBehaviour
         {
             for (int x = 0; x < width; x++)
             {
-                if(roadTilemap.HasTile(new Vector3Int(x,y,0)))
+                if (roadTilemap.HasTile(new Vector3Int(x, y, 0)))
                 {
                     activeBuildings[TilePosToIndex(x, y)] = new Building(buildings[3], TilePosToIndex(x, y));
                 }
@@ -64,17 +77,193 @@ public class GameController : MonoBehaviour
 
         activeBuildings[TilePosToIndex(8, 8)] = new Building(buildings[2], TilePosToIndex(8, 8));
         activeBuildings[TilePosToIndex(7, 5)] = new Building(buildings[4], TilePosToIndex(7, 5));
-        activeBuildings[TilePosToIndex(8, 5)] = new Building(buildings[4], TilePosToIndex(8, 5));
+        //activeBuildings[TilePosToIndex(8, 5)] = new Building(buildings[4], TilePosToIndex(8, 5));
 
-        activeBuildings[TilePosToIndex(7, 5)].AddBuildingComponent(components[0]);
-        activeBuildings[TilePosToIndex(8, 5)].AddBuildingComponent(components[0]);
+        //activeBuildings[TilePosToIndex(7, 5)].AddBuildingComponent(components[0]); //añade luz de 20 seg
+        //activeBuildings[TilePosToIndex(8, 5)].AddBuildingComponent(components[0]); //añade luz de 20 seg
+        //activeBuildings[TilePosToIndex(7, 5)].AddBuildingComponent(components[4]);
+        //activeBuildings[TilePosToIndex(8, 5)].AddBuildingComponent(components[4]);
 
         RefreshMap();
         RefreshGame();
-        ui.UpdateUI(currentGameSessionData.money, CalculatePowerUsage(), 1000);
 
         GetComponent<PGrid>().InitGrid(); //Comentar para PATHFINDING DESHABILITADO
         InputController.OnTap += TileTapped;
+
+        SetupTutorial();
+    }
+
+    private void SetupTutorial()
+    {
+        MissionController mc = GameObject.FindGameObjectWithTag("Mission").GetComponent<MissionController>();
+        InputController ic = GameObject.FindGameObjectWithTag("Input").GetComponent<InputController>();
+        CharController cc = ui.GetComponent<CharController>();
+
+        SwitchState(1);
+        cc.AssignAnActionAtEndOfDialog(0, () =>
+        {
+            mc.CreateCameraMission();
+            SwitchState(0);
+            ic.LockInput(false, true, true);
+        });
+        cc.AssignAnActionAtEndOfDialog(1, () =>
+        {
+            mc.CreateZoomMission();
+            ic.LockInput(true, false, true);
+            SwitchState(0);
+        });
+        cc.AssignAnActionAtEndOfDialog(2, () =>
+        {
+            Vector3 tgtPos = groundTilemap.CellToWorld(new Vector3Int(7, 5, 0)) + new Vector3(0, 0.5f, 0);
+            ic.MoveCameraToWorldPosition(tgtPos, 1, () =>
+             {
+                 SwitchState(1);
+                 ui.AddAttentionBubble("Tutorial bubble", new Vector3Int(7, 5, 0));
+                 ui.WaitAndExecuteFunction(1, () => {
+                     ui.GetComponent<CharController>().ShowDialog(3);
+                 });
+             });
+        });
+        cc.AssignAnActionAtEndOfDialog(3, () => //tile selection
+        {
+            SwitchState(0);
+            ic.LockInput(true, true, false);
+            LimitSelectionOfTiles(new Vector3Int(7, 5, 0), () =>
+            {
+                ic.LockInput(true, true, true);
+                UnlimitSelectionsOfTiles();
+                cc.ShowDialog(4);
+                Debug.Log("Context menu opened! Limit removed and bubble Locked");
+            });
+        });
+        cc.AssignAnActionAtEndOfDialog(4, () => //pop up
+        {
+            ui.ButtonPressed = (s) => {
+                if (s == "Components")
+                {
+                    cc.ShowDialog(5);
+                    Debug.LogWarning("Component bubble button pressed");
+                    ui.ButtonPressed = null;
+                }
+            };
+        });
+        cc.AssignAnActionAtEndOfDialog(5, () => //Categorias
+        {
+            string[] buttonsToDisable = new string[] {
+                "But_CatExit",
+                "CUBIERTAS",
+                "INTERRUPTORES",
+                "TOMACORRIENTES",
+                "SENSORES",
+                "TERMICAS",
+                "But_CompExit"
+            };
+            ui.DisableButton(buttonsToDisable);
+            ui.ButtonPressed = (s) => {
+                if (s == "ILUMINACION")
+                {
+                    cc.ShowDialog(6);
+                    Debug.LogWarning("Boton Iluminacion presionado");
+                    ui.ButtonPressed = null;
+                }
+            };
+        });
+        cc.AssignAnActionAtEndOfDialog(6, () => //Explain Bar
+        {
+            ui.ButtonPressed = (s) => {
+                if (s == "0" || s == "1" || s == "2" || s == "3")
+                {
+                    string[] buttonsToDisable = new string[] {
+                        "0",
+                        "1",
+                        "2",
+                        "3"
+                    };
+                    ui.DisableButton(buttonsToDisable);
+                    cc.ShowDialog(7);
+                    Debug.LogWarning("Producto Comprado");
+                    ui.EnableADisabledButton("But_CompExit");
+                    ui.EnableADisabledButton("But_CatExit");
+                    ui.ButtonPressed = (exit) => {
+                        if(exit == "But_CatExit")
+                        {
+                            ic.MoveCameraToWorldPosition(overlayTilemap.CellToWorld(new Vector3Int(8,8,0)), 3, ()=> {
+                                cc.ShowDialog(8);
+                                ui.ButtonPressed = null;
+                            });
+                        }
+                    };
+                }
+            };
+        });
+        cc.AssignAnActionAtEndOfDialog(8, () =>
+        {
+            Debug.LogWarning("Trying to select 8,7 at "+ state +" state");
+            LimitSelectionOfTiles(new Vector3Int(8, 7, 0), () => {
+                cc.ShowDialog(10);
+            });
+            ic.MoveCameraToWorldPosition(overlayTilemap.CellToWorld(new Vector3Int(8, 7, 0)) + new Vector3(0,0.5f,0), 0.8f, () => {
+                cc.ShowDialog(9);
+                ui.ButtonPressed = null;
+            });
+        });
+        cc.AssignAnActionAtEndOfDialog(9, () =>
+        {
+            ic.LockInput(true, true, false);
+        });
+        cc.AssignAnActionAtEndOfDialog(10, () =>
+        {
+            ic.LockInput(true, true, true);
+            ui.ButtonPressed = (exit) => {
+                if (exit == "Buy")
+                {
+                    cc.ShowDialog(11);
+                    ui.ButtonPressed = null;
+                }
+            };
+
+        });
+        cc.AssignAnActionAtEndOfDialog(11, () =>
+        {
+            ic.LockInput(true, true, false);
+            ui.ButtonPressed = (build) => {
+                if (build == "Build")
+                {
+                    cc.ShowDialog(12);
+                    ui.ButtonPressed = null;
+                }
+            };
+        });
+        cc.AssignAnActionAtEndOfDialog(12, () =>
+        {
+            ui.DisableButton(new string[] { "But_BuildExit" });
+            mc.CreateAnyBuildingMission();
+        });
+        cc.AssignAnActionAtEndOfDialog(13, () =>
+        {
+            SwitchState(0);
+            ic.LockInput(false,false,false);
+            UnlimitSelectionsOfTiles();
+            ui.EnableAllButtons();
+        });
+        //Start Tutorial
+        cc.ShowDialog(0);
+    }
+
+    private void UnlimitSelectionsOfTiles()
+    {
+        limited = false;
+        limitedToTile = -Vector3Int.one ;
+        OnLimitedCleared = null;
+        Debug.Log("Limit selection of tiles disabled");
+    }
+
+    private void LimitSelectionOfTiles(Vector3Int cell, Action _OnTileSelected)
+    {
+        limited = true;
+        limitedToTile = cell;
+        OnLimitedCleared = _OnTileSelected;
+        Debug.Log("Limit selection of tiles active... Can only select" + cell);
     }
 
     public Vector3 TryGetActiveBuildingWorldPos(BuildingData buildingData)
@@ -142,6 +331,10 @@ public class GameController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Intentara añadir un edificio de la lista "building" usando el indice propocionado y la posicion seleccionada
+    /// </summary>
+    /// <param name="index"></param>
     public void TryAddBuildingComponent(int index)
     {
         if (selected)
@@ -177,9 +370,7 @@ public class GameController : MonoBehaviour
                     }
                     if (currentGameSessionData.money >= components[index].cost)
                     {
-                        activeBuildings[TilePosToIndex(selectedTile.x, selectedTile.y)].AddBuildingComponent(components[index]);
-                        currentGameSessionData.money -= components[index].cost;
-                        GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(5);
+                        AddComponent(index);
                     }
                     else
                     {
@@ -192,9 +383,7 @@ public class GameController : MonoBehaviour
                     Debug.LogWarning(" No Limit set for "+ components[index].displayName);
                     if (currentGameSessionData.money >= components[index].cost)
                     {
-                        activeBuildings[TilePosToIndex(selectedTile.x, selectedTile.y)].AddBuildingComponent(components[index]);
-                        currentGameSessionData.money -= components[index].cost;
-                        GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(5);
+                        AddComponent(index);
                     }
                     else
                     {
@@ -216,14 +405,25 @@ public class GameController : MonoBehaviour
         }
     }
 
+    private void AddComponent(int index)
+    {
+        ComponentAdded?.Invoke(components[index]);
+        activeBuildings[TilePosToIndex(selectedTile.x, selectedTile.y)].AddBuildingComponent(components[index]);
+        currentGameSessionData.money -= components[index].cost;
+        ui.UpdateUI(currentGameSessionData.money);
+        GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(5);
+    }
+
     public void TryBuild(int index)
     {
+        bool builded = false;
         if(selected)
         {
             if(currentGameSessionData != null)
             {
                 if(currentGameSessionData.money >= buildings[index].buildingCost)
                 {
+                    builded = true;
                     Build(selectedTile, index);
                     currentGameSessionData.money -= buildings[index].buildingCost;
                     DeselectTile();
@@ -244,13 +444,15 @@ public class GameController : MonoBehaviour
         {
             Debug.Log("No tile selected");
         }
+        BuildActionInfo info = new BuildActionInfo(CellToWorldPosition(selectedTile), selectedTile, buildings[index], builded);
+        BuildingContructed?.Invoke(info);
     }
 
     public void Build(Vector3Int tilePos, int buildingIndex)
     {
         activeBuildings[TilePosToIndex(tilePos.x, tilePos.y)] = new Building(buildings[buildingIndex], TilePosToIndex(tilePos.x, tilePos.y));
-        ui.UpdateUI(currentGameSessionData.money, CalculatePowerUsage(), 1000);
         RefreshMap();
+        ui.UpdateUI(currentGameSessionData.money);
         Debug.Log("Building constructed");
     }
 
@@ -309,9 +511,12 @@ public class GameController : MonoBehaviour
         else
         {
             SelectTile(worldPos);
-            Debug.Log("Sending info of " + selectedTile + " index " + TilePosToIndex(selectedTile.x, selectedTile.y));
-            int selectedBuilding = activeBuildings[TilePosToIndex(selectedTile.x, selectedTile.y)].ListIndex;
-            ui.SetSelectedTileMenu(true, buildings[selectedBuilding]);
+            if(selected)
+            {
+                Debug.Log("Sending info of " + selectedTile + " index " + TilePosToIndex(selectedTile.x, selectedTile.y));
+                int selectedBuilding = activeBuildings[TilePosToIndex(selectedTile.x, selectedTile.y)].ListIndex;
+                ui.SetSelectedTileMenu(true, buildings[selectedBuilding]);
+            }
         }
     }
 
@@ -320,6 +525,18 @@ public class GameController : MonoBehaviour
 
         //Calculate new selected pos
         Vector3Int newSelectedPos = overlayTilemap.WorldToCell(new Vector3(worldPos.x, worldPos.y, 0));
+        if(limited)
+        {
+            if(newSelectedPos == limitedToTile)
+            {
+                OnLimitedCleared?.Invoke();
+            }
+            else
+            {
+                Debug.LogWarning("Limited Selection Active!!");
+                return;
+            }
+        }
         //Clamping the new selected pos;
         newSelectedPos = new Vector3Int(Mathf.Clamp(newSelectedPos.x, 0, width - 1), Mathf.Clamp(newSelectedPos.y, 0, height - 1), 0);
         //Updating view;
@@ -357,6 +574,7 @@ public class GameController : MonoBehaviour
         {
             tPassed = 0;
             UpdateBuildings(buildingRefreshRate);
+            ui.RefreshComponentCategoryBarModeB();
         }
     }
 
@@ -401,8 +619,6 @@ public class GameController : MonoBehaviour
     {
         return groundTilemap.CellToWorld(cell);
     }
-
-
 
     public void TestIndex()
     {

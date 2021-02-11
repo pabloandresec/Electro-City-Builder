@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1300c813b95687c4fb23167cc54d443d, type: 3}
-  m_Name: FocoC
+  m_Name: TermicaA
   m_EditorClassIdentifier: 
-  displayName: Foco Retorcido
-  icon: {fileID: -2920224340129155090, guid: 5e4c7092c343db747b9760c6d74c7bf5, type: 3}
-  category: 0
-  description: Ilumina la oscuridad
-  cost: 30
-  durability: 6000
-  powerConsumption: 10
+  displayName: Sanchez
+  icon: {fileID: -2870216838162600270, guid: 2f07a6943c2e89c43843c71e54550908, type: 3}
+  category: 5
+  description: Termicas sanchez
+  cost: 1000
+  durability: 3600
+  powerConsumption: 3
   premium: 0
-  color: {r: 1, g: 0.99701774, b: 0, a: 1}
+  color: {r: 1, g: 0, b: 0, a: 1}

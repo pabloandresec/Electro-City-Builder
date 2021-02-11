@@ -19,6 +19,7 @@ public class PGrid : MonoBehaviour {
     [SerializeField] private GameObject trafficPrefab;
     [Min(0)]
     [SerializeField] private int trafficAmount;
+    [SerializeField] private Transform trafficParent;
 
     private List<Vector2Int> roads;
     private Node[,] grid;
@@ -54,6 +55,7 @@ public class PGrid : MonoBehaviour {
             Vector3 r = RequestRandomRoadWorldPos();
             GameObject g = Instantiate(trafficPrefab, new Vector3(r.x, r.y, 0), Quaternion.identity) as GameObject;
             g.name = "Traffico " + i.ToString();
+            g.transform.SetParent(trafficParent);
         }
     }
 

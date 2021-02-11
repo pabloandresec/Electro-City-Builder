@@ -10,8 +10,6 @@ public class UIController : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private GameObject[] mainMenus;
-    [SerializeField] private Transform categoryListHolder;
-    [SerializeField] private Transform buildingListHolder;
     [SerializeField] private GameController game;
     [SerializeField] private CharController c;
     [Space(5)]
@@ -19,14 +17,13 @@ public class UIController : MonoBehaviour
     [SerializeField] private Slider powerSlider;
     [SerializeField] private TextMeshProUGUI power;
     [SerializeField] private TextMeshProUGUI money;
-    [Header("Tile manipulation menus")]
-    [SerializeField] private GameObject tileSelectedMenu;
-    [SerializeField] private GameObject selectedDeviceComponentsMenu;
     [Header("NewMenus")]
     [SerializeField] private GameObject buyNewItemPrefab;
     [SerializeField] private GameObject newCategoriesListMenu;
     [SerializeField] private GameObject newComponentsListMenu;
     [SerializeField] private GameObject newBuildingListHolder;
+    [SerializeField] private int currentMenuCategory = -1;
+    [SerializeField] private Transform  bar;
     [SerializeField] private GameObject characterMenu;
     [Header("Prefabs")]
     [SerializeField] private GameObject buyItemPrefab;
@@ -43,24 +40,28 @@ public class UIController : MonoBehaviour
     [Header("DEBUG!")]
     public Button buyButton;
 
+    private List<Button> disabledButtons;
     private bool tileBubbleActive = false;
     private int directionToFadeFrom = 0;
     private Dictionary<string, Vector2> menusPos;
     private bool dialog = false;
     public static bool tweening = false;
+    private Action<string> buttonPressed;
+
+    public Action<string> ButtonPressed { get => buttonPressed; set => buttonPressed = value; }
 
     private void Awake()
     {
         activeBubbles = new List<GameObject>();
         menusPos = new Dictionary<string, Vector2>();
         CanvasGroup[] canvases = GetComponentsInChildren<CanvasGroup>(true);
-        string s = "canvases found : " + canvases.Length + "\n";
+        //string s = "canvases found : " + canvases.Length + "\n";
         foreach (CanvasGroup c in canvases)
         {
-            s += c.transform.name + "\n";
+            //s += c.transform.name + "\n";
             menusPos.Add(c.transform.name, c.GetComponent<RectTransform>().anchoredPosition);
         }
-        Debug.Log(s);
+        //Debug.Log(s);
     }
 
     private void Update()
@@ -68,22 +69,6 @@ public class UIController : MonoBehaviour
         if(Input.GetKeyDown(KeyCode.M))
         {
             DebugActiveMenuPositions();
-        }
-        if (Input.GetKeyDown(KeyCode.L) && !dialog)
-        {
-            dialog = true;
-            game.SwitchState(1);
-            FadeInMenu(characterMenu);
-            InputController ic = GameObject.FindGameObjectWithTag("Input").GetComponent<InputController>();
-            c.DebugADialogFromACharacter(0, Emotion.HAPPY, "Hola Soy INSERT NAME! Ahora voy a decir incoherencias y luego centrare la camara en la central electrica" +
-                "svgggage asdasdadavndskuhrnbekjvybskjvhyrbvkjsvnbkjnbvrknjbvksvyrnbvkvnfjvhnvnkg Centracion!!", ()=> {
-                    Debug.Log("Moving camera to position");
-                    ic.MoveCameraToWorldPosition(game.TryGetActiveBuildingWorldPos(game.Buildings[2]), ()=>
-                    {
-                        game.SwitchState(0);
-                        dialog = false;
-                    });
-                });
         }
     }
 
@@ -93,6 +78,18 @@ public class UIController : MonoBehaviour
         foreach (KeyValuePair<string, Vector2> m in menusPos)
         {
             s += m.Key + " at " + m.Value.ToString() + "\n";
+        }
+        s += "\n\n";
+        if(activeBubbles.Count > 0)
+        {
+            foreach (GameObject b in activeBubbles)
+            {
+                s += b.GetComponent<Bubble>().id + " active as "+ b.transform.name;
+            }
+        }
+        else
+        {
+            s += "No active bubbles";
         }
         Debug.Log(s);
     }
@@ -125,46 +122,44 @@ public class UIController : MonoBehaviour
 
     public void UpdateUI(int currentMoney, int powerInUse, int powerAvailable)
     {
-        money.text = currentMoney.ToString();
+        money.text = "$ " + currentMoney.ToString();
         power.text = powerInUse.ToString() + " / "+ powerAvailable.ToString();
         powerSlider.maxValue = powerAvailable;
         powerSlider.value = powerInUse;
     }
 
-    public void SetComponentsAmounts(Transform list)
+    public void UpdateUI(int currentMoney)
     {
-        Building building = game.GetSelectedBuildingData();
-        if (building == null)
+        money.text = "$ " + currentMoney.ToString();
+    }
+
+    public void SetAvailableCategoriesForSelectedBuilding()
+    {
+        Transform catList = newCategoriesListMenu.transform.Find("Scr_DevicesHolder/Viewport/Content");
+        BuildingData bd = game.Buildings[game.GetSelectedBuildingData().ListIndex];
+
+        for (int i = 0; i < catList.childCount; i++)
         {
-            Debug.Log("Error! nothing selected");
-            return;
+            catList.GetChild(i).gameObject.SetActive(false);
         }
-        BuildingData data = game.Buildings[building.ListIndex];
-        ComponentCategory[] values = (ComponentCategory[])Enum.GetValues(typeof(ComponentCategory));
-        foreach (ComponentCategory cat in values)
+
+        int itemAmount = 0;
+        for (int c = 0; c < bd.limits.Length; c++)
         {
-            List<BuildingComponent> bc = building.components.FindAll(comp => game.Components[comp.index].category.ToString() == cat.ToString());
-            bool limitFound = false;
-            ComponentLimit cl = null;
-            foreach (ComponentLimit c in data.limits)
+            for (int i = 0; i < catList.childCount; i++)
             {
-                if (c.category == cat)
+                if(catList.GetChild(i).transform.name == bd.limits[c].category.ToString())
                 {
-                    cl = c;
-                    limitFound = true;
+                    catList.GetChild(i).gameObject.SetActive(true);
+                    itemAmount++;
                     break;
                 }
             }
-            Transform it = list.Find(cat.ToString());
-            if (it != null)
-            {
-                it.GetChild(3).GetChild(0).GetComponent<TextMeshProUGUI>().text = bc.Count.ToString();
-                if (limitFound)
-                {
-                    it.GetChild(3).GetChild(1).GetComponent<TextMeshProUGUI>().text = cl.val.ToString();
-                }
-            }
         }
+
+        RectTransform rt = catList.GetComponent<RectTransform>();
+        float buttonWidth = catList.GetChild(0).GetComponent<RectTransform>().sizeDelta.x;
+        rt.sizeDelta = new Vector2(buttonWidth * itemAmount, rt.sizeDelta.y);
     }
 
     public void ShakeMenu(GameObject menu)
@@ -173,35 +168,33 @@ public class UIController : MonoBehaviour
 
     }
 
-    public void FillListWithAvailableBuildings(Transform holderList)
+    public void SetLockBubbleButtons(string button, bool state)
     {
-        for (int i = 0; i < holderList.childCount; i++) //
-        {                                               //
-            Destroy(holderList.GetChild(i).gameObject); //
-        }                                               //Limpia la lista!
-
-        float contentSize = 0;
-        for (int i = 4; i < game.Buildings.Count; i++)
+        Bubble b = null;
+        foreach (GameObject bub in activeBubbles)
         {
-            GameObject itemInstantiated = Instantiate(buyItemPrefab, holderList, false);
-
-            UIItem uiItem = itemInstantiated.GetComponent<UIItem>();
-            uiItem.FillData(game.Buildings[i]);
-            uiItem.GetComponent<Button>().onClick.AddListener(() =>
+            if(bub.transform.name == button)
             {
-                Debug.Log("Trying to build " + uiItem.Index);
-                game.TryBuild(uiItem.Index);
-                game.SwitchState(0);
-                FadeOutMenu(uiItem.transform.parent.parent.gameObject);
-            });
+                b = bub.GetComponent<Bubble>();
+                break;
+            }
         }
-        Debug.Log(holderList.name + " filled with buildings!");
-        
+        if(b == null)
+        {
+            Debug.LogWarning("Cant find that bubble");
+            return;
+        }
+        else
+        {
+            for(int i = 0;i < b.transform.childCount; i++)
+            {
+                b.transform.GetChild(i).GetComponent<Button>().interactable = state;
+            }
+        }
     }
 
     public void FillNewListWithAvailableComponents(int category)
     {
-        ComponentCategory selectedCategory = (ComponentCategory)category;
         Transform holderList = newComponentsListMenu.transform.GetChild(0).GetChild(0).GetChild(0);
 
         for (int i = 0; i < holderList.childCount; i++) //
@@ -209,6 +202,9 @@ public class UIController : MonoBehaviour
             Destroy(holderList.GetChild(i).gameObject); //
         }                                               //Limpia la lista!
 
+        ComponentCategory selectedCategory = (ComponentCategory)category;
+        buttonPressed?.Invoke(selectedCategory.ToString());
+        currentMenuCategory = category;
         List<ComponentData> categorizedComponents = game.Components.FindAll(comp => comp.category == selectedCategory); //Encuentra todos los comp de la misma categoria seleccionada
         newComponentsListMenu.transform.Find("Img_Label/Txt_Label").GetComponent<TextMeshProUGUI>().text = selectedCategory.ToString(); //Asigna el titulo del menu
 
@@ -225,9 +221,163 @@ public class UIController : MonoBehaviour
                 int pint = int.Parse(itemInstantiated.transform.name);
                 Debug.Log("Trying to add " + game.Components[pint].displayName);
                 game.TryAddBuildingComponent(pint);
+                RefreshComponentCategoryBarModeB();
+                buttonPressed?.Invoke(itemInstantiated.transform.name);
             });
         }
+        RefreshComponentCategoryBarModeB();
         Debug.Log(holderList.name + " filled with components!");
+    }
+
+    public void EnableAllButtons()
+    {
+        for (int i = 0; i < disabledButtons.Count; i++)
+        {
+            if(disabledButtons[i] != null)
+            {
+                disabledButtons[i].interactable = true;
+                disabledButtons.RemoveAt(i);
+            }
+        }
+        Debug.Log("All buttons disable are now enabled");
+    }
+
+    public void EnableADisabledButton(string buttonName)
+    {
+        Button b = disabledButtons.FirstOrDefault(val => val.transform.name == buttonName);
+        if(b != null)
+        {
+            b.interactable = true;
+            disabledButtons.Remove(b);
+            Debug.Log(b.transform.name + " is now enabled");
+        }
+        else
+        {
+            Debug.LogWarning(b.transform.name + " not found");
+        }
+    }
+
+    public void FirePressedButtonEvent(Button b)
+    {
+        buttonPressed?.Invoke(b.transform.name);
+    }
+
+    public void DisableButton(string[] buttonNames)
+    {
+        if(disabledButtons == null)
+        {
+            disabledButtons = new List<Button>();
+        }
+
+        Button[] buttons = Resources.FindObjectsOfTypeAll<Button>();
+        Debug.Log("Buttons found " + buttons.Length);
+        for (int i = 0; i < buttonNames.Length; i++)
+        {
+            for (int b = 0; b < buttons.Length; b++)
+            {
+                if (buttons[b].transform.name == buttonNames[i])
+                {
+                    buttons[b].interactable = false;
+                    disabledButtons.Add(buttons[b]);
+                    Debug.Log(buttons[b].transform.name + " button disabled");
+                    break;
+                }
+            }
+        }
+    }
+
+    public void RefreshComponentCategoryBarModeB()
+    {
+        if(currentMenuCategory == -1)
+        {
+            Debug.Log("no Menu open");
+        }
+        Building bd = game.GetSelectedBuildingData(); //trata de obtener el edificio activo en el mapa
+        if (bd == null)
+        {
+            Debug.Log("No tile selected");
+            return;
+        }
+        BuildingData bdata = game.Buildings[bd.ListIndex]; //datos del edifico activo
+
+        ComponentCategory selectedCategory = (ComponentCategory)currentMenuCategory;
+        List<ComponentData> categorizedComponents = game.Components.FindAll(comp => comp.category == selectedCategory); //Encuentra todos los comp de la misma categoria seleccionada
+        List<BuildingComponent> currentBuildingComponent = new List<BuildingComponent>();//lista donde guardaremos los componentes activos del edifico en cuestion
+        foreach (BuildingComponent builComp in bd.components) //Por cada elemento de los componentes de esa categoria
+        {
+            foreach (ComponentData compData in categorizedComponents) //nos fijamos si los componentes activos coinciden
+            {
+                if (builComp.index == compData.Index)
+                {
+                    currentBuildingComponent.Add(builComp);
+                    break;
+                }
+            }
+        }
+
+        for (int i = 1; i < bar.childCount; i++)
+        {
+            Destroy(bar.GetChild(i).gameObject);
+        }
+
+        if(currentBuildingComponent.Count == 0)
+        {
+            bar.GetChild(0).gameObject.SetActive(false);
+        }
+        else
+        {
+            bar.GetChild(0).gameObject.SetActive(true);
+        }
+
+        ComponentLimit componentLimit = bdata.limits.FirstOrDefault(val => val.category == selectedCategory);
+        if(componentLimit == null)
+        {
+            Debug.Log("No limits");
+            return;
+        }
+        int maxVal = int.MinValue;
+        ComponentData bestLight;
+        foreach (ComponentData cd in categorizedComponents)
+        {
+            if (cd.durability > maxVal)
+            {
+                maxVal = cd.durability;
+                bestLight = cd;
+            }
+        }
+        int bestCategoryDuration = maxVal * componentLimit.val;
+
+        float barRectWidth = bar.GetComponent<RectTransform>().sizeDelta.x;
+        RectTransform lastRectT = bar.GetChild(0).GetComponent<RectTransform>();
+        float lastRectWidth = 0;
+        for (int i = 0; i < currentBuildingComponent.Count; i++)
+        {
+            float smallRectSize = (currentBuildingComponent[i].life * barRectWidth) / bestCategoryDuration;
+            if (i == 0)
+            {
+                RectTransform firstRect = bar.GetChild(0).GetComponent<RectTransform>();
+                firstRect.sizeDelta = new Vector2(smallRectSize, firstRect.sizeDelta.y);
+                firstRect.anchoredPosition = firstRect.anchoredPosition;
+                firstRect.transform.name = i.ToString();
+                firstRect.GetComponent<Image>().color = game.Components[currentBuildingComponent[i].index].color;
+
+                lastRectT = bar.GetChild(0).GetComponent<RectTransform>();
+                lastRectWidth = smallRectSize;
+            }
+            else
+            {
+                GameObject go = Instantiate(bar.GetChild(0).gameObject, bar, false);
+                RectTransform goRectTrans = go.GetComponent<RectTransform>();
+
+                goRectTrans.sizeDelta = new Vector2(smallRectSize, bar.GetComponent<RectTransform>().sizeDelta.y);
+                goRectTrans.anchoredPosition = lastRectT.anchoredPosition + new Vector2(lastRectT.sizeDelta.x, 0);
+                goRectTrans.transform.name = i.ToString();
+                goRectTrans.GetComponent<Image>().color = game.Components[currentBuildingComponent[i].index].color;
+
+                lastRectT = goRectTrans;
+                lastRectWidth = smallRectSize;
+            }
+        }
     }
 
     public void FillNewListWithAvailableBuildings(Transform buildingMenu)
@@ -266,69 +416,24 @@ public class UIController : MonoBehaviour
     {
         if (v)
         {
-            Debug.Log("Showing tile menu");
-            if (tileMenuMode == TileMenuMode.BUBBLE)
-            {
-                SpawnTileSelectionBubble(buildingData);
-            }
-            else
-            {
-                SpawnTileSelectionMenu(buildingData);
-            }
+            Debug.Log("Showing bubble menu");
+            SpawnTileSelectionBubble(buildingData);
         }
         else
         {
-            Debug.Log("Disabling Tile menu");
+            Debug.Log("Disabling bubble menu");
             if (powerSlider.gameObject.activeSelf)
             {
                 SetDirectionOfFade(2);
                 FadeOutMenu(powerSlider.gameObject);
             }
-            if (tileMenuMode == TileMenuMode.BUBBLE)
-            {
-                if(tileBubbleActive)
-                {
-                    DespawnTileSelectionBubble();
-                }
-            }
-            else
-            {
-                FadeOutMenu(tileSelectedMenu);
-            }  
+            DespawnTileSelectionBubble();
         }
     }
 
-    private void SpawnTileSelectionMenu(BuildingData buildingData)
+    public void ClearCategory()
     {
-        SetDirectionOfFade(2);
-        FadeInMenu(tileSelectedMenu);
-
-        tileSelectedMenu.transform.GetChild(0).GetChild(0).GetComponent<TextMeshProUGUI>().text = buildingData.name;
-        tileSelectedMenu.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = buildingData.description;
-        switch (buildingData.Index)
-        {
-            case 0:
-                tileSelectedMenu.transform.GetChild(2).GetChild(0).gameObject.SetActive(true);
-                tileSelectedMenu.transform.GetChild(2).GetChild(3).gameObject.SetActive(false);
-                break;
-            case 1:
-                tileSelectedMenu.transform.GetChild(2).GetChild(0).gameObject.SetActive(false);
-                tileSelectedMenu.transform.GetChild(2).GetChild(3).gameObject.SetActive(true);
-                break;
-            case 2: // Central
-                SetDirectionOfFade(0);
-                FadeInMenu(powerSlider.gameObject);
-                tileSelectedMenu.transform.GetChild(2).GetChild(0).gameObject.SetActive(false);
-                tileSelectedMenu.transform.GetChild(2).GetChild(3).gameObject.SetActive(false);
-                break;
-            default:
-                tileSelectedMenu.transform.GetChild(2).GetChild(0).gameObject.SetActive(false);
-                tileSelectedMenu.transform.GetChild(2).GetChild(3).gameObject.SetActive(false);
-                break;
-        }
-        bool upgradeAvailable = buildingData.upgradeBuildingName == "" ? false : true;
-        tileSelectedMenu.transform.GetChild(2).GetChild(1).gameObject.SetActive(upgradeAvailable);
-        tileSelectedMenu.transform.GetChild(2).GetChild(2).gameObject.SetActive(buildingData.hasComponents);
+        currentMenuCategory = -1;
     }
 
     #region Bubble
@@ -378,10 +483,15 @@ public class UIController : MonoBehaviour
         menusPos.Add(bubbleGO.name, bubbleGO.GetComponent<RectTransform>().position);
         SetDirectionOfFade(2);
         GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(7);
-        FadeInWorldMenu(bubbleGO, () => StartCoroutine(WaitAndExecute(t, () => {
+        FadeInWorldMenu(bubbleGO, () => {
             FadeOutWorldMenu(bubbleGO);
-            menusPos.Remove(bubbleGO.name);
-        })));
+            activeBubbles.Remove(bubbleGO);
+        });
+    }
+
+    public void WaitAndExecuteFunction(float time, Action onTimerEnd)
+    {
+        StartCoroutine(WaitAndExecute(time, onTimerEnd));
     }
 
     private IEnumerator WaitAndExecute(float time, Action onTimerEnd)
@@ -393,15 +503,26 @@ public class UIController : MonoBehaviour
     private void DespawnTileSelectionBubble()
     {
         Debug.Log("disabling " + game.SelectedTile.ToString() + " bubble");
-        GameObject b = activeBubbles.Find(bub => bub.name == game.SelectedTile.ToString());
-        activeBubbles.Remove(b);
-        FadeOutWorldMenu(b);
-        menusPos.Remove(game.SelectedTile.ToString());
-        tileBubbleActive = false;
+        GameObject b = activeBubbles.FirstOrDefault(bub => bub.name == game.SelectedTile.ToString());
+        if(b != null)
+        {
+            activeBubbles.Remove(b);
+            FadeOutWorldMenu(b);
+            menusPos.Remove(game.SelectedTile.ToString());
+            tileBubbleActive = false;
+        }
+        else
+        {
+            Debug.LogWarning("disabling of bubble " + game.SelectedTile.ToString() + " failed because it doesnt exist");
+        }
     }
 
     private void SpawnTileSelectionBubble(BuildingData buildingData)
     {
+        if(buildingData == null || buildingData.Index == 3)
+        {
+            return;
+        }
         GameObject bubbleGO = Instantiate(popUpPrefab, game.SelectedToWorldPosition() + new Vector3(0, 0.75f, 0), Quaternion.identity);
         bubbleGO.transform.SetParent(popUpHolder);
         bubbleGO.name = game.SelectedTile.ToString();
@@ -576,17 +697,20 @@ public class UIController : MonoBehaviour
     public void BuyButtonFunction() // Va a tratar de comprar la parcela
     {
         game.TryBuild(1); //Intenta comprar parcela
+        buttonPressed?.Invoke("Buy");
     }
     public void UpgradeButtonFunction()
     {
         game.SwitchState(1); // cambia al modo menu
+        buttonPressed?.Invoke("Upgrade");
     }
     public void ComponentButtonFunction()
     {
         DespawnTileSelectionBubble(); //Despawn world menu
-        game.SwitchState(1); // cambia al modo menu
-        //SetComponentsAmounts(categoryListHolder); 
+        game.SwitchState(1); //Cambia al modo menu
+        SetAvailableCategoriesForSelectedBuilding();
         FadeInMenu(newCategoriesListMenu.gameObject);
+        buttonPressed?.Invoke("Components");
     }
     public void BuildButtonFunction()
     {
@@ -594,6 +718,7 @@ public class UIController : MonoBehaviour
         game.SwitchState(1); // cambia al modo menu
         FillNewListWithAvailableBuildings(newBuildingListHolder.transform);
         FadeInMenu(newBuildingListHolder);
+        buttonPressed?.Invoke("Build");
     } 
     #endregion
 }
