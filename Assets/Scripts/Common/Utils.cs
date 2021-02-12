@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
 using System;
@@ -24,6 +25,11 @@ public class Utils
               1
             );
         return randColor;
+    }
+
+    public static void LoadLevelAsync(int sceneIndex)
+    {
+        SceneManager.LoadSceneAsync(sceneIndex);
     }
 
     public static string GenerateRandomString(int lenght)

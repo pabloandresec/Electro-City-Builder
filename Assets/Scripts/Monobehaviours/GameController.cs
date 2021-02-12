@@ -56,6 +56,7 @@ public class GameController : MonoBehaviour
     #region Eventos
     public static Action<BuildActionInfo> BuildingContructed;
     public static Action<ComponentData> ComponentAdded;
+    public static Action OnMainScriptReady;
     #endregion
 
     void Start()
@@ -77,12 +78,6 @@ public class GameController : MonoBehaviour
 
         activeBuildings[TilePosToIndex(8, 8)] = new Building(buildings[2], TilePosToIndex(8, 8));
         activeBuildings[TilePosToIndex(7, 5)] = new Building(buildings[4], TilePosToIndex(7, 5));
-        //activeBuildings[TilePosToIndex(8, 5)] = new Building(buildings[4], TilePosToIndex(8, 5));
-
-        //activeBuildings[TilePosToIndex(7, 5)].AddBuildingComponent(components[0]); //añade luz de 20 seg
-        //activeBuildings[TilePosToIndex(8, 5)].AddBuildingComponent(components[0]); //añade luz de 20 seg
-        //activeBuildings[TilePosToIndex(7, 5)].AddBuildingComponent(components[4]);
-        //activeBuildings[TilePosToIndex(8, 5)].AddBuildingComponent(components[4]);
 
         RefreshMap();
         RefreshGame();
@@ -90,9 +85,9 @@ public class GameController : MonoBehaviour
         GetComponent<PGrid>().InitGrid(); //Comentar para PATHFINDING DESHABILITADO
         InputController.OnTap += TileTapped;
 
-        SetupTutorial();
+        OnMainScriptReady?.Invoke();
     }
-
+    /*
     private void SetupTutorial()
     {
         MissionController mc = GameObject.FindGameObjectWithTag("Mission").GetComponent<MissionController>();
@@ -219,6 +214,11 @@ public class GameController : MonoBehaviour
                 {
                     cc.ShowDialog(11);
                     ui.ButtonPressed = null;
+                    UnlimitSelectionsOfTiles();
+                    LimitSelectionOfTiles(new Vector3Int(8, 7, 0), null);
+                    Debug.LogWarning("Error Step");
+                    ui.EnableAllButtons();
+                    ui.DisableButton(new string[] { "But_BuildExit" });
                 }
             };
 
@@ -236,7 +236,6 @@ public class GameController : MonoBehaviour
         });
         cc.AssignAnActionAtEndOfDialog(12, () =>
         {
-            ui.DisableButton(new string[] { "But_BuildExit" });
             mc.CreateAnyBuildingMission();
         });
         cc.AssignAnActionAtEndOfDialog(13, () =>
@@ -249,8 +248,8 @@ public class GameController : MonoBehaviour
         //Start Tutorial
         cc.ShowDialog(0);
     }
-
-    private void UnlimitSelectionsOfTiles()
+    */
+    public void UnlimitSelectionsOfTiles()
     {
         limited = false;
         limitedToTile = -Vector3Int.one ;
@@ -258,7 +257,7 @@ public class GameController : MonoBehaviour
         Debug.Log("Limit selection of tiles disabled");
     }
 
-    private void LimitSelectionOfTiles(Vector3Int cell, Action _OnTileSelected)
+    public void LimitSelectionOfTiles(Vector3Int cell, Action _OnTileSelected)
     {
         limited = true;
         limitedToTile = cell;

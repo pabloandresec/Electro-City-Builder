@@ -162,7 +162,7 @@ public class UIController : MonoBehaviour
         rt.sizeDelta = new Vector2(buttonWidth * itemAmount, rt.sizeDelta.y);
     }
 
-    public void ShakeMenu(GameObject menu)
+    public void ShakeMenu(RectTransform menu)
     {
         RectTransform menuRect = menu.GetComponent<RectTransform>();
 
@@ -239,6 +239,7 @@ public class UIController : MonoBehaviour
                 disabledButtons.RemoveAt(i);
             }
         }
+        disabledButtons = null;
         Debug.Log("All buttons disable are now enabled");
     }
 
@@ -572,7 +573,7 @@ public class UIController : MonoBehaviour
         tweening = true;
 
         RectTransform menuRect = menu.GetComponent<RectTransform>();
-        Vector2 intialPos = menuRect.anchoredPosition + GetTGTPos(menuRect);
+        Vector2 intialPos = menuRect.anchoredPosition + GetFadeTargetPosition(menuRect);
         menuRect.anchoredPosition = intialPos;
         //Debug.Log("getting " + menu.transform.name + " og pos");
         Vector2 tgtPos = menusPos[menu.transform.name];
@@ -595,7 +596,7 @@ public class UIController : MonoBehaviour
 
         RectTransform menuRect = menu.GetComponent<RectTransform>();
         Vector2 intialPos = menuRect.anchoredPosition;
-        Vector2 tgtPos = menuRect.anchoredPosition + GetTGTPos(menuRect);
+        Vector2 tgtPos = menuRect.anchoredPosition + GetFadeTargetPosition(menuRect);
 
         SetAlpha(menu, 1, 0);
         LeanTween.value(menu, (vec) =>
@@ -613,7 +614,7 @@ public class UIController : MonoBehaviour
         tweening = true;
 
         RectTransform menuRect = menu.GetComponent<RectTransform>();
-        Vector2 intialPos = (Vector2)menuRect.transform.position + GetTGTPos(menuRect);
+        Vector2 intialPos = (Vector2)menuRect.transform.position + GetFadeTargetPosition(menuRect);
         menuRect.transform.position = intialPos;
         //Debug.Log("getting " + menu.transform.name + " og pos");
         Vector2 tgtPos = menusPos[menu.name];
@@ -637,7 +638,7 @@ public class UIController : MonoBehaviour
         Debug.Log("menu in question: " + menu.transform.name);
         RectTransform menuRect = menu.GetComponent<RectTransform>();
         Vector2 intialPos = menuRect.transform.position;
-        Vector2 tgtPos = (Vector2)menuRect.transform.position + GetTGTPos(menuRect);
+        Vector2 tgtPos = (Vector2)menuRect.transform.position + GetFadeTargetPosition(menuRect);
 
         SetAlpha(menu, 1, 0);
         LeanTween.value(menu, (vec) =>
@@ -665,22 +666,27 @@ public class UIController : MonoBehaviour
         });
     }
 
-    private Vector2 GetTGTPos(RectTransform rt)
+    /// <summary>
+    /// De Acuredo a la direccion de "directionToFadeFrom" calcular el destino del fade
+    /// </summary>
+    /// <param name="rt"></param>
+    /// <returns></returns>
+    private Vector2 GetFadeTargetPosition(RectTransform rt)
     {
         Vector2 t = Vector2.zero;
         switch (directionToFadeFrom)
         {
             case 0: //North
-                t += new Vector2(0, rt.rect.size.y);
+                t += new Vector2(0, rt.rect.size.y / 2);
                 break;
             case 1: //East
-                t += new Vector2(rt.rect.size.x, 0);
+                t += new Vector2(rt.rect.size.x / 2, 0);
                 break;
             case 2: //South
-                t -= new Vector2(0, rt.rect.size.y);
+                t -= new Vector2(0, rt.rect.size.y / 2);
                 break;
             case 3: //West
-                t -= new Vector2(rt.rect.size.x, 0);
+                t -= new Vector2(rt.rect.size.x / 2, 0);
                 break;
         }
 
