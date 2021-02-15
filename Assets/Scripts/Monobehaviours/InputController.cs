@@ -126,12 +126,12 @@ public class InputController : MonoBehaviour
         lockTap = tap;
     }
 
-    public void MoveCameraToWorldPosition(Vector3 worldPos, float ortographicSize, Action onMoveEnd)
+    public void MoveCameraToWorldPosition(Vector3 worldPos, float ortographicSize, float t, Action onMoveEnd)
     {
         Debug.Log("moving Camera");
         worldPos.z = vcam.transform.position.z;
-        LeanTween.value(vcam.gameObject, (newVal) => { vcam.m_Lens.OrthographicSize = newVal; }, vcam.m_Lens.OrthographicSize, ortographicSize, 0.9f);
-        LeanTween.move(vcam.gameObject, worldPos, 1f).setOnComplete(() => {
+        LeanTween.value(vcam.gameObject, (newVal) => { vcam.m_Lens.OrthographicSize = newVal; }, vcam.m_Lens.OrthographicSize, ortographicSize, t - 0.1f);
+        LeanTween.move(vcam.gameObject, worldPos, t).setOnComplete(() => {
             Debug.Log("Camera moved!");
             onMoveEnd?.Invoke();
         });

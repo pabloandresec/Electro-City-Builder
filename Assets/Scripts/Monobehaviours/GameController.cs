@@ -41,9 +41,11 @@ public class GameController : MonoBehaviour
     private Building selectedBuilding;
     private bool selected = false;
     private float tPassed = 0;
+    private uint totalPassed = uint.MinValue;
 
     public static int currentWidth { get => GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>().width; }
     public static int currentHeight { get => GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>().height; }
+
     public List<BuildingData> Buildings { get => buildings; }
     public List<ComponentData> Components { get => components; }
     public Building[] ActiveBuildings { get => activeBuildings; }
@@ -87,6 +89,64 @@ public class GameController : MonoBehaviour
 
         OnMainScriptReady?.Invoke();
     }
+
+    private void Update()
+    {
+        RefreshGame();
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            //TileTapped(new Vector3(0.999f, 3.209f, 0));
+            SpawnMoneyBubbles();
+        }
+    }
+
+    private void RefreshGame()
+    {
+        tPassed += Time.deltaTime * gameTimeSpeedMult;
+        if (tPassed >= buildingRefreshRate)
+        {
+            tPassed = 0;
+            UpdateBuildings(buildingRefreshRate);
+            ui.RefreshComponentCategoryBarModeB();
+            totalPassed += (uint)buildingRefreshRate;
+
+            if(totalPassed % 3600 == 0)
+            {
+                SpawnMoneyBubbles();
+            }
+        }
+    }
+
+    public void SpawnMoneyBubbles()
+    {
+        foreach (Building b in activeBuildings)
+        {
+            if(b.ListIndex > 3)
+            {
+                ui.AddMoneyBubble(b.PositionIndex.ToString(), Utils.IndexToTilePos(b.PositionIndex, width), b, -1);
+            }
+        }
+    }
+
+    private void UpdateBuildings(float timePassed)
+    {
+        Debug.Log("Refreshing buildings");
+        int totalPow = 0;
+        for (int i = 0; i < activeBuildings.Length; i++)
+        {
+            activeBuildings[i].UpdateComponentsLife(components, timePassed);
+            totalPow += activeBuildings[i].totalPowerConsumption;
+        }
+        ui.UpdateUI(currentGameSessionData.money, totalPow, 1000);
+    }
+
+    public void SetMoney(int money)
+    {
+        currentGameSessionData.money = money;
+        ui.UpdateUI(currentGameSessionData.money);
+    }
+
+
     /*
     private void SetupTutorial()
     {
@@ -279,6 +339,14 @@ public class GameController : MonoBehaviour
         }
     }
 
+    public void AddMoney(int money)
+    {
+        if(currentGameSessionData != null)
+        {
+            currentGameSessionData.money += money;
+        }
+    }
+
     public bool HasActiveBuilding(BuildingData buildingData)
     {
         Building b = activeBuildings.First(val => val.ListIndex == buildingData.Index);
@@ -404,6 +472,10 @@ public class GameController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Añade un componente a cada edificio
+    /// </summary>
+    /// <param name="index"></param>
     private void AddComponent(int index)
     {
         ComponentAdded?.Invoke(components[index]);
@@ -425,6 +497,7 @@ public class GameController : MonoBehaviour
                     builded = true;
                     Build(selectedTile, index);
                     currentGameSessionData.money -= buildings[index].buildingCost;
+                    ui.UpdateUI(currentGameSessionData.money);
                     DeselectTile();
                     GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(5);
                 }
@@ -451,10 +524,13 @@ public class GameController : MonoBehaviour
     {
         activeBuildings[TilePosToIndex(tilePos.x, tilePos.y)] = new Building(buildings[buildingIndex], TilePosToIndex(tilePos.x, tilePos.y));
         RefreshMap();
-        ui.UpdateUI(currentGameSessionData.money);
         Debug.Log("Building constructed");
     }
 
+    /// <summary>
+    /// Bkn???
+    /// </summary>
+    /// <returns></returns>
     private int CalculatePowerUsage()
     {
         int total = 0;
@@ -465,6 +541,9 @@ public class GameController : MonoBehaviour
         return total;
     }
 
+    /// <summary>
+    /// De acuerdo a los edificios dibuja el mapa correspondiente
+    /// </summary>
     private void RefreshMap()
     {
         for (int x = 0; x < width; x++)
@@ -473,7 +552,7 @@ public class GameController : MonoBehaviour
             {
                 Building b = activeBuildings[TilePosToIndex(x, y)];
                 BuildingData bd = buildings[b.ListIndex];
-                if(bd.Index != 3)
+                if(bd.Index != 3) //no es igual a calle
                 {
                     buildTilemap.SetTile(new Vector3Int(x, y, 0), bd.tile);
                 }
@@ -482,20 +561,32 @@ public class GameController : MonoBehaviour
         }
     }
 
-    
 
+    #region Cambio de estados
+    /// <summary>
+    /// Cambia el estado de juego
+    /// </summary>
+    /// <param name="newState"></param>
     public void SwitchState(int newState)
     {
         PlayerState s = (PlayerState)newState;
         SwitchState(s);
     }
-
+    /// <summary>
+    /// Cambia el estado de juego
+    /// </summary>
+    /// <param name="newState"></param>
     public void SwitchState(PlayerState newState)
     {
         //Logica
         state = newState;
     }
+    #endregion
 
+    /// <summary>
+    /// Cuando el jugador presiona en una celda
+    /// </summary>
+    /// <param name="worldPos"></param>
     public void TileTapped(Vector3 worldPos)
     {
         if (state == PlayerState.MENUS || UIController.tweening)
@@ -519,9 +610,12 @@ public class GameController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Trata de seleccionar una celda valida
+    /// </summary>
+    /// <param name="worldPos"></param>
     private void SelectTile(Vector3 worldPos)
     {
-
         //Calculate new selected pos
         Vector3Int newSelectedPos = overlayTilemap.WorldToCell(new Vector3(worldPos.x, worldPos.y, 0));
         if(limited)
@@ -556,40 +650,6 @@ public class GameController : MonoBehaviour
         selected = false;
         ui.SetSelectedTileMenu(false, null);
     }
-
-    private void Update()
-    {
-        RefreshGame();
-        if(Input.GetKeyDown(KeyCode.T))
-        {
-            TileTapped(new Vector3(0.999f, 3.209f, 0));
-        }
-    }
-
-    private void RefreshGame()
-    {
-        tPassed += Time.deltaTime * gameTimeSpeedMult;
-        if(tPassed >= buildingRefreshRate)
-        {
-            tPassed = 0;
-            UpdateBuildings(buildingRefreshRate);
-            ui.RefreshComponentCategoryBarModeB();
-        }
-    }
-
-    private void UpdateBuildings(float timePassed)
-    {
-        Debug.Log("Refreshing buildings");
-        int totalPow = 0;
-        for (int i = 0; i < activeBuildings.Length; i++)
-        {
-            activeBuildings[i].UpdateComponentsLife(components, timePassed);
-            totalPow += activeBuildings[i].totalPowerConsumption;
-        }
-        ui.UpdateUI(currentGameSessionData.money, totalPow, 1000);
-    }
-
-    
 
     private void OnDestroy()
     {

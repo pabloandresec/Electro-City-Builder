@@ -13,11 +13,11 @@ public class CharController : MonoBehaviour
     [Header("Dialogs")]
     [SerializeField] private Dialog[] dialogs;
     [Header("UI references")]
-    [SerializeField] GameObject characterMenu;
+    [SerializeField] private GameObject characterMenu;
+    [SerializeField] private Image characterImage;
+    [SerializeField] private TextMeshProUGUI characterText;
+    [SerializeField] private Button bubble;
 
-    private Image image;
-    private TextMeshProUGUI text;
-    private Button but;
     private int currentDialog = 0;
     private int currentEntry = 0;
 
@@ -28,10 +28,7 @@ public class CharController : MonoBehaviour
 
     private void Setup()
     {
-        image = characterMenu.transform.Find("Img_Person").GetComponent<Image>();
-        text = characterMenu.transform.Find("Img_Bubble/Txt_Text").GetComponent<TextMeshProUGUI>();
-        but = characterMenu.transform.Find("Img_Bubble").GetComponent<Button>();
-        but.onClick.AddListener(() => {
+        bubble.onClick.AddListener(() => {
             NextEntry();
             Debug.Log("Pushing button");
         });
@@ -44,13 +41,14 @@ public class CharController : MonoBehaviour
         {
             GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(ce.sounds[Random.Range(0, ce.sounds.Length)]);
         }
-        image.sprite = ce.sprite;
-        text.text = dialog;
+        characterImage.sprite = ce.sprite;
+        characterText.text = dialog;
     }
 
     public void ShowDialog(int index)
     {
         GetComponent<UIController>().FadeInMenu(characterMenu);
+        GetComponent<UIController>().FadeInMenu(bubble.transform.parent.gameObject);
         currentDialog = index;
         currentEntry = -1;
         NextEntry();
@@ -62,14 +60,15 @@ public class CharController : MonoBehaviour
         if(nextEntry >= dialogs[currentDialog].Entries.Length)
         {
             GetComponent<UIController>().FadeOutMenu(characterMenu);
+            GetComponent<UIController>().FadeOutMenu(bubble.transform.parent.gameObject);
             dialogs[currentDialog].OnDialogEnd?.Invoke();
         }
         else
         {
             Entry e = dialogs[currentDialog].Entries[nextEntry];
             CharacterEmotion ce = characters[e.CharacterIndex].GetEmotion(e.Emotion);
-            image.sprite = ce.sprite;
-            text.text = e.Text;
+            characterImage.sprite = ce.sprite;
+            characterText.text = e.Text;
             if (ce != null && ce.sounds.Length > 0)
             {
                 GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(ce.sounds[Random.Range(0, ce.sounds.Length)]);

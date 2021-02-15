@@ -15,6 +15,9 @@ public class BuildingData : ScriptableObject
     [Header("Build Settings")]
     public int buildingCost;
     public bool essential = false;
+    [Tooltip("Rent for category")]
+    [Min(0)]
+    public int rent = 100;
     [Header("Upgrade Settings")]
     public int upgradeCost;
     public string upgradeBuildingName;

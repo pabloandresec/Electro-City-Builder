@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: Empty
   m_EditorClassIdentifier: 
   icon: {fileID: 0}
-  tile: {fileID: 0}
+  tile: {fileID: 11400000, guid: 5fd4bb99b7da8f043af23ea01770bcbc, type: 2}
   description: Parcela vacia
   buildingCost: 3000
   essential: 0
+  rent: 100
   upgradeCost: 0
   upgradeBuildingName: 
   hasComponents: 0

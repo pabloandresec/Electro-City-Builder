@@ -11,7 +11,7 @@ public class UIController : MonoBehaviour
     [Header("References")]
     [SerializeField] private GameObject[] mainMenus;
     [SerializeField] private GameController game;
-    [SerializeField] private CharController c;
+    [SerializeField] private CharController cc;
     [Space(5)]
     [Header("Game UI")]
     [SerializeField] private Slider powerSlider;
@@ -193,6 +193,36 @@ public class UIController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Habilita los botones proporcionados sin tener en cuenta el estado
+    /// </summary>
+    /// <param name="buttonsToEnable"></param>
+    public void EnableButtons(string[] buttonsToEnable)
+    {
+        Button[] buttons = Resources.FindObjectsOfTypeAll<Button>();
+        Debug.Log("Buttons found " + buttons.Length);
+        for (int i = 0; i < buttonsToEnable.Length; i++)
+        {
+            for (int b = 0; b < buttons.Length; b++)
+            {
+                if (buttons[b].transform.name == buttonsToEnable[i])
+                {
+                    buttons[b].interactable = true;
+                    if(disabledButtons.Contains(buttons[b]))
+                    {
+                        disabledButtons.Remove(buttons[b]);
+                    }
+                    Debug.Log(buttons[b].transform.name + " button enabled");
+                    break;
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Llena la lista de componentes de la categoria suministrada
+    /// </summary>
+    /// <param name="category"></param>
     public void FillNewListWithAvailableComponents(int category)
     {
         Transform holderList = newComponentsListMenu.transform.GetChild(0).GetChild(0).GetChild(0);
@@ -229,6 +259,9 @@ public class UIController : MonoBehaviour
         Debug.Log(holderList.name + " filled with components!");
     }
 
+    /// <summary>
+    /// Habilita todos los botones que esten desabilitados
+    /// </summary>
     public void EnableAllButtons()
     {
         for (int i = 0; i < disabledButtons.Count; i++)
@@ -243,6 +276,11 @@ public class UIController : MonoBehaviour
         Debug.Log("All buttons disable are now enabled");
     }
 
+
+    /// <summary>
+    /// Habilita un boton en especifico de acuerdo al nombre
+    /// </summary>
+    /// <param name="buttonName"></param>
     public void EnableADisabledButton(string buttonName)
     {
         Button b = disabledButtons.FirstOrDefault(val => val.transform.name == buttonName);
@@ -258,14 +296,13 @@ public class UIController : MonoBehaviour
         }
     }
 
-    public void FirePressedButtonEvent(Button b)
-    {
-        buttonPressed?.Invoke(b.transform.name);
-    }
-
+    /// <summary>
+    /// Desabilita los botones especificados
+    /// </summary>
+    /// <param name="buttonNames"></param>
     public void DisableButton(string[] buttonNames)
     {
-        if(disabledButtons == null)
+        if (disabledButtons == null)
         {
             disabledButtons = new List<Button>();
         }
@@ -287,6 +324,18 @@ public class UIController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Ejecuta el evento de boton presionado con el nombre de un boton
+    /// </summary>
+    /// <param name="buttonName"></param>
+    public void FirePressedButtonEvent(Button b)
+    {
+        buttonPressed?.Invoke(b.transform.name);
+    }
+
+    /// <summary>
+    /// Actualiza la barra de componentes activos de la categoria seleccionada
+    /// </summary>
     public void RefreshComponentCategoryBarModeB()
     {
         if(currentMenuCategory == -1)
@@ -381,6 +430,10 @@ public class UIController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Llena la lista de edificos comprables
+    /// </summary>
+    /// <param name="buildingMenu"></param>
     public void FillNewListWithAvailableBuildings(Transform buildingMenu)
     {
         Transform holderList = buildingMenu.Find("Scr_BuildingsHolder/Viewport/Content");
@@ -413,6 +466,9 @@ public class UIController : MonoBehaviour
         Debug.Log(holderList.name + " filled with buildings!");
     }
 
+    /// <summary>
+    /// muestra o oculta la burbuja de contexto
+    /// </summary>
     public void SetSelectedTileMenu(bool v, BuildingData buildingData)
     {
         if (v)
@@ -432,6 +488,9 @@ public class UIController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Resetea la categoria
+    /// </summary>
     public void ClearCategory()
     {
         currentMenuCategory = -1;
@@ -488,6 +547,34 @@ public class UIController : MonoBehaviour
             FadeOutWorldMenu(bubbleGO);
             activeBubbles.Remove(bubbleGO);
         });
+    }
+
+    public void AddMoneyBubble(string id, Vector3Int tilePos, Building b, float t)
+    {
+        string n = id + " - money";
+        if (menusPos.ContainsKey(n))
+        {
+            Debug.LogWarning("Bubble "+ n +" already existed! ignoring");
+            return;
+        }
+        GameObject bubbleGO = Instantiate(popUpPrefab, game.CellToWorldPosition(tilePos) + new Vector3(0, 0.75f, 0), Quaternion.identity); //Crea la burbuja
+        bubbleGO.transform.SetParent(popUpHolder); //setea el padre
+        bubbleGO.name = n; // setea el nombre
+
+        GameObject image = Instantiate(bubbleButtonPrefab, bubbleGO.transform.GetChild(0), false);
+        image.GetComponent<Image>().enabled = false;
+        image.GetComponent<Button>().onClick.AddListener(() => {
+            b.PayRent();
+            FadeOutWorldMenu(bubbleGO);
+            activeBubbles.Remove(bubbleGO);
+            buttonPressed?.Invoke(n);
+        });
+        image.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Tome!";
+        image.transform.GetChild(1).GetComponent<Image>().sprite = icons[6];
+        menusPos.Add(bubbleGO.name, bubbleGO.GetComponent<RectTransform>().position);
+        SetDirectionOfFade(2);
+        GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(7);
+        FadeInWorldMenu(bubbleGO, null);
     }
 
     public void WaitAndExecuteFunction(float time, Action onTimerEnd)
@@ -652,7 +739,8 @@ public class UIController : MonoBehaviour
             Destroy(menu);
         });
     }
-    private void SetAlpha(GameObject nextMenu, float from, float to)
+
+    public void SetAlpha(GameObject nextMenu, float from, float to)
     {
         CanvasGroup canvas = nextMenu.GetComponent<CanvasGroup>();
         canvas.interactable = false;
@@ -660,6 +748,20 @@ public class UIController : MonoBehaviour
         LeanTween.value(nextMenu, (v) => { canvas.alpha = v; }, from, to, fadeTime).setOnComplete(()=> 
         {
             if(canvas.alpha == 1)
+            {
+                canvas.interactable = true;
+            }
+        });
+    }
+
+    public void SetAlpha(GameObject nextMenu, float from, float to , float t)
+    {
+        CanvasGroup canvas = nextMenu.GetComponent<CanvasGroup>();
+        canvas.interactable = false;
+        canvas.alpha = from;
+        LeanTween.value(nextMenu, (v) => { canvas.alpha = v; }, from, to, t).setOnComplete(() =>
+        {
+            if (canvas.alpha == 1)
             {
                 canvas.interactable = true;
             }

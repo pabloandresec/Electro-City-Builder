@@ -17,15 +17,16 @@ MonoBehaviour:
   description: Prueba
   buildingCost: 10000
   essential: 0
+  rent: 100
   upgradeCost: 1500
   upgradeBuildingName: 
   hasComponents: 1
   limits:
   - category: 0
-    val: 20
+    val: 5
   - category: 1
-    val: 20
+    val: 5
   - category: 2
-    val: 20
+    val: 5
   - category: 3
-    val: 20
+    val: 5

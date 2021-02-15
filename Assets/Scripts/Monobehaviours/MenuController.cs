@@ -19,19 +19,32 @@ public class MenuController : MonoBehaviour
         SetupButtonFunctionality();
     }
 
+
+    /// <summary>
+    /// Asigna las funciones de los botones
+    /// </summary>
     private void SetupButtonFunctionality()
     {
         //Tutorial button
-        transform.Find("Men_Main/Spc_Buttons/But_Tutorial").GetComponent<Button>().onClick.AddListener(() =>
+        Transform butTutorial = transform.Find("Men_Main/Spc_Buttons/But_Tutorial");
+        if(butTutorial != null)
         {
-            FadeSwapMenu(mainMenus[0], mainMenus[1], () => { Utils.LoadLevelAsync(1); });
-        });
+            butTutorial.GetComponent<Button>().onClick.AddListener(() =>
+            {
+                FadeSwapMenu(mainMenus[0], mainMenus[1], () => { Utils.LoadLevelAsync(1); });
+            });
+        }
         //Exit button
-        transform.Find("Men_Main/Spc_Buttons/But_Salir").GetComponent<Button>().onClick.AddListener(() =>
+        Transform butExitApp = transform.Find("Men_Main/Spc_Buttons/But_Salir");
+        if(butExitApp != null)
         {
-            Debug.Log("Quitting!");
-            Application.Quit();
-        });
+            butExitApp.GetComponent<Button>().onClick.AddListener(() =>
+            {
+                Debug.Log("Quitting!");
+                Application.Quit();
+            });
+        }
+        
     }
 
     /// <summary>
@@ -82,6 +95,16 @@ public class MenuController : MonoBehaviour
                 menuGroup.interactable = true;
             }
         });
+    }
+
+    /// <summary>
+    /// Setea la direccion en la que los menus iran mientras estan en fade
+    /// </summary>
+    /// <param name="direction"></param>
+    public void SetFadeDirection(int direction)
+    {
+        fadeDirection = Mathf.Clamp(direction,0,5);
+        Debug.Log("Direction");
     }
 
     /// <summary>

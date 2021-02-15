@@ -15,10 +15,13 @@ public class ComponentData : ScriptableObject
     [TextArea()]
     public string description;
     [Tooltip("Cuanto cuesta")]
+    [Min(0)]
     public int cost;
     [Tooltip("Duracion en segundos reales")]
+    [Min(0)]
     public int durability;
     [Tooltip("Duracion en segundos")]
+    [Min(0)]
     public int powerConsumption;
     [Tooltip("Es un objeto premium?")]
     public bool premium;

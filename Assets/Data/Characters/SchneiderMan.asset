@@ -10,22 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a9fc176aede5dff44a1f4bb91408a6e7, type: 3}
-  m_Name: Ivan
+  m_Name: SchneiderMan
   m_EditorClassIdentifier: 
   emotions:
   - emotion: 0
-    sprite: {fileID: 21300000, guid: 5341369f33056904483f1eb0ff1b11a8, type: 3}
-    sounds:
-    - {fileID: 8300000, guid: ae54d858649a5344ba857d34941cf7f5, type: 3}
+    sprite: {fileID: 21300000, guid: 8eee6fe291fa49b4ea5b937f6102ebd2, type: 3}
+    sounds: []
   - emotion: 1
-    sprite: {fileID: 21300000, guid: 9c1230b5a4c4460499887d39eddb7ed7, type: 3}
+    sprite: {fileID: 21300000, guid: 5fae046f43b9f5949a157214bd308dec, type: 3}
     sounds: []
   - emotion: 2
-    sprite: {fileID: 21300000, guid: 669354e6414972f4698aa47307443bea, type: 3}
+    sprite: {fileID: 21300000, guid: 46bf58e13cda603448f90afa4db22381, type: 3}
     sounds: []
   - emotion: 3
-    sprite: {fileID: 21300000, guid: 669354e6414972f4698aa47307443bea, type: 3}
+    sprite: {fileID: 21300000, guid: ed8af56fbaab21a40962c4a109d38d77, type: 3}
     sounds: []
   - emotion: 4
-    sprite: {fileID: 21300000, guid: 5341369f33056904483f1eb0ff1b11a8, type: 3}
+    sprite: {fileID: 21300000, guid: 9df0a94dd3f0cdf4baa593cd1b9e834c, type: 3}
     sounds: []

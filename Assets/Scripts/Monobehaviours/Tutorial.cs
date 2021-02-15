@@ -10,6 +10,9 @@ using System;
 
 public class Tutorial : MonoBehaviour
 {
+    [Header("UI things")]
+    [SerializeField] private GameObject cover;
+    [SerializeField] private GameObject money;
     [Header("References")]
     [SerializeField] private GameController gc;
     [SerializeField] private UIController ui;
@@ -42,7 +45,7 @@ public class Tutorial : MonoBehaviour
         cc.AssignAnActionAtEndOfDialog(2, () =>
         {
             Vector3 tgtPos = gc.CellToWorldPosition(new Vector3Int(7, 5, 0)) + new Vector3(0, 0.5f, 0);
-            ic.MoveCameraToWorldPosition(tgtPos, 1, () =>
+            ic.MoveCameraToWorldPosition(tgtPos, 2, 1,() =>
             {
                 gc.SwitchState(1);
                 ui.AddAttentionBubble("Tutorial bubble", new Vector3Int(7, 5, 0));
@@ -69,6 +72,7 @@ public class Tutorial : MonoBehaviour
                 if (s == "Components")
                 {
                     cc.ShowDialog(5);
+                    ui.FadeInMenu(money);
                     Debug.LogWarning("Component bubble button pressed");
                     ui.ButtonPressed = null;
                 }
@@ -114,7 +118,7 @@ public class Tutorial : MonoBehaviour
                     ui.ButtonPressed = (exit) => {
                         if (exit == "But_CatExit")
                         {
-                            ic.MoveCameraToWorldPosition(gc.CellToWorldPosition(new Vector3Int(8, 8, 0)), 3, () => {
+                            ic.MoveCameraToWorldPosition(gc.CellToWorldPosition(new Vector3Int(8, 8, 0)), 3, 1,() => {
                                 cc.ShowDialog(8);
                                 ui.ButtonPressed = null;
                             });
@@ -128,7 +132,7 @@ public class Tutorial : MonoBehaviour
             gc.LimitSelectionOfTiles(new Vector3Int(8, 7, 0), () => {
                 cc.ShowDialog(10);
             });
-            ic.MoveCameraToWorldPosition(gc.CellToWorldPosition(new Vector3Int(8, 7, 0)) + new Vector3(0, 0.5f, 0), 0.8f, () => {
+            ic.MoveCameraToWorldPosition(gc.CellToWorldPosition(new Vector3Int(8, 7, 0)) + new Vector3(0, 0.5f, 0), 0.8f, 1 ,() => {
                 cc.ShowDialog(9);
                 ui.ButtonPressed = null;
             });
@@ -147,6 +151,16 @@ public class Tutorial : MonoBehaviour
                     ui.ButtonPressed = null;
                     gc.UnlimitSelectionsOfTiles();
                     gc.LimitSelectionOfTiles(new Vector3Int(8, 7, 0), null);
+                    string[] buttonsToEnable = new string[] {
+                        "But_CatExit",
+                        "CUBIERTAS",
+                        "INTERRUPTORES",
+                        "TOMACORRIENTES",
+                        "SENSORES",
+                        "TERMICAS",
+                        "But_CompExit"
+                    };
+                    ui.EnableButtons(buttonsToEnable);
                     Debug.LogWarning("Error Step");
                     ui.EnableAllButtons();
                     ui.DisableButton(new string[] { "But_BuildExit" });
@@ -171,12 +185,40 @@ public class Tutorial : MonoBehaviour
         });
         cc.AssignAnActionAtEndOfDialog(13, () =>
         {
+            ic.MoveCameraToWorldPosition(gc.CellToWorldPosition(new Vector3Int(7,5,0)), 3, 1, () =>
+            {
+                cc.ShowDialog(14);
+            });
+        });
+        cc.AssignAnActionAtEndOfDialog(14, () =>
+        {
+            ic.LockInput(true, true, true);
+            gc.SpawnMoneyBubbles();
+            ui.ButtonPressed = (build) => {
+                if (build == "87 - money")
+                {
+                    cc.ShowDialog(15);
+                    ui.ButtonPressed = null;
+                }
+            };
+            
+        });
+        cc.AssignAnActionAtEndOfDialog(15, () =>
+        {
             gc.SwitchState(0);
             ic.LockInput(false, false, false);
             gc.UnlimitSelectionsOfTiles();
             ui.EnableAllButtons();
         });
+
         //Start Tutorial
-        cc.ShowDialog(0);
+        gc.SetMoney(10000);
+        cover.SetActive(true);
+        ui.SetAlpha(cover, 1, 0, 2);
+        ic.MoveCameraToWorldPosition(new Vector3(0, 4, -30), 3, 3,() =>
+          {
+              ui.SetDirectionOfFade(2);
+              cc.ShowDialog(0);
+          });
     }
 }

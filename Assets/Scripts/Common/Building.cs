@@ -33,6 +33,28 @@ public class Building
         CalculateOnlyFirstComponentByCategory(referenceData, timePassed);
     }
 
+    public void PayRent()
+    {
+        int rent = 0;
+        GameController gc = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
+        BuildingData bd = gc.Buildings[listIndex];
+        if(currentCompAmounts == null || currentCompAmounts.Count <= 0)
+        {
+            Debug.Log("Building has no sevices");
+            return;
+        }
+
+        foreach(ComponentLimit cl in currentCompAmounts)
+        {
+            if(cl.val > 0)
+            {
+                rent += bd.rent;
+            }
+        }
+        Debug.Log("paying " + rent);
+        gc.AddMoney(rent);
+    }
+
     private void CalculateOnlyFirstComponentByCategory(List<ComponentData> referenceData, float timePassed)
     {
         totalPowerConsumption = 0;
