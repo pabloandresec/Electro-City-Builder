@@ -10,13 +10,14 @@ public class PGrid : MonoBehaviour {
 	[SerializeField] private bool displayGridGizmos;
     [SerializeField] private GameController gameController;
 
+    [SerializeField] private bool spawnTraffic;
     [SerializeField] private Tilemap roadTilemap;
     [SerializeField] private int roadIndex;
     [SerializeField] private Vector2 gridWorldSize;
     [SerializeField] private float nodeRadius;
 
     [SerializeField] private Vector3 gridOffset;
-    [SerializeField] private GameObject trafficPrefab;
+    [SerializeField] private GameObject[] trafficPrefabs;
     [Min(0)]
     [SerializeField] private int trafficAmount;
     [SerializeField] private Transform trafficParent;
@@ -50,12 +51,15 @@ public class PGrid : MonoBehaviour {
         Debug.Log("start pGrid");
         grid = new Node[gameController.Width, gameController.Height];
         ScanRoadTiles();
-        for (int i = 0; i < trafficAmount; i++)
+        if(spawnTraffic)
         {
-            Vector3 r = RequestRandomRoadWorldPos();
-            GameObject g = Instantiate(trafficPrefab, new Vector3(r.x, r.y, 0), Quaternion.identity) as GameObject;
-            g.name = "Traffico " + i.ToString();
-            g.transform.SetParent(trafficParent);
+            for (int i = 0; i < trafficAmount; i++)
+            {
+                Vector3 r = RequestRandomRoadWorldPos();
+                GameObject g = Instantiate(trafficPrefabs[Random.Range(0, trafficPrefabs.Length)], new Vector3(r.x, r.y, 0), Quaternion.identity) as GameObject;
+                g.name = "Traffico " + i.ToString();
+                g.transform.SetParent(trafficParent);
+            }
         }
     }
 

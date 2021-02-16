@@ -14,9 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   icon: {fileID: 21300000, guid: 6a8012a7e3d0dad498268b33e19aac72, type: 3}
   tile: {fileID: 11400000, guid: 212ffec1200df374893b30610508a454, type: 2}
+  tileOff: {fileID: 0}
   description: 
   buildingCost: 500
   essential: 0
+  rent: 100
   upgradeCost: 0
   upgradeBuildingName: 
   hasComponents: 0

@@ -17,6 +17,7 @@ public class GameController : MonoBehaviour
     [SerializeField] private float gameTimeSpeedMult = 1;
     [Range(0.2f, 30)]
     [SerializeField] private float buildingRefreshRate = 10;
+    [SerializeField] private bool randomBuilds = false;
     [SerializeField] private GameSession currentGameSessionData;
     [Header("References")]
     [SerializeField] private Tile highlightTile;
@@ -53,6 +54,7 @@ public class GameController : MonoBehaviour
     public int Width { get => width; }
     public int Height { get => height; }
     public PlayerState State { get => state; }
+    public bool RandomBuilds { get => randomBuilds; }
     #endregion
 
     #region Eventos
@@ -88,6 +90,14 @@ public class GameController : MonoBehaviour
         InputController.OnTap += TileTapped;
 
         OnMainScriptReady?.Invoke();
+    }
+
+    public void SetBuildingElectricVisibility(bool state, Vector3Int cell, BuildingData data)
+    {
+        TileBase tb = null;
+        tb = state ? data.tile : data.tileOff;
+        buildTilemap.SetTile(cell, tb);
+        Debug.Log("building electricity in " + cell + " is now " + state);
     }
 
     private void Update()
@@ -478,25 +488,36 @@ public class GameController : MonoBehaviour
     /// <param name="index"></param>
     private void AddComponent(int index)
     {
-        ComponentAdded?.Invoke(components[index]);
-        activeBuildings[TilePosToIndex(selectedTile.x, selectedTile.y)].AddBuildingComponent(components[index]);
+        Building targetBuilding = activeBuildings[TilePosToIndex(selectedTile.x, selectedTile.y)];
+
+        targetBuilding.AddBuildingComponent(components[index]);
+        SetBuildingElectricVisibility(true, new Vector3Int(selectedTile.x, selectedTile.y, 0), buildings[targetBuilding.ListIndex]);
         currentGameSessionData.money -= components[index].cost;
         ui.UpdateUI(currentGameSessionData.money);
+        ComponentAdded?.Invoke(components[index]);
         GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(5);
     }
 
     public void TryBuild(int index)
     {
         bool builded = false;
-        if(selected)
+        Debug.LogWarning("Trying to build " + index);
+        int indexSelected = index;
+        if (index > 3 && randomBuilds)
+        {
+            indexSelected =  Random.Range(4, buildings.Count);
+        }
+        Debug.LogWarning("TryBuild has commited to " + indexSelected);
+
+        if (selected)
         {
             if(currentGameSessionData != null)
             {
-                if(currentGameSessionData.money >= buildings[index].buildingCost)
+                if(currentGameSessionData.money >= buildings[indexSelected].buildingCost)
                 {
                     builded = true;
-                    Build(selectedTile, index);
-                    currentGameSessionData.money -= buildings[index].buildingCost;
+                    Build(selectedTile, indexSelected);
+                    currentGameSessionData.money -= buildings[indexSelected].buildingCost;
                     ui.UpdateUI(currentGameSessionData.money);
                     DeselectTile();
                     GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(5);
@@ -516,7 +537,7 @@ public class GameController : MonoBehaviour
         {
             Debug.Log("No tile selected");
         }
-        BuildActionInfo info = new BuildActionInfo(CellToWorldPosition(selectedTile), selectedTile, buildings[index], builded);
+        BuildActionInfo info = new BuildActionInfo(CellToWorldPosition(selectedTile), selectedTile, buildings[indexSelected], builded);
         BuildingContructed?.Invoke(info);
     }
 

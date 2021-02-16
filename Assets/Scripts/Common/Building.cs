@@ -31,6 +31,24 @@ public class Building
     public void UpdateComponentsLife(List<ComponentData> referenceData, float timePassed)
     {
         CalculateOnlyFirstComponentByCategory(referenceData, timePassed);
+        CheckForActiveComponents();
+    }
+
+    private void CheckForActiveComponents()
+    {
+        if (components == null)
+        {
+            return;
+        }
+        GameController gc = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
+        if (components.Count == 0)
+        {
+            gc.SetBuildingElectricVisibility(false, Utils.IndexToTilePos(positionIndex,GameController.currentWidth), gc.Buildings[listIndex]);
+        }
+        else
+        {
+            gc.SetBuildingElectricVisibility(true, Utils.IndexToTilePos(positionIndex, GameController.currentWidth), gc.Buildings[listIndex]);
+        }
     }
 
     public void PayRent()

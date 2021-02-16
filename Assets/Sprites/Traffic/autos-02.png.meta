@@ -1,55 +1,31 @@
 fileFormatVersion: 2
-guid: 6ee4f581fa07ecc4384762b54a88e34f
+guid: 6b5db3255e1f8c843b7e4b80fbe7b989
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 7834091085209995221
-    second: Car_Up_Right
+      213: -4931273437630989618
+    second: UL_Top_Shape
   - first:
-      213: 5700799779973100228
-    second: autos1-01_1
+      213: -1403966844932845690
+    second: UL_Bottom_Color
   - first:
-      213: -1427440653365790809
-    second: autos1-01_2
+      213: 7063523127175321468
+    second: autos-02_2
   - first:
-      213: -5367015367603730890
-    second: autos1-01_3
+      213: -2032435978410296278
+    second: autos-02_3
   - first:
-      213: -2647435632515765958
-    second: autos1-01_4
+      213: -4507808314260128859
+    second: autos-02_4
   - first:
-      213: -1820977177567236644
-    second: autos1-01_5
+      213: 3060110107981189344
+    second: autos-02_5
   - first:
-      213: 4011650364884730305
-    second: autos1-01_6
+      213: 4285847523756002368
+    second: DL_Top_Shape
   - first:
-      213: -1540988262036743599
-    second: autos1-01_7
-  - first:
-      213: 2452328154429457517
-    second: autos1-01_8
-  - first:
-      213: 8976067340614966056
-    second: autos1-01_9
-  - first:
-      213: -1571858247906565923
-    second: autos1-01_10
-  - first:
-      213: -7477465914728393794
-    second: autos1-01_11
-  - first:
-      213: -7018937965524281711
-    second: Car_Down_Right
-  - first:
-      213: 8885895747287585
-    second: autos1-01_13
-  - first:
-      213: -8179534167475059605
-    second: autos1-01_14
-  - first:
-      213: 626791727013436172
-    second: autos1-01_15
+      213: -4264416367031703087
+    second: DL_Bottom_Color
   externalObjects: {}
   serializedVersion: 11
   mipmaps:
@@ -149,43 +125,85 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Car_Up_Right
+      name: UL_Top_Shape
       rect:
         serializedVersion: 2
-        x: 96
-        y: 630
-        width: 167
-        height: 105
+        x: 18
+        y: 154
+        width: 41
+        height: 26
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 5d70fffc55848bc60800000000000000
-      internalID: 7834091085209995221
+      spriteID: eca7fab7fe8909bb0800000000000000
+      internalID: -4931273437630989618
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Car_Down_Right
+      name: UL_Bottom_Color
       rect:
         serializedVersion: 2
-        x: 85
-        y: 125
-        width: 175
-        height: 110
+        x: 88
+        y: 155
+        width: 40
+        height: 25
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 1961c68bb19b79e90800000000000000
-      internalID: -7018937965524281711
+      spriteID: 68f0a53d79b148ce0800000000000000
+      internalID: -1403966844932845690
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DL_Top_Shape
+      rect:
+        serializedVersion: 2
+        x: 15
+        y: 13
+        width: 43
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 04cc6fe8d936a7b30800000000000000
+      internalID: 4285847523756002368
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DL_Bottom_Color
+      rect:
+        serializedVersion: 2
+        x: 85
+        y: 15
+        width: 43
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1d9a6b478efb1d4c0800000000000000
+      internalID: -4264416367031703087
       vertices: []
       indices: 
       edges: []

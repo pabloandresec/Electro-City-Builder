@@ -168,13 +168,20 @@ public class Tutorial : MonoBehaviour
             };
 
         });
-        cc.AssignAnActionAtEndOfDialog(11, () =>
+        cc.AssignAnActionAtEndOfDialog(11, () => //Cuando presionamos el boton construir
         {
             ic.LockInput(true, true, false);
             ui.ButtonPressed = (build) => {
                 if (build == "Build")
                 {
-                    cc.ShowDialog(12);
+                    if(gc.RandomBuilds) //Si edificios random estan seleccionados salteamos el dialogo 12
+                    {
+                        cc.ShowDialog(13);
+                    }
+                    else
+                    {
+                        cc.ShowDialog(12);
+                    }
                     ui.ButtonPressed = null;
                 }
             };
@@ -212,7 +219,7 @@ public class Tutorial : MonoBehaviour
         });
 
         //Start Tutorial
-        gc.SetMoney(10000);
+        gc.SetMoney(50000);
         cover.SetActive(true);
         ui.SetAlpha(cover, 1, 0, 2);
         ic.MoveCameraToWorldPosition(new Vector3(0, 4, -30), 3, 3,() =>

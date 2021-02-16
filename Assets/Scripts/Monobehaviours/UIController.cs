@@ -823,9 +823,16 @@ public class UIController : MonoBehaviour
     public void BuildButtonFunction()
     {
         DespawnTileSelectionBubble(); //Despawn menu
-        game.SwitchState(1); // cambia al modo menu
-        FillNewListWithAvailableBuildings(newBuildingListHolder.transform);
-        FadeInMenu(newBuildingListHolder);
+        if(game.RandomBuilds)
+        {
+            game.TryBuild(4); 
+        }
+        else
+        {
+            game.SwitchState(1); // cambia al modo menu
+            FillNewListWithAvailableBuildings(newBuildingListHolder.transform);
+            FadeInMenu(newBuildingListHolder);
+        }
         buttonPressed?.Invoke("Build");
     } 
     #endregion

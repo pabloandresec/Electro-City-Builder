@@ -10,6 +10,7 @@ public class BuildingData : ScriptableObject
     [Header("Sprites")]
     public Sprite icon;
     public TileBase tile;
+    public TileBase tileOff;
     [TextArea()]
     public string description;
     [Header("Build Settings")]

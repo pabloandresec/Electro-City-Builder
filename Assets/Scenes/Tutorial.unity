@@ -15268,6 +15268,7 @@ MonoBehaviour:
   height: 16
   gameTimeSpeedMult: 1
   buildingRefreshRate: 10
+  randomBuilds: 1
   currentGameSessionData: {fileID: 11400000, guid: 1dd46890e1cd274419800719c298190f, type: 2}
   highlightTile: {fileID: 11400000, guid: a3ac7ae6d4a8c99458b012966d19e9e1, type: 2}
   overlayTilemap: {fileID: 536756827}
@@ -15326,12 +15327,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   displayGridGizmos: 0
   gameController: {fileID: 1994174127}
+  spawnTraffic: 1
   roadTilemap: {fileID: 1543499730}
   roadIndex: 3
   gridWorldSize: {x: 64, y: 64}
   nodeRadius: 0.2
   gridOffset: {x: 0, y: 0.25, z: 0}
-  trafficPrefab: {fileID: 790739379095361296, guid: 21113ea1713d5274abe7ba6b1f8833e0, type: 3}
+  trafficPrefabs:
+  - {fileID: 5698333417985759345, guid: b7f79e0afe61e9349a48e7dbcf485d49, type: 3}
+  - {fileID: 1684655843302091259, guid: af5922b18870bd5418aae98f3a728461, type: 3}
   trafficAmount: 10
   trafficParent: {fileID: 931424163}
 --- !u!1 &1994580297

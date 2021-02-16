@@ -14,9 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   icon: {fileID: 21300000, guid: e2bcbfd319ba7e14b890c58af38e4ea7, type: 3}
   tile: {fileID: 11400000, guid: 0b8422714e84a5e408752bc963cc477e, type: 2}
+  tileOff: {fileID: 11400000, guid: 0b8422714e84a5e408752bc963cc477e, type: 2}
   description: Provee de energia a la ciudad
   buildingCost: 999999
   essential: 1
+  rent: 100
   upgradeCost: 999999
   upgradeBuildingName: 
   hasComponents: 0
