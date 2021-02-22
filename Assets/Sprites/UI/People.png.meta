@@ -4,10 +4,10 @@ TextureImporter:
   internalIDToNameTable:
   - first:
       213: -240327516165942470
-    second: People_0
+    second: TreesXp
   - first:
       213: 5135744385290702156
-    second: People_1
+    second: TreesXp2
   - first:
       213: 5865162929812395281
     second: People_2
@@ -266,7 +266,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: People_0
+      name: TreesXp
       rect:
         serializedVersion: 2
         x: 18
@@ -274,7 +274,7 @@ TextureImporter:
         width: 160
         height: 94
       alignment: 9
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0.50839835, y: 0.3999348}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -287,7 +287,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: People_1
+      name: TreesXp2
       rect:
         serializedVersion: 2
         x: 202
@@ -295,7 +295,7 @@ TextureImporter:
         width: 57
         height: 60
       alignment: 9
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0.50000054, y: 0.23871867}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []

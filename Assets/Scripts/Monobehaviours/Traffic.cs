@@ -12,19 +12,11 @@ public class Traffic : MonoBehaviour
     [SerializeField] protected float speed = 0;
     [SerializeField] private float offset;
 
-    private SpriteRenderer sr;
-    
     private Vector2[] path;
     private Vector3[] correctPath;
     private bool hasPath = false;
     private bool calculatingPath = false;
     private int currentIndex = -1;
-
-    private void Start()
-    {
-        //SetupTraffic();
-        //RequestPath();
-    }
 
     protected void RequestPath()
     {

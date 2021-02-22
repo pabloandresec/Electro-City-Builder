@@ -122,7 +122,7 @@ public class UIController : MonoBehaviour
 
     public void UpdateUI(int currentMoney, int powerInUse, int powerAvailable)
     {
-        money.text = "$ " + currentMoney.ToString();
+        money.text = currentMoney.ToString();
         power.text = powerInUse.ToString() + " / "+ powerAvailable.ToString();
         powerSlider.maxValue = powerAvailable;
         powerSlider.value = powerInUse;
@@ -130,7 +130,7 @@ public class UIController : MonoBehaviour
 
     public void UpdateUI(int currentMoney)
     {
-        money.text = "$ " + currentMoney.ToString();
+        money.text = currentMoney.ToString();
     }
 
     public void SetAvailableCategoriesForSelectedBuilding()
@@ -607,10 +607,17 @@ public class UIController : MonoBehaviour
 
     private void SpawnTileSelectionBubble(BuildingData buildingData)
     {
-        if(buildingData == null || buildingData.Index == 3)
+        if(buildingData == null || buildingData.Index == 3 )
         {
             return;
         }
+        if(buildingData.Index == 2) ///TEMPORAFDNFKJANSKFJNEFKJANFKJA
+        {
+            SetDirectionOfFade(0);
+            FadeInMenu(powerSlider.gameObject);
+            return;
+        }
+
         GameObject bubbleGO = Instantiate(popUpPrefab, game.SelectedToWorldPosition() + new Vector3(0, 0.75f, 0), Quaternion.identity);
         bubbleGO.transform.SetParent(popUpHolder);
         bubbleGO.name = game.SelectedTile.ToString();

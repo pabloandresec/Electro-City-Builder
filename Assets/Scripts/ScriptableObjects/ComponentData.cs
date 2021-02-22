@@ -38,7 +38,7 @@ public class ComponentData : ScriptableObject
 
 public enum ComponentCategory
 {
-    ILUMINACION = 0,
+    TABLEROS = 0,
     CUBIERTAS = 1,
     INTERRUPTORES = 2,
     TOMACORRIENTES = 3,

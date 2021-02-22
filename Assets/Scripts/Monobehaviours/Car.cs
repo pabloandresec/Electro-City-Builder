@@ -14,15 +14,7 @@ public class Car : Traffic
         layers[layers.Length-1].color = Utils.GenerateRandomColor();
         RequestPath();
     }
-    /*
-    private void Update()
-    {
-        if(Input.GetKeyDown(KeyCode.Alpha0))
-        {
-            RequestPath();
-        }
-    }
-    */
+
     protected override void RefreshSprites(Vector2 direction)
     {
         float angle = Vector2.SignedAngle(Vector2.left, direction);

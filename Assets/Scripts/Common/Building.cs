@@ -27,20 +27,26 @@ public class Building
     }
 
     #endregion
-
+    /*
     public void UpdateComponentsLife(List<ComponentData> referenceData, float timePassed)
     {
         CalculateOnlyFirstComponentByCategory(referenceData, timePassed);
         CheckForActiveComponents();
     }
+    */
+    public void UpdateComponentsLife(GameController gc, float timePassed)
+    {
+        CalculateOnlyFirstComponentByCategory(gc.Components, timePassed);
+        CheckForActiveComponents(gc);
+    }
 
-    private void CheckForActiveComponents()
+    private void CheckForActiveComponents(GameController gc)
     {
         if (components == null)
         {
             return;
         }
-        GameController gc = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
+        //GameController gc = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
         if (components.Count == 0)
         {
             gc.SetBuildingElectricVisibility(false, Utils.IndexToTilePos(positionIndex,GameController.currentWidth), gc.Buildings[listIndex]);

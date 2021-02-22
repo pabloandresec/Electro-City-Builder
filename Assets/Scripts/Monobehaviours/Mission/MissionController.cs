@@ -114,7 +114,7 @@ public class MissionController : MonoBehaviour
     public void CreateZoomMission()
     {
         //Se Crean los objetivos (pueden ser varios...)
-        CameraZoomObjective cameraZoomObj = new CameraZoomObjective("Haz zoom con la camara", 1f, 2.5f, () => {
+        CameraZoomObjective cameraZoomObj = new CameraZoomObjective("Haz zoom con la camara", 1.25f, 2.5f, () => {
             ui.GetComponent<CharController>().ShowDialog(2);
             game.SwitchState(1); //lock all Input
         });

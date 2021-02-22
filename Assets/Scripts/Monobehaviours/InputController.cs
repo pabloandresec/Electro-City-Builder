@@ -45,10 +45,6 @@ public class InputController : MonoBehaviour
 
     private void HandleInput()
     {
-        if(game.State == PlayerState.MENUS)
-        {
-            return;
-        }
         if (Input.touchCount > 0)
         {
             foreach (Touch touch in Input.touches)

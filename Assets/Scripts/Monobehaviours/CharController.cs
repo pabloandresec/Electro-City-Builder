@@ -48,7 +48,7 @@ public class CharController : MonoBehaviour
     public void ShowDialog(int index)
     {
         GetComponent<UIController>().FadeInMenu(characterMenu);
-        GetComponent<UIController>().FadeInMenu(bubble.transform.parent.gameObject);
+        GetComponent<UIController>().FadeInMenu(bubble.transform.gameObject);
         currentDialog = index;
         currentEntry = -1;
         NextEntry();
@@ -60,7 +60,7 @@ public class CharController : MonoBehaviour
         if(nextEntry >= dialogs[currentDialog].Entries.Length)
         {
             GetComponent<UIController>().FadeOutMenu(characterMenu);
-            GetComponent<UIController>().FadeOutMenu(bubble.transform.parent.gameObject);
+            GetComponent<UIController>().FadeOutMenu(bubble.transform.gameObject);
             dialogs[currentDialog].OnDialogEnd?.Invoke();
         }
         else

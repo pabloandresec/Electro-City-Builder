@@ -1,0 +1,514 @@
+fileFormatVersion: 2
+guid: c5e5de221e50d55488cef01f4bac9bc0
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -366618894272716768
+    second: Amarillo_BrokenBulb
+  - first:
+      213: -2245577054902212136
+    second: iconos-03_1
+  - first:
+      213: -2486817352402706490
+    second: iconos-03_2
+  - first:
+      213: -2446368976777652725
+    second: iconos-03_3
+  - first:
+      213: -3057537088848180328
+    second: Amarillo_Hammer
+  - first:
+      213: 4008617395048255335
+    second: iconos-03_5
+  - first:
+      213: -6560751099631931924
+    second: iconos-03_6
+  - first:
+      213: -6005678303050141141
+    second: iconos-03_7
+  - first:
+      213: -7638674570339076250
+    second: iconos-03_8
+  - first:
+      213: 6453523623115028071
+    second: Amarillo_Componentes
+  - first:
+      213: 1207411224785152651
+    second: iconos-03_10
+  - first:
+      213: 6217214822422101830
+    second: iconos-03_11
+  - first:
+      213: -3868573263589803931
+    second: iconos-03_12
+  - first:
+      213: -3082899807432963593
+    second: iconos-03_13
+  - first:
+      213: -6605174258927534474
+    second: iconos-03_14
+  - first:
+      213: -6534616135789074681
+    second: iconos-03_15
+  - first:
+      213: -7391557884777661412
+    second: iconos-03_16
+  - first:
+      213: -8198907228697223668
+    second: iconos-03_17
+  - first:
+      213: -6132651648673721688
+    second: iconos-03_18
+  - first:
+      213: 5659401959669534405
+    second: iconos-03_19
+  - first:
+      213: 4704356533336731315
+    second: iconos-03_20
+  - first:
+      213: -8522135141683119351
+    second: iconos-03_21
+  - first:
+      213: 7583124597722848738
+    second: iconos-03_22
+  - first:
+      213: 5910463537106419546
+    second: iconos-03_23
+  - first:
+      213: 7674359434911970867
+    second: iconos-03_24
+  - first:
+      213: -239148869142211607
+    second: iconos-03_25
+  - first:
+      213: 736980385672698373
+    second: iconos-03_26
+  externalObjects: {}
+  serializedVersion: 11
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: -1
+    aniso: -1
+    mipBias: -100
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 0
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  platformSettings:
+  - serializedVersion: 3
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Amarillo_BrokenBulb
+      rect:
+        serializedVersion: 2
+        x: 31
+        y: 191
+        width: 97
+        height: 153
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 020adeede0289eaf0800000000000000
+      internalID: -366618894272716768
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: iconos-03_3
+      rect:
+        serializedVersion: 2
+        x: 515
+        y: 195
+        width: 80
+        height: 145
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b06d1a58060cc0ed0800000000000000
+      internalID: -2446368976777652725
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Amarillo_Hammer
+      rect:
+        serializedVersion: 2
+        x: 683
+        y: 197
+        width: 152
+        height: 141
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 89b4f9b97327195d0800000000000000
+      internalID: -3057537088848180328
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: iconos-03_6
+      rect:
+        serializedVersion: 2
+        x: 902
+        y: 193
+        width: 157
+        height: 154
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ced6fae92a783f4a0800000000000000
+      internalID: -6560751099631931924
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Amarillo_Componentes
+      rect:
+        serializedVersion: 2
+        x: 222
+        y: 177
+        width: 204
+        height: 183
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 766fc510b858f8950800000000000000
+      internalID: 6453523623115028071
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: iconos-03_16
+      rect:
+        serializedVersion: 2
+        x: 1105
+        y: 162
+        width: 83
+        height: 83
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c1cf6151449eb6990800000000000000
+      internalID: -7391557884777661412
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: iconos-03_17
+      rect:
+        serializedVersion: 2
+        x: 1226
+        y: 162
+        width: 83
+        height: 83
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c0e9e1fa051a73e80800000000000000
+      internalID: -8198907228697223668
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: iconos-03_18
+      rect:
+        serializedVersion: 2
+        x: 44
+        y: 28
+        width: 68
+        height: 107
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8a2d69551d174eaa0800000000000000
+      internalID: -6132651648673721688
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: iconos-03_19
+      rect:
+        serializedVersion: 2
+        x: 204
+        y: 30
+        width: 79
+        height: 103
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5ce8047f81c3a8e40800000000000000
+      internalID: 5659401959669534405
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: iconos-03_20
+      rect:
+        serializedVersion: 2
+        x: 382
+        y: 39
+        width: 90
+        height: 85
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3bee252a75b394140800000000000000
+      internalID: 4704356533336731315
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: iconos-03_21
+      rect:
+        serializedVersion: 2
+        x: 567
+        y: 28
+        width: 79
+        height: 106
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 90bba18ad3b4bb980800000000000000
+      internalID: -8522135141683119351
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: iconos-03_22
+      rect:
+        serializedVersion: 2
+        x: 712
+        y: 32
+        width: 97
+        height: 94
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2ed1ccef4abac3960800000000000000
+      internalID: 7583124597722848738
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: iconos-03_24
+      rect:
+        serializedVersion: 2
+        x: 876
+        y: 26
+        width: 71
+        height: 106
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 336789cde3dc08a60800000000000000
+      internalID: 7674359434911970867
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: iconos-03_25
+      rect:
+        serializedVersion: 2
+        x: 1105
+        y: 22
+        width: 83
+        height: 83
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9e3975ede5f5eacf0800000000000000
+      internalID: -239148869142211607
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: iconos-03_26
+      rect:
+        serializedVersion: 2
+        x: 1239
+        y: 27
+        width: 64
+        height: 74
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 50a937e81c74a3a00800000000000000
+      internalID: 736980385672698373
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+  spritePackingTag: 
+  pSDRemoveMatte: 0
+  pSDShowRemoveMatteOption: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

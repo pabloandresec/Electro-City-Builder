@@ -31,6 +31,9 @@ public class GameController : MonoBehaviour
     [Header("Juego Activo")]
     [SerializeField] private Building[] activeBuildings;
     [SerializeField] private PlayerState state = PlayerState.GAME;
+    [Header("Animation")]
+    [SerializeField] private GameObject buildingAnimationPrefab;
+    [SerializeField] private List<GameObject> spawnedBuildingAnims;
     [Header("DEBUG")]
     [SerializeField] private int testIndex = 17;
     [SerializeField] private Vector3Int selectedTile = -Vector3Int.one;
@@ -38,6 +41,7 @@ public class GameController : MonoBehaviour
     private bool limited = false;
     private Vector3Int limitedToTile = -Vector3Int.one;
     private Action OnLimitedCleared;
+    private List<Vector3Int> lockedCells;
 
     private Building selectedBuilding;
     private bool selected = false;
@@ -80,10 +84,11 @@ public class GameController : MonoBehaviour
             }
         }
 
-        activeBuildings[TilePosToIndex(8, 8)] = new Building(buildings[2], TilePosToIndex(8, 8));
+        activeBuildings[TilePosToIndex(8, 7)] = new Building(buildings[2], TilePosToIndex(8, 7));
+        LockCell(new Vector3Int(9, 7, 0));
         activeBuildings[TilePosToIndex(7, 5)] = new Building(buildings[4], TilePosToIndex(7, 5));
 
-        RefreshMap();
+        DrawMap();
         RefreshGame();
 
         GetComponent<PGrid>().InitGrid(); //Comentar para PATHFINDING DESHABILITADO
@@ -97,7 +102,7 @@ public class GameController : MonoBehaviour
         TileBase tb = null;
         tb = state ? data.tile : data.tileOff;
         buildTilemap.SetTile(cell, tb);
-        Debug.Log("building electricity in " + cell + " is now " + state);
+        //Debug.Log("building electricity in " + cell + " is now " + state);
     }
 
     private void Update()
@@ -144,10 +149,11 @@ public class GameController : MonoBehaviour
         int totalPow = 0;
         for (int i = 0; i < activeBuildings.Length; i++)
         {
-            activeBuildings[i].UpdateComponentsLife(components, timePassed);
+            activeBuildings[i].UpdateComponentsLife(this, timePassed);
             totalPow += activeBuildings[i].totalPowerConsumption;
         }
         ui.UpdateUI(currentGameSessionData.money, totalPow, 1000);
+        DrawMap();
     }
 
     public void SetMoney(int money)
@@ -325,6 +331,33 @@ public class GameController : MonoBehaviour
         limitedToTile = -Vector3Int.one ;
         OnLimitedCleared = null;
         Debug.Log("Limit selection of tiles disabled");
+    }
+
+    /// <summary>
+    /// Will lock the cell so cannot be selected
+    /// </summary>
+    public void LockCell(Vector3Int cell)
+    {
+        if(lockedCells == null)
+        {
+            lockedCells = new List<Vector3Int>();
+        }
+        lockedCells.Add(cell);
+        Debug.Log("Cell "+cell+" locked!");
+    }
+    /// <summary>
+    /// Unlocks a cell is it exists
+    /// </summary>
+    /// <param name="cell"></param>
+    public void UnlockCell(Vector3Int cell)
+    {
+        if (lockedCells == null)
+        {
+            Debug.Log("No locked cells");
+            return;
+        }
+        lockedCells.Remove(cell);
+        Debug.Log("Cell " + cell + " lock REMOVED!");
     }
 
     public void LimitSelectionOfTiles(Vector3Int cell, Action _OnTileSelected)
@@ -520,7 +553,7 @@ public class GameController : MonoBehaviour
                     currentGameSessionData.money -= buildings[indexSelected].buildingCost;
                     ui.UpdateUI(currentGameSessionData.money);
                     DeselectTile();
-                    GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(5);
+                    GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(8);
                 }
                 else
                 {
@@ -544,8 +577,66 @@ public class GameController : MonoBehaviour
     public void Build(Vector3Int tilePos, int buildingIndex)
     {
         activeBuildings[TilePosToIndex(tilePos.x, tilePos.y)] = new Building(buildings[buildingIndex], TilePosToIndex(tilePos.x, tilePos.y));
-        RefreshMap();
+        DrawTile(tilePos);
+        //DrawMap();
         Debug.Log("Building constructed");
+    }
+
+    public void SquishTile(Vector3Int cell)
+    {
+        if(cell.x < 0 || cell.x >= width || cell.y < 0 || cell.y >= height)
+        {
+            Debug.Log("Cell outside of bounds");
+            return;
+        }
+        Debug.Log("Squishing " + cell);
+        GameObject animBuilding = Instantiate(buildingAnimationPrefab, buildTilemap.CellToWorld(cell), Quaternion.identity); // Spawn anim prefab
+        animBuilding.transform.name = cell + "_anim";
+        SpriteRenderer sr = animBuilding.transform.GetChild(0).GetComponent<SpriteRenderer>();
+
+        Building actBuilding = activeBuildings[Utils.TilePosToIndex(cell.x, cell.y, width)];
+        BuildingData buildingData = buildings[actBuilding.ListIndex];
+        Sprite s = buildTilemap.GetSprite(cell);
+
+        sr.sprite = s;
+
+        buildTilemap.SetTile(cell, null);
+        buildTilemap.RefreshTile(cell);
+        DrawLockedTiles();
+
+        if (spawnedBuildingAnims == null)
+        {
+            spawnedBuildingAnims = new List<GameObject>();
+            spawnedBuildingAnims.Add(animBuilding);
+            return;
+        }
+        if (spawnedBuildingAnims.Contains(animBuilding))
+        {
+            Debug.Log(animBuilding.transform.name + " already exist");
+            return;
+        }
+
+        spawnedBuildingAnims.Add(animBuilding);
+        Debug.Log("Spawned buiding for anim " + animBuilding);
+
+        Action onEnd = () =>
+        {
+            spawnedBuildingAnims.Remove(animBuilding);
+            Debug.Log("Despawned " + animBuilding);
+            int index = Utils.TilePosToIndex(cell.x, cell.y, width);
+            TileBase tile = actBuilding.components.Count == 0 ? buildingData.tileOff : buildingData.tile;
+            buildTilemap.SetTile(cell, tile);
+            buildTilemap.RefreshTile(cell);
+            DrawLockedTiles();
+            Destroy(animBuilding);
+        };
+        LeanTween.scale(animBuilding, new Vector3(0.9f, 0.9f, 1f), 0.2f).setEaseInOutBounce().setOnComplete(() =>
+        {
+            LeanTween.scale(animBuilding, new Vector3(1f, 1f, 1f), 0.2f).setEaseInOutBounce().setOnComplete(() =>
+            {
+                onEnd?.Invoke();
+            });
+        });
     }
 
     /// <summary>
@@ -562,10 +653,30 @@ public class GameController : MonoBehaviour
         return total;
     }
 
+
+    private void DrawTile(Vector3Int cell)
+    {
+        Building b = activeBuildings[TilePosToIndex(cell.x, cell.y)];
+        BuildingData bd = buildings[b.ListIndex];
+        if (bd.Index != 3)
+        {
+            if (b.components == null || b.components.Count == 0)
+            {
+                buildTilemap.SetTile(cell, bd.tileOff);
+            }
+            else
+            {
+                buildTilemap.SetTile(cell, bd.tile);
+            }
+        }
+        buildTilemap.RefreshTile(cell);
+        DrawLockedTiles();
+    }
+
     /// <summary>
     /// De acuerdo a los edificios dibuja el mapa correspondiente
     /// </summary>
-    private void RefreshMap()
+    private void DrawMap()
     {
         for (int x = 0; x < width; x++)
         {
@@ -573,15 +684,34 @@ public class GameController : MonoBehaviour
             {
                 Building b = activeBuildings[TilePosToIndex(x, y)];
                 BuildingData bd = buildings[b.ListIndex];
-                if(bd.Index != 3) //no es igual a calle
+                Vector3Int cell = new Vector3Int(x, y, 0);
+                if (bd.Index != 3)
                 {
-                    buildTilemap.SetTile(new Vector3Int(x, y, 0), bd.tile);
+                    if(b.components == null || b.components.Count == 0)
+                    {
+                        buildTilemap.SetTile(cell, bd.tileOff);
+                    }
+                    else
+                    {
+                        buildTilemap.SetTile(cell, bd.tile);
+                    }
                 }
-                //buildTilemap.SetTile(new Vector3Int(x, y, 0), bd.tile);
+                buildTilemap.RefreshTile(cell);
             }
         }
+        DrawLockedTiles();
+        Debug.Log("Map Drawed");
     }
 
+    public void DrawLockedTiles()
+    {
+        foreach (Vector3Int l in lockedCells)
+        {
+            buildTilemap.SetTile(l, null);
+            buildTilemap.RefreshTile(l);
+        }
+        Debug.Log("Lock tiles Drawed");
+    }
 
     #region Cambio de estados
     /// <summary>
@@ -600,6 +730,17 @@ public class GameController : MonoBehaviour
     public void SwitchState(PlayerState newState)
     {
         //Logica
+        switch (newState)
+        {
+            case PlayerState.GAME:
+                GameObject.FindGameObjectWithTag("Input").GetComponent<InputController>().LockInput(false, false, false);
+                break;
+            case PlayerState.MENUS:
+                GameObject.FindGameObjectWithTag("Input").GetComponent<InputController>().LockInput(false, false, true);
+                break;
+        }
+
+
         state = newState;
     }
     #endregion
@@ -610,7 +751,7 @@ public class GameController : MonoBehaviour
     /// <param name="worldPos"></param>
     public void TileTapped(Vector3 worldPos)
     {
-        if (state == PlayerState.MENUS || UIController.tweening)
+        if (UIController.tweening)
         {
             Debug.Log("Using Menus!!");
             return;
@@ -639,18 +780,13 @@ public class GameController : MonoBehaviour
     {
         //Calculate new selected pos
         Vector3Int newSelectedPos = overlayTilemap.WorldToCell(new Vector3(worldPos.x, worldPos.y, 0));
-        if(limited)
-        {
-            if(newSelectedPos == limitedToTile)
-            {
-                OnLimitedCleared?.Invoke();
-            }
-            else
-            {
-                Debug.LogWarning("Limited Selection Active!!");
-                return;
-            }
-        }
+        bool isThisCellSelectable = CheckForActiveLimitedSelection(newSelectedPos);
+        if (!isThisCellSelectable) return;
+        bool isThisCellLocked = CheckForActiveCellLocks(newSelectedPos);
+        if (!isThisCellLocked) return;
+
+        //SquishTest
+        SquishTile(newSelectedPos);
         //Clamping the new selected pos;
         newSelectedPos = new Vector3Int(Mathf.Clamp(newSelectedPos.x, 0, width - 1), Mathf.Clamp(newSelectedPos.y, 0, height - 1), 0);
         //Updating view;
@@ -661,6 +797,56 @@ public class GameController : MonoBehaviour
         testIndex = TilePosToIndex(selectedTile.x, selectedTile.y);
         Debug.Log("Buildings index = " + testIndex);
         selected = true;
+    }
+
+    /// <summary>
+    /// Se fija si la casilla suminstrada esta bloqueada
+    /// </summary>
+    /// <param name="newSelectedPos"></param>
+    /// <returns></returns>
+    private bool CheckForActiveCellLocks(Vector3Int _cell)
+    {
+        if(lockedCells == null)
+        {
+            return true;
+        }
+        bool allowed = true;
+        foreach(Vector3Int cell in lockedCells)
+        {
+            if(cell == _cell)
+            {
+                Debug.Log("cell " + cell + " is locked");
+                allowed = false;
+                break;
+            }
+        }
+        Debug.Log("Cell " + _cell + " lock is " + allowed);
+        return allowed;
+    }
+
+    /// <summary>
+    /// Se fija si la sellecion esta limitada a cierta casilla
+    /// </summary>
+    /// <param name="newSelectedPos"></param>
+    /// <returns></returns>
+    private bool CheckForActiveLimitedSelection(Vector3Int newSelectedPos)
+    {
+        bool allowed = true;
+        if (limited)
+        {
+            if (newSelectedPos == limitedToTile)
+            {
+                allowed = true;
+                OnLimitedCleared?.Invoke();
+            }
+            else
+            {
+                allowed = false;
+                Debug.LogWarning("Limited Selection Active!!");
+            }
+        }
+        Debug.Log("Selection limited = " + limited);
+        return allowed;
     }
 
     public void DeselectTile()

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   icon: {fileID: 21300000, guid: 56a56357bd374d34e828118c9fc2b541, type: 3}
   tile: {fileID: 11400000, guid: 528c51a7d075c074e9de66dcdefb945d, type: 2}
-  tileOff: {fileID: 11400000, guid: 528c51a7d075c074e9de66dcdefb945d, type: 2}
+  tileOff: {fileID: 11400000, guid: 74040f4982c758843b1d5cccd0cd84bc, type: 2}
   description: "Peque\xF1o edifico de apartamentos\n"
   buildingCost: 2000
   essential: 0

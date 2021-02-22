@@ -29,25 +29,27 @@ public class Tutorial : MonoBehaviour
     private void SetupTutorial()
     {
         GameController.OnMainScriptReady -= SetupTutorial;
-        gc.SwitchState(1);
+        //gc.SwitchState(1);
+        ic.LockInput(true, true, true);
         cc.AssignAnActionAtEndOfDialog(0, () =>
         {
             mc.CreateCameraMission();
-            gc.SwitchState(0);
+            //gc.SwitchState(0);
             ic.LockInput(false, true, true);
         });
         cc.AssignAnActionAtEndOfDialog(1, () =>
         {
             mc.CreateZoomMission();
             ic.LockInput(true, false, true);
-            gc.SwitchState(0);
+            //gc.SwitchState(0);
         });
         cc.AssignAnActionAtEndOfDialog(2, () =>
         {
+            ic.LockInput(true, true, false);
             Vector3 tgtPos = gc.CellToWorldPosition(new Vector3Int(7, 5, 0)) + new Vector3(0, 0.5f, 0);
             ic.MoveCameraToWorldPosition(tgtPos, 2, 1,() =>
             {
-                gc.SwitchState(1);
+                //gc.SwitchState(1);
                 ui.AddAttentionBubble("Tutorial bubble", new Vector3Int(7, 5, 0));
                 ui.WaitAndExecuteFunction(1, () => {
                     ui.GetComponent<CharController>().ShowDialog(3);
@@ -56,9 +58,10 @@ public class Tutorial : MonoBehaviour
         });
         cc.AssignAnActionAtEndOfDialog(3, () => //tile selection
         {
-            gc.SwitchState(0);
+            //gc.SwitchState(0);
             ic.LockInput(true, true, false);
-            gc.LimitSelectionOfTiles(new Vector3Int(7, 5, 0), () =>
+
+            gc.LimitSelectionOfTiles(new Vector3Int(7, 5, 0), () => //trabamos toda seleccion excepto a esta casilla
             {
                 ic.LockInput(true, true, true);
                 gc.UnlimitSelectionsOfTiles();
@@ -91,10 +94,10 @@ public class Tutorial : MonoBehaviour
             };
             ui.DisableButton(buttonsToDisable);
             ui.ButtonPressed = (s) => {
-                if (s == "ILUMINACION")
+                if (s == "TABLEROS")
                 {
                     cc.ShowDialog(6);
-                    Debug.LogWarning("Boton Iluminacion presionado");
+                    Debug.LogWarning("Boton TABLEROS presionado");
                     ui.ButtonPressed = null;
                 }
             };
@@ -118,6 +121,7 @@ public class Tutorial : MonoBehaviour
                     ui.ButtonPressed = (exit) => {
                         if (exit == "But_CatExit")
                         {
+                            ic.LockInput(true, true, true);
                             ic.MoveCameraToWorldPosition(gc.CellToWorldPosition(new Vector3Int(8, 8, 0)), 3, 1,() => {
                                 cc.ShowDialog(8);
                                 ui.ButtonPressed = null;
@@ -129,10 +133,10 @@ public class Tutorial : MonoBehaviour
         });
         cc.AssignAnActionAtEndOfDialog(8, () =>
         {
-            gc.LimitSelectionOfTiles(new Vector3Int(8, 7, 0), () => {
+            gc.LimitSelectionOfTiles(new Vector3Int(8, 8, 0), () => {
                 cc.ShowDialog(10);
             });
-            ic.MoveCameraToWorldPosition(gc.CellToWorldPosition(new Vector3Int(8, 7, 0)) + new Vector3(0, 0.5f, 0), 0.8f, 1 ,() => {
+            ic.MoveCameraToWorldPosition(gc.CellToWorldPosition(new Vector3Int(8, 8, 0)) + new Vector3(0, 0.5f, 0), 1f, 1 ,() => {
                 cc.ShowDialog(9);
                 ui.ButtonPressed = null;
             });
@@ -150,7 +154,7 @@ public class Tutorial : MonoBehaviour
                     cc.ShowDialog(11);
                     ui.ButtonPressed = null;
                     gc.UnlimitSelectionsOfTiles();
-                    gc.LimitSelectionOfTiles(new Vector3Int(8, 7, 0), null);
+                    gc.LimitSelectionOfTiles(new Vector3Int(8, 8, 0), null);
                     string[] buttonsToEnable = new string[] {
                         "But_CatExit",
                         "CUBIERTAS",
@@ -213,7 +217,7 @@ public class Tutorial : MonoBehaviour
         cc.AssignAnActionAtEndOfDialog(15, () =>
         {
             gc.SwitchState(0);
-            ic.LockInput(false, false, false);
+            //ic.LockInput(false, false, false);
             gc.UnlimitSelectionsOfTiles();
             ui.EnableAllButtons();
         });
