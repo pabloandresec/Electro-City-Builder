@@ -45,7 +45,7 @@ public class Tutorial : MonoBehaviour
         });
         cc.AssignAnActionAtEndOfDialog(2, () =>
         {
-            ic.LockInput(true, true, false);
+            ic.LockInput(true, true, true);
             Vector3 tgtPos = gc.CellToWorldPosition(new Vector3Int(7, 5, 0)) + new Vector3(0, 0.5f, 0);
             ic.MoveCameraToWorldPosition(tgtPos, 2, 1,() =>
             {
