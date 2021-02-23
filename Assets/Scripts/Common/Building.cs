@@ -27,13 +27,6 @@ public class Building
     }
 
     #endregion
-    /*
-    public void UpdateComponentsLife(List<ComponentData> referenceData, float timePassed)
-    {
-        CalculateOnlyFirstComponentByCategory(referenceData, timePassed);
-        CheckForActiveComponents();
-    }
-    */
     public void UpdateComponentsLife(GameController gc, float timePassed)
     {
         CalculateOnlyFirstComponentByCategory(gc.Components, timePassed);
@@ -46,7 +39,6 @@ public class Building
         {
             return;
         }
-        //GameController gc = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
         if (components.Count == 0)
         {
             gc.SetBuildingElectricVisibility(false, Utils.IndexToTilePos(positionIndex,GameController.currentWidth), gc.Buildings[listIndex]);
@@ -79,6 +71,11 @@ public class Building
         gc.AddMoney(rent);
     }
 
+    /// <summary>
+    /// Calcula el primer componenete por categoria solamente
+    /// </summary>
+    /// <param name="referenceData"></param>
+    /// <param name="timePassed"></param>
     private void CalculateOnlyFirstComponentByCategory(List<ComponentData> referenceData, float timePassed)
     {
         totalPowerConsumption = 0;
