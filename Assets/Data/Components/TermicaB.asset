@@ -17,7 +17,7 @@ MonoBehaviour:
   category: 5
   description: Termicas Leopoldo
   cost: 1250
-  durability: 4320
+  durability: 40
   powerConsumption: 5
   premium: 0
   color: {r: 0, g: 0.20058537, b: 1, a: 1}

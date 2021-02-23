@@ -10975,9 +10975,11 @@ MonoBehaviour:
   vcam: {fileID: 1692559470}
   camSpeed: 10
   maxTapTime: 0.2
+  maxDistanceForMovedFlag: 0.2
   zoomMult: 0.005
   zoomMin: 1
   zoomMax: 8
+  wheelMouseZoomMult: 8
   ui: {fileID: 1165729319}
   game: {fileID: 1994174127}
 --- !u!4 &1390440862

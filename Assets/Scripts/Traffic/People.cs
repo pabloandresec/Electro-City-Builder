@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class People : Traffic
 {
-    [SerializeField] private SpriteRenderer renderer;
+    [SerializeField] private SpriteRenderer rend;
     [SerializeField] private Animator anim;
 
     private void Start()
@@ -12,47 +12,26 @@ public class People : Traffic
         RequestPath();
     }
 
-    /*
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Alpha0))
-        {
-            RequestPath();
-        }
-    }
-    */
     protected override void RefreshSprites(Vector2 direction)
     {
         float angle = Vector2.SignedAngle(Vector2.left, direction);
         anim.SetFloat("angle", angle);
-        /*
-        if (angle < 0)
-        {
-            anim.SetFloat("angle", angle);
-        }
-        else
-        {
-            for (int i = 0; i < layers.Length; i++)
-            {
-                layers[i].sprite = bottomRightSprites[i];
-            }
-        }
-        */
+
         if (angle > 0 && angle < 90)
         {
-            renderer.flipX = true;
+            rend.flipX = true;
         }
         else if (angle > 90 && angle < 180)
         {
-            renderer.flipX = false;
+            rend.flipX = false;
         }
         else if (angle < -90 && angle > -180)
         {
-            renderer.flipX = false;
+            rend.flipX = false;
         }
         else if (angle < 0 && angle > -90)
         {
-            renderer.flipX = true;
+            rend.flipX = true;
         }
     }
 }

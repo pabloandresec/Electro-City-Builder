@@ -161,5 +161,5 @@ MonoBehaviour:
   dest: {x: 0, y: 0}
   speed: 0.1
   offset: 0.15
-  renderer: {fileID: 5698333417880702336}
+  rend: {fileID: 5698333417880702336}
   anim: {fileID: 5698333417880702343}

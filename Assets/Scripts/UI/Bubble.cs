@@ -45,4 +45,12 @@ public class Bubble : MonoBehaviour
         }
         GetComponent<RectTransform>().sizeDelta = new Vector2(initSize.x * transform.GetChild(0).childCount, initSize.y * transform.GetChild(0).childCount);
     }
+
+    public void EnableButtons()
+    {
+        for (int i = 0; i < popUpButtonHolder.childCount; i++)
+        {
+            popUpButtonHolder.GetChild(i).GetComponent<Button>().interactable = true;
+        }
+    }
 }

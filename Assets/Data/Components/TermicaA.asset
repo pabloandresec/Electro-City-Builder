@@ -17,7 +17,7 @@ MonoBehaviour:
   category: 5
   description: Termicas sanchez
   cost: 1000
-  durability: 3600
+  durability: 30
   powerConsumption: 3
   premium: 0
   color: {r: 1, g: 0, b: 0, a: 1}

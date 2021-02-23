@@ -17,7 +17,7 @@ MonoBehaviour:
   category: 0
   description: El tablero de alambrado mas eficaz y completo que existe
   cost: 25
-  durability: 7200
+  durability: 60
   powerConsumption: 10
   premium: 1
   color: {r: 0.09821415, g: 1, b: 0, a: 1}

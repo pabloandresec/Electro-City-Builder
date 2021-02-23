@@ -17,7 +17,7 @@ MonoBehaviour:
   category: 0
   description: Tablero de alambrado grande pero ineficaz
   cost: 30
-  durability: 6000
+  durability: 50
   powerConsumption: 10
   premium: 0
   color: {r: 1, g: 0.99701774, b: 0, a: 1}

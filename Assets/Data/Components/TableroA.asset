@@ -17,7 +17,7 @@ MonoBehaviour:
   category: 0
   description: "Tablero de alambrado peque\xF1o"
   cost: 15
-  durability: 4500
+  durability: 30
   powerConsumption: 5
   premium: 0
   color: {r: 1, g: 0, b: 0, a: 1}

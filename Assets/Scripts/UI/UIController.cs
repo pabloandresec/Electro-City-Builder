@@ -55,20 +55,9 @@ public class UIController : MonoBehaviour
         activeBubbles = new List<GameObject>();
         menusPos = new Dictionary<string, Vector2>();
         CanvasGroup[] canvases = GetComponentsInChildren<CanvasGroup>(true);
-        //string s = "canvases found : " + canvases.Length + "\n";
         foreach (CanvasGroup c in canvases)
         {
-            //s += c.transform.name + "\n";
             menusPos.Add(c.transform.name, c.GetComponent<RectTransform>().anchoredPosition);
-        }
-        //Debug.Log(s);
-    }
-
-    private void Update()
-    {
-        if(Input.GetKeyDown(KeyCode.M))
-        {
-            DebugActiveMenuPositions();
         }
     }
 
@@ -574,7 +563,9 @@ public class UIController : MonoBehaviour
         menusPos.Add(bubbleGO.name, bubbleGO.GetComponent<RectTransform>().position);
         SetDirectionOfFade(2);
         GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(7);
-        FadeInWorldMenu(bubbleGO, null);
+        FadeInWorldMenu(bubbleGO, () => {
+            image.GetComponent<Button>().interactable = true;
+        });
     }
 
     public void WaitAndExecuteFunction(float time, Action onTimerEnd)
@@ -656,7 +647,9 @@ public class UIController : MonoBehaviour
         }
         activeBubbles.Add(bubbleGO);
         SetDirectionOfFade(2);
-        FadeInWorldMenu(bubbleGO, null);
+        FadeInWorldMenu(bubbleGO, () => {
+            bubble.EnableButtons();
+        });
         tileBubbleActive = true;
     } 
     #endregion

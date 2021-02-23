@@ -11,10 +11,12 @@ public class InputController : MonoBehaviour
     [SerializeField] private CinemachineVirtualCamera vcam;
     [SerializeField] private float camSpeed = 10f;
     [SerializeField] private float maxTapTime = 0.2f;
+    [SerializeField] private float maxDistanceForMovedFlag = 0.2f;
     [Header("Zoom")]
     [SerializeField] private float zoomMult = 0.01f;
     [SerializeField] private float zoomMin = 3f;
     [SerializeField] private float zoomMax = 8f;
+    [SerializeField] private float wheelMouseZoomMult = 8f;
     [Header("References")]
     [SerializeField] private UIController ui;
     [SerializeField] private GameController game;
@@ -38,14 +40,98 @@ public class InputController : MonoBehaviour
     public static Action<Vector2> OnCameraMoved;
     public static Action<float> OnCameraZoom;
 
-    private void Update()
+    private TargetDevice targetDevice;
+
+    private void Awake()
     {
-        HandleInput();
+        #if UNITY_IOS
+           Debug.Log("Iphone");
+           targetDevice = TargetDevice.IOS;
+        #endif
+
+        #if UNITY_ANDROID
+            Debug.Log("Android");
+            targetDevice = TargetDevice.ANDROID;
+        #endif
+
+        #if UNITY_WEBGL
+            Debug.Log("Web gl");
+            targetDevice = TargetDevice.WEB;
+        #endif
+
+        #if UNITY_EDITOR
+           Debug.Log("Unity Editor");
+           targetDevice = TargetDevice.WEB;
+        #endif
     }
 
-    private void HandleInput()
+    private void Update()
     {
-        if (Input.touchCount > 0)
+        switch (targetDevice)
+        {
+            case TargetDevice.ANDROID:
+                HandleMobileInput();
+                break;
+            case TargetDevice.IOS:
+                HandleMobileInput();
+                break;
+            case TargetDevice.WEB:
+                HandleKeyboardAndMouseInput();
+                break;
+        }
+    }
+
+    private void HandleKeyboardAndMouseInput()
+    {
+        overUI = EventSystem.current.IsPointerOverGameObject();
+
+        if (Input.GetMouseButtonDown(0) && !overUI)
+        {
+            touchTime = 0;
+            startingTouchPos = mainCam.ScreenToWorldPoint(Input.mousePosition);
+        }
+        if (Input.GetMouseButton(0) && !overUI)
+        {
+            touchTime += Time.deltaTime;
+            float dist = 0;
+            if(!dragginScreen)
+            {
+                dist = Vector2.Distance(startingTouchPos, mainCam.ScreenToWorldPoint(Input.mousePosition));
+            }
+            //Debug.Log("Mouse Distace" + dist);
+            if (!dragginScreen && dist > maxDistanceForMovedFlag)
+            {
+                dragginScreen = true;
+            }
+            if(dragginScreen)
+            {
+                if (!zooming && !lockMovement)
+                {
+                    Vector2 dir = startingTouchPos - (Vector2)mainCam.ScreenToWorldPoint(Input.mousePosition);
+                    OnCameraMoved?.Invoke(dir);
+                    vcam.transform.position += new Vector3(dir.x, dir.y, 0);
+                }
+            }
+        }
+        if (Input.GetMouseButtonUp(0) && !overUI)
+        {
+            endTouchPos = mainCam.ScreenToWorldPoint(Input.mousePosition);
+            vcam.transform.position = mainCam.transform.position;
+            if (touchTime < maxTapTime && !dragginScreen && !zooming && !lockTap)
+            {
+                OnTap?.Invoke(endTouchPos);
+            }
+            dragginScreen = false;
+        }
+        if(!lockZoom)
+        {
+            ZoomCamera(Input.GetAxis("Mouse ScrollWheel") * wheelMouseZoomMult);
+        }
+    }
+
+    private void HandleMobileInput()
+    {
+        if (Input.touchCount > 0) //detect touch over ui
         {
             foreach (Touch touch in Input.touches)
             {
@@ -57,7 +143,7 @@ public class InputController : MonoBehaviour
             }
         }
 
-        if (Input.touchCount == 2 && !dragginScreen && !overUI && !lockZoom)
+        if (Input.touchCount == 2 && !dragginScreen && !overUI && !lockZoom) //Handle pinch zoom
         {
             noInput = false;
             zooming = true;
@@ -70,7 +156,7 @@ public class InputController : MonoBehaviour
             float diff = currentMag - prevMag;
             ZoomCamera(diff * zoomMult);
         }
-        if (Input.touchCount == 1 && !zooming && !overUI)
+        if (Input.touchCount == 1 && !zooming && !overUI) //Tap and movement
         {
             noInput = false;
             Touch t = Input.GetTouch(0);
@@ -78,7 +164,6 @@ public class InputController : MonoBehaviour
             {
                 case TouchPhase.Began:
                     startingTouchPos = mainCam.ScreenToWorldPoint(t.position);
-                    //cam.transform.position = mainCam.transform.position;
                     touchTime = 0;
                     break;
                 case TouchPhase.Moved:
@@ -105,7 +190,7 @@ public class InputController : MonoBehaviour
                     break;
             }
         }
-        if (Input.touchCount == 0)
+        if (Input.touchCount == 0) //clear all
         {
             overUI = false;
             noInput = true;
@@ -138,4 +223,11 @@ public class InputController : MonoBehaviour
         vcam.m_Lens.OrthographicSize = Mathf.Clamp(vcam.m_Lens.OrthographicSize - incrementValue, zoomMin, zoomMax);
         OnCameraZoom?.Invoke(vcam.m_Lens.OrthographicSize);
     }
+}
+
+public enum TargetDevice
+{
+    ANDROID,
+    IOS,
+    WEB
 }

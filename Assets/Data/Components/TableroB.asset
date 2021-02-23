@@ -17,7 +17,7 @@ MonoBehaviour:
   category: 0
   description: "Contiene un poco mas de lugar que el peque\xF1o"
   cost: 20
-  durability: 5000
+  durability: 40
   powerConsumption: 10
   premium: 0
   color: {r: 0, g: 0.24711537, b: 1, a: 1}
