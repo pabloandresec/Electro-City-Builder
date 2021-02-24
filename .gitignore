@@ -10,6 +10,9 @@
 /[Ll]ogs/
 /[Mm]emoryCaptures/
 
+# Ignore Rider stuff
+/.idea/
+
 # Never ignore Asset meta data
 !/[Aa]ssets/**/*.meta
 
