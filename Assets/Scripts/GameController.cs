@@ -26,6 +26,7 @@ public class GameController : MonoBehaviour
     [SerializeField] private Tilemap roadTilemap;
     [SerializeField] private Tilemap groundTilemap;
     [SerializeField] private UIController ui;
+    [SerializeField] private int minimalAllowedToBuildIndex = 3;
     [SerializeField] private List<BuildingData> buildings;
     [SerializeField] private List<ComponentData> components;
     [Header("Juego Activo")]
@@ -35,7 +36,6 @@ public class GameController : MonoBehaviour
     [SerializeField] private GameObject buildingAnimationPrefab;
     [SerializeField] private List<GameObject> spawnedBuildingAnims;
     [Header("DEBUG")]
-    [SerializeField] private int testIndex = 17;
     [SerializeField] private Vector3Int selectedTile = -Vector3Int.one;
     [Header("Limits")]
     private bool limited = false;
@@ -44,9 +44,11 @@ public class GameController : MonoBehaviour
     private List<Vector3Int> lockedCells;
 
     private Building selectedBuilding;
+    private Building tempSel = null;
     private bool selected = false;
     private float tPassed = 0;
     private uint totalPassed = uint.MinValue;
+    private bool squishing = false;
 
     public static int currentWidth { get => GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>().width; }
     public static int currentHeight { get => GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>().height; }
@@ -162,169 +164,6 @@ public class GameController : MonoBehaviour
         ui.UpdateUI(currentGameSessionData.money);
     }
 
-
-    /*
-    private void SetupTutorial()
-    {
-        MissionController mc = GameObject.FindGameObjectWithTag("Mission").GetComponent<MissionController>();
-        InputController ic = GameObject.FindGameObjectWithTag("Input").GetComponent<InputController>();
-        CharController cc = ui.GetComponent<CharController>();
-
-        SwitchState(1);
-        cc.AssignAnActionAtEndOfDialog(0, () =>
-        {
-            mc.CreateCameraMission();
-            SwitchState(0);
-            ic.LockInput(false, true, true);
-        });
-        cc.AssignAnActionAtEndOfDialog(1, () =>
-        {
-            mc.CreateZoomMission();
-            ic.LockInput(true, false, true);
-            SwitchState(0);
-        });
-        cc.AssignAnActionAtEndOfDialog(2, () =>
-        {
-            Vector3 tgtPos = groundTilemap.CellToWorld(new Vector3Int(7, 5, 0)) + new Vector3(0, 0.5f, 0);
-            ic.MoveCameraToWorldPosition(tgtPos, 1, () =>
-             {
-                 SwitchState(1);
-                 ui.AddAttentionBubble("Tutorial bubble", new Vector3Int(7, 5, 0));
-                 ui.WaitAndExecuteFunction(1, () => {
-                     ui.GetComponent<CharController>().ShowDialog(3);
-                 });
-             });
-        });
-        cc.AssignAnActionAtEndOfDialog(3, () => //tile selection
-        {
-            SwitchState(0);
-            ic.LockInput(true, true, false);
-            LimitSelectionOfTiles(new Vector3Int(7, 5, 0), () =>
-            {
-                ic.LockInput(true, true, true);
-                UnlimitSelectionsOfTiles();
-                cc.ShowDialog(4);
-                Debug.Log("Context menu opened! Limit removed and bubble Locked");
-            });
-        });
-        cc.AssignAnActionAtEndOfDialog(4, () => //pop up
-        {
-            ui.ButtonPressed = (s) => {
-                if (s == "Components")
-                {
-                    cc.ShowDialog(5);
-                    Debug.LogWarning("Component bubble button pressed");
-                    ui.ButtonPressed = null;
-                }
-            };
-        });
-        cc.AssignAnActionAtEndOfDialog(5, () => //Categorias
-        {
-            string[] buttonsToDisable = new string[] {
-                "But_CatExit",
-                "CUBIERTAS",
-                "INTERRUPTORES",
-                "TOMACORRIENTES",
-                "SENSORES",
-                "TERMICAS",
-                "But_CompExit"
-            };
-            ui.DisableButton(buttonsToDisable);
-            ui.ButtonPressed = (s) => {
-                if (s == "ILUMINACION")
-                {
-                    cc.ShowDialog(6);
-                    Debug.LogWarning("Boton Iluminacion presionado");
-                    ui.ButtonPressed = null;
-                }
-            };
-        });
-        cc.AssignAnActionAtEndOfDialog(6, () => //Explain Bar
-        {
-            ui.ButtonPressed = (s) => {
-                if (s == "0" || s == "1" || s == "2" || s == "3")
-                {
-                    string[] buttonsToDisable = new string[] {
-                        "0",
-                        "1",
-                        "2",
-                        "3"
-                    };
-                    ui.DisableButton(buttonsToDisable);
-                    cc.ShowDialog(7);
-                    Debug.LogWarning("Producto Comprado");
-                    ui.EnableADisabledButton("But_CompExit");
-                    ui.EnableADisabledButton("But_CatExit");
-                    ui.ButtonPressed = (exit) => {
-                        if(exit == "But_CatExit")
-                        {
-                            ic.MoveCameraToWorldPosition(overlayTilemap.CellToWorld(new Vector3Int(8,8,0)), 3, ()=> {
-                                cc.ShowDialog(8);
-                                ui.ButtonPressed = null;
-                            });
-                        }
-                    };
-                }
-            };
-        });
-        cc.AssignAnActionAtEndOfDialog(8, () =>
-        {
-            Debug.LogWarning("Trying to select 8,7 at "+ state +" state");
-            LimitSelectionOfTiles(new Vector3Int(8, 7, 0), () => {
-                cc.ShowDialog(10);
-            });
-            ic.MoveCameraToWorldPosition(overlayTilemap.CellToWorld(new Vector3Int(8, 7, 0)) + new Vector3(0,0.5f,0), 0.8f, () => {
-                cc.ShowDialog(9);
-                ui.ButtonPressed = null;
-            });
-        });
-        cc.AssignAnActionAtEndOfDialog(9, () =>
-        {
-            ic.LockInput(true, true, false);
-        });
-        cc.AssignAnActionAtEndOfDialog(10, () =>
-        {
-            ic.LockInput(true, true, true);
-            ui.ButtonPressed = (exit) => {
-                if (exit == "Buy")
-                {
-                    cc.ShowDialog(11);
-                    ui.ButtonPressed = null;
-                    UnlimitSelectionsOfTiles();
-                    LimitSelectionOfTiles(new Vector3Int(8, 7, 0), null);
-                    Debug.LogWarning("Error Step");
-                    ui.EnableAllButtons();
-                    ui.DisableButton(new string[] { "But_BuildExit" });
-                }
-            };
-
-        });
-        cc.AssignAnActionAtEndOfDialog(11, () =>
-        {
-            ic.LockInput(true, true, false);
-            ui.ButtonPressed = (build) => {
-                if (build == "Build")
-                {
-                    cc.ShowDialog(12);
-                    ui.ButtonPressed = null;
-                }
-            };
-        });
-        cc.AssignAnActionAtEndOfDialog(12, () =>
-        {
-            mc.CreateAnyBuildingMission();
-        });
-        cc.AssignAnActionAtEndOfDialog(13, () =>
-        {
-            SwitchState(0);
-            ic.LockInput(false,false,false);
-            UnlimitSelectionsOfTiles();
-            ui.EnableAllButtons();
-        });
-        //Start Tutorial
-        cc.ShowDialog(0);
-    }
-    */
     public void UnlimitSelectionsOfTiles()
     {
         limited = false;
@@ -360,6 +199,11 @@ public class GameController : MonoBehaviour
         Debug.Log("Cell " + cell + " lock REMOVED!");
     }
 
+    /// <summary>
+    /// Limita la seleccion de tiles a una unica casilla
+    /// </summary>
+    /// <param name="cell"></param>
+    /// <param name="_OnTileSelected"></param>
     public void LimitSelectionOfTiles(Vector3Int cell, Action _OnTileSelected)
     {
         limited = true;
@@ -367,6 +211,7 @@ public class GameController : MonoBehaviour
         OnLimitedCleared = _OnTileSelected;
         Debug.Log("Limit selection of tiles active... Can only select" + cell);
     }
+
 
     public Vector3 TryGetActiveBuildingWorldPos(BuildingData buildingData)
     {
@@ -442,7 +287,7 @@ public class GameController : MonoBehaviour
     }
 
     /// <summary>
-    /// Intentara añadir un edificio de la lista "building" usando el indice propocionado y la posicion seleccionada
+    /// Intentara añadir un edificio de la lista "building" usando el indice propocionado y la posicion seleccionada REFACTORIAZARRR!
     /// </summary>
     /// <param name="index"></param>
     public void TryAddBuildingComponent(int index)
@@ -531,12 +376,17 @@ public class GameController : MonoBehaviour
         GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(5);
     }
 
+    /// <summary> 
+    /// Va a intentar a construir un edificio REFACTORIZAR
+    /// </summary>
+    /// <param name="index"></param>
     public void TryBuild(int index)
     {
         bool builded = false;
         Debug.LogWarning("Trying to build " + index);
         int indexSelected = index;
-        if (index > 3 && randomBuilds)
+
+        if (index > minimalAllowedToBuildIndex && randomBuilds)
         {
             indexSelected =  Random.Range(4, buildings.Count);
         }
@@ -548,8 +398,8 @@ public class GameController : MonoBehaviour
             {
                 if(currentGameSessionData.money >= buildings[indexSelected].buildingCost)
                 {
-                    builded = true;
                     Build(selectedTile, indexSelected);
+                    builded = true;
                     currentGameSessionData.money -= buildings[indexSelected].buildingCost;
                     ui.UpdateUI(currentGameSessionData.money);
                     DeselectTile();
@@ -578,7 +428,6 @@ public class GameController : MonoBehaviour
     {
         activeBuildings[TilePosToIndex(tilePos.x, tilePos.y)] = new Building(buildings[buildingIndex], TilePosToIndex(tilePos.x, tilePos.y));
         DrawTile(tilePos);
-        //DrawMap();
         Debug.Log("Building constructed");
     }
 
@@ -589,6 +438,7 @@ public class GameController : MonoBehaviour
             Debug.Log("Cell outside of bounds");
             return;
         }
+        squishing = true;
         Debug.Log("Squishing " + cell);
         GameObject animBuilding = Instantiate(buildingAnimationPrefab, buildTilemap.CellToWorld(cell), Quaternion.identity); // Spawn anim prefab
         animBuilding.transform.name = cell + "_anim";
@@ -629,6 +479,7 @@ public class GameController : MonoBehaviour
             buildTilemap.RefreshTile(cell);
             DrawLockedTiles();
             Destroy(animBuilding);
+            squishing = false;
         };
         LeanTween.scale(animBuilding, new Vector3(0.9f, 0.9f, 1f), 0.2f).setEaseInOutBounce().setOnComplete(() =>
         {
@@ -658,7 +509,7 @@ public class GameController : MonoBehaviour
     {
         Building b = activeBuildings[TilePosToIndex(cell.x, cell.y)];
         BuildingData bd = buildings[b.ListIndex];
-        if (bd.Index != 3)
+        if (bd.Index != minimalAllowedToBuildIndex)
         {
             if (b.components == null || b.components.Count == 0)
             {
@@ -785,8 +636,6 @@ public class GameController : MonoBehaviour
         bool isThisCellLocked = CheckForActiveCellLocks(newSelectedPos);
         if (!isThisCellLocked) return;
 
-        //SquishTest
-        SquishTile(newSelectedPos);
         //Clamping the new selected pos;
         newSelectedPos = new Vector3Int(Mathf.Clamp(newSelectedPos.x, 0, width - 1), Mathf.Clamp(newSelectedPos.y, 0, height - 1), 0);
         //Updating view;
@@ -794,8 +643,13 @@ public class GameController : MonoBehaviour
         overlayTilemap.RefreshTile(newSelectedPos);
         //Set selected tile;
         selectedTile = newSelectedPos;
-        testIndex = TilePosToIndex(selectedTile.x, selectedTile.y);
-        Debug.Log("Buildings index = " + testIndex);
+        tempSel = activeBuildings[TilePosToIndex(selectedTile.x, selectedTile.y)];
+        Debug.Log("Selected tile position index = " + tempSel.ListIndex);
+        //SquishTest
+        if (tempSel.ListIndex > minimalAllowedToBuildIndex)
+        {
+            SquishTile(newSelectedPos);
+        }
         selected = true;
     }
 
@@ -886,8 +740,4 @@ public class GameController : MonoBehaviour
         return groundTilemap.CellToWorld(cell);
     }
 
-    public void TestIndex()
-    {
-        Debug.Log("Index " + testIndex + " is " + IndexToTilePos(testIndex));
-    }
 }

@@ -42,27 +42,36 @@ public class InputController : MonoBehaviour
 
     private TargetDevice targetDevice;
 
+    
     private void Awake()
     {
-        #if UNITY_IOS
+        SetupControlDevice();
+    }
+
+    /// <summary>
+    /// De acuedo al build target elige el edificio
+    /// </summary>
+    private void SetupControlDevice()
+    {
+#if UNITY_IOS
            Debug.Log("Iphone");
            targetDevice = TargetDevice.IOS;
-        #endif
+#endif
 
-        #if UNITY_ANDROID
+#if UNITY_ANDROID
             Debug.Log("Android");
             targetDevice = TargetDevice.ANDROID;
-        #endif
+#endif
 
-        #if UNITY_WEBGL
-            Debug.Log("Web gl");
-            targetDevice = TargetDevice.WEB;
-        #endif
+#if UNITY_WEBGL
+        Debug.Log("Web gl");
+        targetDevice = TargetDevice.WEB;
+#endif
 
-        #if UNITY_EDITOR
-           Debug.Log("Unity Editor");
-           targetDevice = TargetDevice.WEB;
-        #endif
+#if UNITY_EDITOR
+        Debug.Log("Unity Editor");
+        targetDevice = TargetDevice.WEB;
+#endif
     }
 
     private void Update()
@@ -81,6 +90,9 @@ public class InputController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Teclado y mouse
+    /// </summary>
     private void HandleKeyboardAndMouseInput()
     {
         overUI = EventSystem.current.IsPointerOverGameObject();
@@ -129,6 +141,9 @@ public class InputController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Mobile
+    /// </summary>
     private void HandleMobileInput()
     {
         if (Input.touchCount > 0) //detect touch over ui
@@ -197,9 +212,14 @@ public class InputController : MonoBehaviour
             zooming = false;
             dragginScreen = false;
         }
-        //ClampCameraPosition();
     }
 
+    /// <summary>
+    /// traba los controles especificados
+    /// </summary>
+    /// <param name="mov"></param>
+    /// <param name="zoom"></param>
+    /// <param name="tap"></param>
     public void LockInput(bool mov, bool zoom, bool tap)
     {
         lockMovement = mov;
@@ -207,6 +227,13 @@ public class InputController : MonoBehaviour
         lockTap = tap;
     }
 
+    /// <summary>
+    /// Fuerza el movimiento de la camara a la pos establecida y ejecuta una accion al terminar
+    /// </summary>
+    /// <param name="worldPos"></param>
+    /// <param name="ortographicSize"></param>
+    /// <param name="t"></param>
+    /// <param name="onMoveEnd"></param>
     public void MoveCameraToWorldPosition(Vector3 worldPos, float ortographicSize, float t, Action onMoveEnd)
     {
         Debug.Log("moving Camera");
@@ -218,6 +245,10 @@ public class InputController : MonoBehaviour
         });
     }
 
+    /// <summary>
+    /// Controla el zoom de la camara de acuerdo al incremento
+    /// </summary>
+    /// <param name="incrementValue"></param>
     private void ZoomCamera(float incrementValue)
     {
         vcam.m_Lens.OrthographicSize = Mathf.Clamp(vcam.m_Lens.OrthographicSize - incrementValue, zoomMin, zoomMax);

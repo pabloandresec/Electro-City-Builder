@@ -7,12 +7,11 @@ using System.Linq;
 [Serializable]
 public class Building
 {
-    int listIndex;                                  //indica el indice de donde se encuentra en la lista de datos de edificios
-    int positionIndex;                              //indica la posicion en el mapa
-    public List<BuildingComponent> components;      //componentes que posee este edificio
-    public List<ComponentLimit> currentCompAmounts; //montos categorizados de los componentes
-    public int totalPowerConsumption;               //Poder que consumio este edificio
-
+    int listIndex;                                                          //indica el indice de donde se encuentra en la lista de datos de edificios
+    int positionIndex;                                                      //indica la posicion en el mapa
+    public List<BuildingComponent> components;                              //componentes que posee este edificio
+    public List<ComponentLimit> currentCompAmounts;                         //montos categorizados de los componentes
+    public int totalPowerConsumption;                                       //Poder que consumio este edificio
     public int ListIndex { get => listIndex; set => listIndex = value; }
     public int PositionIndex { get => positionIndex; set => positionIndex = value; }
 
@@ -27,12 +26,23 @@ public class Building
     }
 
     #endregion
+
+
+    /// <summary>
+    /// Actualiza la vida de los componentes
+    /// </summary>
+    /// <param name="gc"></param>
+    /// <param name="timePassed"></param>
     public void UpdateComponentsLife(GameController gc, float timePassed)
     {
         CalculateOnlyFirstComponentByCategory(gc.Components, timePassed);
         CheckForActiveComponents(gc);
     }
 
+    /// <summary>
+    /// Determina si hay componetes activos en el edificio y actuliza la sprite de ser necesario
+    /// </summary>
+    /// <param name="gc"></param>
     private void CheckForActiveComponents(GameController gc)
     {
         if (components == null)
@@ -49,6 +59,9 @@ public class Building
         }
     }
 
+    /// <summary>
+    /// De acuerdo a cada dispositivo activo añadimos dinero y lo enviamos al gameController
+    /// </summary>
     public void PayRent()
     {
         int rent = 0;
@@ -56,10 +69,9 @@ public class Building
         BuildingData bd = gc.Buildings[listIndex];
         if(currentCompAmounts == null || currentCompAmounts.Count <= 0)
         {
-            Debug.Log("Building has no sevices");
+            Debug.Log("Building has no devices");
             return;
         }
-
         foreach(ComponentLimit cl in currentCompAmounts)
         {
             if(cl.val > 0)
@@ -200,17 +212,5 @@ public class Building
                 currentCompAmounts.Add(new ComponentLimit(_category, 1));
             }
         }
-    }
-}
-[Serializable]
-public class BuildingComponent
-{
-    public int index;
-    public int life;
-
-    public BuildingComponent(ComponentData componentData)
-    {
-        this.index = componentData.Index;
-        this.life = componentData.durability;
     }
 }

@@ -54,6 +54,14 @@ public class UIController : MonoBehaviour
     {
         activeBubbles = new List<GameObject>();
         menusPos = new Dictionary<string, Vector2>();
+        StoreMenuGroupPositions();
+    }
+
+    /// <summary>
+    /// Almacena la posicion inicial para los tweens
+    /// </summary>
+    private void StoreMenuGroupPositions()
+    {
         CanvasGroup[] canvases = GetComponentsInChildren<CanvasGroup>(true);
         foreach (CanvasGroup c in canvases)
         {
@@ -61,6 +69,9 @@ public class UIController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// DEBUG muestar los menus almacenados
+    /// </summary>
     private void DebugActiveMenuPositions()
     {
         string s = "Save menu positions \n";
@@ -83,6 +94,10 @@ public class UIController : MonoBehaviour
         Debug.Log(s);
     }
 
+    /// <summary>
+    /// Cierra todos los menus de la lista de menus y abre el del indice suministrado 
+    /// </summary>
+    /// <param name="i"></param>
     public void SwitchMenu(int i)
     {
         if (i < 0 || i >= mainMenus.Length)
@@ -96,12 +111,17 @@ public class UIController : MonoBehaviour
         mainMenus[i].SetActive(true);
     }
 
-    public void SetMenuVisibility(string path, bool s)
+    /// <summary>
+    /// De acuerdo al path camabia al estado suministrado
+    /// </summary>
+    /// <param name="path"></param>
+    /// <param name="newState"></param>
+    public void SetMenuVisibility(string path, bool newState)
     {
         Transform t = transform.Find(path);
         if (t != null)
         {
-            t.gameObject.SetActive(s);
+            t.gameObject.SetActive(newState);
         }
         else
         {
@@ -109,6 +129,12 @@ public class UIController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Acutaliza los objetos de la ui con lo suministrado
+    /// </summary>
+    /// <param name="currentMoney"></param>
+    /// <param name="powerInUse"></param>
+    /// <param name="powerAvailable"></param>
     public void UpdateUI(int currentMoney, int powerInUse, int powerAvailable)
     {
         money.text = currentMoney.ToString();
@@ -122,6 +148,9 @@ public class UIController : MonoBehaviour
         money.text = currentMoney.ToString();
     }
 
+    /// <summary>
+    /// Muestra las categorias que posee el edificio
+    /// </summary>
     public void SetAvailableCategoriesForSelectedBuilding()
     {
         Transform catList = newCategoriesListMenu.transform.Find("Scr_DevicesHolder/Viewport/Content");
@@ -151,12 +180,11 @@ public class UIController : MonoBehaviour
         rt.sizeDelta = new Vector2(buttonWidth * itemAmount, rt.sizeDelta.y);
     }
 
-    public void ShakeMenu(RectTransform menu)
-    {
-        RectTransform menuRect = menu.GetComponent<RectTransform>();
-
-    }
-
+    /// <summary>
+    /// Cambia la interactividad de un boton de burbuja si es que existe
+    /// </summary>
+    /// <param name="button"></param>
+    /// <param name="state"></param>
     public void SetLockBubbleButtons(string button, bool state)
     {
         Bubble b = null;
@@ -486,6 +514,11 @@ public class UIController : MonoBehaviour
     }
 
     #region Bubble
+    /// <summary>
+    /// Spawnea una burbuja de atencion
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="tilePos"></param>
     public void AddAttentionBubble(string id, Vector3Int tilePos)
     {
         string n = id + " - notification";
@@ -512,6 +545,12 @@ public class UIController : MonoBehaviour
         })));
     }
 
+    /// <summary>
+    /// Spawnea la burbuja que indica que se añadio un componente
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="tilePos"></param>
+    /// <param name="t"></param>
     public void AddAddedBubble(string id, Vector3Int tilePos, float t)
     {
         string n = id + " - added a component";
@@ -538,6 +577,13 @@ public class UIController : MonoBehaviour
         });
     }
 
+    /// <summary>
+    /// spawnea la burbuja de cobranza sobre el edificio
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="tilePos"></param>
+    /// <param name="b"></param>
+    /// <param name="t"></param>
     public void AddMoneyBubble(string id, Vector3Int tilePos, Building b, float t)
     {
         string n = id + " - money";
@@ -568,6 +614,11 @@ public class UIController : MonoBehaviour
         });
     }
 
+    /// <summary>
+    /// Espera un tiempo y ejecuta una accion
+    /// </summary>
+    /// <param name="time"></param>
+    /// <param name="onTimerEnd"></param>
     public void WaitAndExecuteFunction(float time, Action onTimerEnd)
     {
         StartCoroutine(WaitAndExecute(time, onTimerEnd));
@@ -579,6 +630,9 @@ public class UIController : MonoBehaviour
         onTimerEnd?.Invoke();
     }
 
+    /// <summary>
+    /// De haber una burbuja la despawnea
+    /// </summary>
     private void DespawnTileSelectionBubble()
     {
         Debug.Log("disabling " + game.SelectedTile.ToString() + " bubble");
@@ -596,13 +650,16 @@ public class UIController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Spawnea la una burbuja de acuerdo a la data del parametro
+    /// </summary>
     private void SpawnTileSelectionBubble(BuildingData buildingData)
     {
-        if(buildingData == null || buildingData.Index == 3 )
+        if(buildingData == null || buildingData.Index == 3 ) ///Bloquea la burbuja de la calle
         {
             return;
         }
-        if(buildingData.Index == 2) ///TEMPORAFDNFKJANSKFJNEFKJANFKJA
+        if(buildingData.Index == 2) ///TEMPORAL bloquea la burbuja de la central
         {
             SetDirectionOfFade(0);
             FadeInMenu(powerSlider.gameObject);
