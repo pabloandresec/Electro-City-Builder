@@ -31,6 +31,7 @@ public class InputController : MonoBehaviour
     private bool dragginScreen = false;
     private bool zooming = false;
     private bool noInput = true;
+    private bool invalid = false;
 
     private bool lockMovement = false;
     private bool lockZoom = false;
@@ -96,13 +97,18 @@ public class InputController : MonoBehaviour
     private void HandleKeyboardAndMouseInput()
     {
         overUI = EventSystem.current.IsPointerOverGameObject();
+        
 
+        if (Input.GetMouseButtonDown(0) && overUI)
+        {
+            invalid = true;
+        }
         if (Input.GetMouseButtonDown(0) && !overUI)
         {
             touchTime = 0;
             startingTouchPos = mainCam.ScreenToWorldPoint(Input.mousePosition);
         }
-        if (Input.GetMouseButton(0) && !overUI)
+        if (Input.GetMouseButton(0) && !overUI && !invalid)
         {
             touchTime += Time.deltaTime;
             float dist = 0;
@@ -111,7 +117,7 @@ public class InputController : MonoBehaviour
                 dist = Vector2.Distance(startingTouchPos, mainCam.ScreenToWorldPoint(Input.mousePosition));
             }
             //Debug.Log("Mouse Distace" + dist);
-            if (!dragginScreen && dist > maxDistanceForMovedFlag)
+            if (!dragginScreen && dist > maxDistanceForMovedFlag && !invalid)
             {
                 dragginScreen = true;
             }
@@ -134,6 +140,7 @@ public class InputController : MonoBehaviour
                 OnTap?.Invoke(endTouchPos);
             }
             dragginScreen = false;
+            invalid = false;
         }
         if(!lockZoom)
         {
