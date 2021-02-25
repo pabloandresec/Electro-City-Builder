@@ -26,18 +26,22 @@ public class GameController : MonoBehaviour
     [SerializeField] private Tilemap roadTilemap;
     [SerializeField] private Tilemap groundTilemap;
     [SerializeField] private UIController ui;
-    [SerializeField] private int minimalAllowedToBuildIndex = 3;
+    [HideInInspector]
     [SerializeField] private List<BuildingData> buildings;
+    [HideInInspector]
     [SerializeField] private List<ComponentData> components;
     [Header("Juego Activo")]
     [SerializeField] private Building[] activeBuildings;
     [SerializeField] private PlayerState state = PlayerState.GAME;
-    [Header("Animation")]
+    [Header("Squish animation")]
     [SerializeField] private GameObject buildingAnimationPrefab;
     [SerializeField] private List<GameObject> spawnedBuildingAnims;
-    [Header("DEBUG")]
-    [SerializeField] private Vector3Int selectedTile = -Vector3Int.one;
-    [Header("Limits")]
+    [Header("--------- REFERENCE DATA ----------")]
+    [Min(0)]
+    [Tooltip("Todos los edificios menores o iguales a este indice no podran ser construidos/listados")]
+    [SerializeField] private int nonAllowedToBuildMaxIndex = 3;
+
+    private Vector3Int selectedTile = -Vector3Int.one;
     private bool limited = false;
     private Vector3Int limitedToTile = -Vector3Int.one;
     private Action OnLimitedCleared;
@@ -386,7 +390,7 @@ public class GameController : MonoBehaviour
         Debug.LogWarning("Trying to build " + index);
         int indexSelected = index;
 
-        if (index > minimalAllowedToBuildIndex && randomBuilds)
+        if (index > nonAllowedToBuildMaxIndex && randomBuilds)
         {
             indexSelected =  Random.Range(4, buildings.Count);
         }
@@ -514,7 +518,7 @@ public class GameController : MonoBehaviour
     {
         Building b = activeBuildings[Utils.TilePosToIndex(cell.x, cell.y, width)];
         BuildingData bd = buildings[b.ListIndex];
-        if (bd.Index != minimalAllowedToBuildIndex)
+        if (bd.Index != nonAllowedToBuildMaxIndex)
         {
             if (b.components == null || b.components.Count == 0)
             {
@@ -651,7 +655,7 @@ public class GameController : MonoBehaviour
         tempSel = activeBuildings[Utils.TilePosToIndex(selectedTile.x, selectedTile.y, width)];
         Debug.Log("Selected tile position index = " + tempSel.ListIndex);
         //SquishTest
-        if (tempSel.ListIndex > minimalAllowedToBuildIndex)
+        if (tempSel.ListIndex > nonAllowedToBuildMaxIndex)
         {
             SquishTile(newSelectedPos);
         }

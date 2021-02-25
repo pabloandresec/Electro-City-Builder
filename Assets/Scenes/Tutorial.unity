@@ -212,7 +212,7 @@ MonoBehaviour:
   m_fontWeight: 400
   m_enableAutoSizing: 1
   m_fontSizeMin: 18
-  m_fontSizeMax: 35
+  m_fontSizeMax: 28
   m_fontStyle: 16
   m_HorizontalAlignment: 1
   m_VerticalAlignment: 256
@@ -14005,7 +14005,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -44.6}
+  m_AnchoredPosition: {x: 0, y: -44.600098}
   m_SizeDelta: {x: -76.53546, y: -110.51526}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1879662124
@@ -14917,7 +14917,6 @@ MonoBehaviour:
   roadTilemap: {fileID: 1543499730}
   groundTilemap: {fileID: 108015606}
   ui: {fileID: 1165729319}
-  minimalAllowedToBuildIndex: 3
   buildings:
   - {fileID: 11400000, guid: e1fc79c9e9d9c2e42a6e9c8e823fafa4, type: 2}
   - {fileID: 11400000, guid: fa7f7bd7c8eb42445882beb0953f6dc6, type: 2}
@@ -14942,7 +14941,7 @@ MonoBehaviour:
   state: 0
   buildingAnimationPrefab: {fileID: 3782275413214175199, guid: 9c649b17787243247b5c8c51e5688573, type: 3}
   spawnedBuildingAnims: []
-  selectedTile: {x: 0, y: 0, z: 0}
+  nonAllowedToBuildMaxIndex: 3
 --- !u!114 &1994174128
 MonoBehaviour:
   m_ObjectHideFlags: 0
