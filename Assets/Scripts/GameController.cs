@@ -81,14 +81,14 @@ public class GameController : MonoBehaviour
             {
                 if (roadTilemap.HasTile(new Vector3Int(x, y, 0)))
                 {
-                    activeBuildings[TilePosToIndex(x, y)] = new Building(buildings[3], TilePosToIndex(x, y));
+                    activeBuildings[Utils.TilePosToIndex(x, y, width)] = new Building(buildings[3], Utils.TilePosToIndex(x, y, width));
                 }
             }
         }
 
-        activeBuildings[TilePosToIndex(8, 7)] = new Building(buildings[2], TilePosToIndex(8, 7));
+        activeBuildings[Utils.TilePosToIndex(8, 7, width)] = new Building(buildings[2], Utils.TilePosToIndex(8, 7, width));
         LockCell(new Vector3Int(9, 7, 0));
-        activeBuildings[TilePosToIndex(7, 5)] = new Building(buildings[4], TilePosToIndex(7, 5));
+        activeBuildings[Utils.TilePosToIndex(7, 5, width)] = new Building(buildings[4], Utils.TilePosToIndex(7, 5, width));
 
         DrawMap();
         RefreshGame();
@@ -252,7 +252,7 @@ public class GameController : MonoBehaviour
     {
         if(selected)
         {
-            return activeBuildings[TilePosToIndex(selectedTile.x, selectedTile.y)];
+            return activeBuildings[Utils.TilePosToIndex(selectedTile.x, selectedTile.y, width)];
         }
         else
         {
@@ -267,7 +267,7 @@ public class GameController : MonoBehaviour
         {
             for (int y = 0; y < height; y++)
             {
-                int posIndex = TilePosToIndex(x, y);
+                int posIndex = Utils.TilePosToIndex(x, y, width);
                 activeBuildings[posIndex] = new Building(buildings[0], posIndex);
             }
         }
@@ -297,7 +297,7 @@ public class GameController : MonoBehaviour
             if (currentGameSessionData != null)
             {
                 ComponentData componentData = components[index]; //Datos del componente a añadir
-                Building building = activeBuildings[TilePosToIndex(selectedTile.x, selectedTile.y)]; // Edificio a modificar
+                Building building = activeBuildings[Utils.TilePosToIndex(selectedTile.x, selectedTile.y, width)]; // Edificio a modificar
                 BuildingData buildingData = buildings[building.ListIndex]; // Data para referencias del edificio
 
                 ComponentLimit currentAmount = building.currentCompAmounts.Find(amount => amount.category == componentData.category);// Trata de obtener la cantidad de esos dispositivos
@@ -366,7 +366,7 @@ public class GameController : MonoBehaviour
     /// <param name="index"></param>
     private void AddComponent(int index)
     {
-        Building targetBuilding = activeBuildings[TilePosToIndex(selectedTile.x, selectedTile.y)];
+        Building targetBuilding = activeBuildings[Utils.TilePosToIndex(selectedTile.x, selectedTile.y, width)];
 
         targetBuilding.AddBuildingComponent(components[index]);
         SetBuildingElectricVisibility(true, new Vector3Int(selectedTile.x, selectedTile.y, 0), buildings[targetBuilding.ListIndex]);
@@ -426,7 +426,9 @@ public class GameController : MonoBehaviour
 
     public void Build(Vector3Int tilePos, int buildingIndex)
     {
-        activeBuildings[TilePosToIndex(tilePos.x, tilePos.y)] = new Building(buildings[buildingIndex], TilePosToIndex(tilePos.x, tilePos.y));
+        BuildingData selectedBuildingData = buildings[buildingIndex];
+        int buildGridIndex = Utils.TilePosToIndex(tilePos.x, tilePos.y, width);
+        activeBuildings[buildGridIndex] = new Building(selectedBuildingData, buildGridIndex);
         DrawTile(tilePos);
         Debug.Log("Building constructed");
     }
@@ -504,10 +506,13 @@ public class GameController : MonoBehaviour
         return total;
     }
 
-
+    /// <summary>
+    /// Dibuja solo alrededor de la celda en cuestion
+    /// </summary>
+    /// <param name="cell"></param>
     private void DrawTile(Vector3Int cell)
     {
-        Building b = activeBuildings[TilePosToIndex(cell.x, cell.y)];
+        Building b = activeBuildings[Utils.TilePosToIndex(cell.x, cell.y, width)];
         BuildingData bd = buildings[b.ListIndex];
         if (bd.Index != minimalAllowedToBuildIndex)
         {
@@ -533,7 +538,7 @@ public class GameController : MonoBehaviour
         {
             for (int y = 0; y < height; y++)
             {
-                Building b = activeBuildings[TilePosToIndex(x, y)];
+                Building b = activeBuildings[Utils.TilePosToIndex(x, y, width)];
                 BuildingData bd = buildings[b.ListIndex];
                 Vector3Int cell = new Vector3Int(x, y, 0);
                 if (bd.Index != 3)
@@ -616,9 +621,9 @@ public class GameController : MonoBehaviour
             SelectTile(worldPos);
             if(selected)
             {
-                Debug.Log("Sending info of " + selectedTile + " index " + TilePosToIndex(selectedTile.x, selectedTile.y));
-                int selectedBuilding = activeBuildings[TilePosToIndex(selectedTile.x, selectedTile.y)].ListIndex;
-                ui.SetSelectedTileMenu(true, buildings[selectedBuilding]);
+                int selBuildingIndex = activeBuildings[Utils.TilePosToIndex(selectedTile.x, selectedTile.y, width)].ListIndex;
+                Debug.Log("Sending info of " + selectedTile + " index " + selBuildingIndex);
+                ui.SetSelectedTileMenu(true, buildings[selBuildingIndex]);
             }
         }
     }
@@ -643,7 +648,7 @@ public class GameController : MonoBehaviour
         overlayTilemap.RefreshTile(newSelectedPos);
         //Set selected tile;
         selectedTile = newSelectedPos;
-        tempSel = activeBuildings[TilePosToIndex(selectedTile.x, selectedTile.y)];
+        tempSel = activeBuildings[Utils.TilePosToIndex(selectedTile.x, selectedTile.y, width)];
         Debug.Log("Selected tile position index = " + tempSel.ListIndex);
         //SquishTest
         if (tempSel.ListIndex > minimalAllowedToBuildIndex)
@@ -703,6 +708,9 @@ public class GameController : MonoBehaviour
         return allowed;
     }
 
+    /// <summary>
+    /// Deselecciona una tile
+    /// </summary>
     public void DeselectTile()
     {
         //Clear previous selection
@@ -718,6 +726,7 @@ public class GameController : MonoBehaviour
         Debug.Log("Cleaned Events");
     }
 
+    /*
     public int TilePosToIndex(int x, int y)
     {
         int index = x + y * width;
@@ -729,7 +738,7 @@ public class GameController : MonoBehaviour
         int x = indx - (y * width);
         return new Vector3Int(x, y, 0);
     }
-
+    */
     public Vector3 SelectedToWorldPosition()
     {
         return groundTilemap.CellToWorld(selectedTile);

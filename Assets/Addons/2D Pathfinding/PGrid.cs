@@ -72,7 +72,7 @@ public class PGrid : MonoBehaviour {
             for (int y = 0; y < gameController.Height; y++)
             {
                 Vector2 worldPoint = roadTilemap.CellToWorld(new Vector3Int(x, y, 0)) + gridOffset;
-                bool walkable = gameController.ActiveBuildings[gameController.TilePosToIndex(x, y)].ListIndex == 3;
+                bool walkable = gameController.ActiveBuildings[Utils.TilePosToIndex(x, y, GameController.currentWidth)].ListIndex == 3;
                 if (walkable) roads.Add(new Vector2Int(x, y));
                 grid[x, y] = new Node(walkable, worldPoint, x, y);
             }
