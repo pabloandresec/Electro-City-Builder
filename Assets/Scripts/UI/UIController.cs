@@ -12,6 +12,7 @@ public class UIController : MonoBehaviour
     [SerializeField] private GameObject[] mainMenus;
     [SerializeField] private GameController game;
     [SerializeField] private CharController cc;
+    [SerializeField] private SelectionHandler selectionHandler;
     [Space(5)]
     [Header("Game UI")]
     [SerializeField] private Slider powerSlider;
@@ -635,18 +636,18 @@ public class UIController : MonoBehaviour
     /// </summary>
     private void DespawnTileSelectionBubble()
     {
-        Debug.Log("disabling " + game.SelectedTile.ToString() + " bubble");
-        GameObject b = activeBubbles.FirstOrDefault(bub => bub.name == game.SelectedTile.ToString());
+        Debug.Log("disabling " + selectionHandler.Selection.CellPosition.ToString() + " bubble");
+        GameObject b = activeBubbles.FirstOrDefault(bub => bub.name == selectionHandler.Selection.CellPosition.ToString());
         if(b != null)
         {
             activeBubbles.Remove(b);
             FadeOutWorldMenu(b);
-            menusPos.Remove(game.SelectedTile.ToString());
+            menusPos.Remove(selectionHandler.Selection.CellPosition.ToString());
             tileBubbleActive = false;
         }
         else
         {
-            Debug.LogWarning("disabling of bubble " + game.SelectedTile.ToString() + " failed because it doesnt exist");
+            Debug.LogWarning("disabling of bubble " + selectionHandler.Selection.CellPosition.ToString() + " failed because it doesnt exist");
         }
     }
 
@@ -668,7 +669,7 @@ public class UIController : MonoBehaviour
 
         GameObject bubbleGO = Instantiate(popUpPrefab, game.SelectedToWorldPosition() + new Vector3(0, 0.75f, 0), Quaternion.identity);
         bubbleGO.transform.SetParent(popUpHolder);
-        bubbleGO.name = game.SelectedTile.ToString();
+        bubbleGO.name = selectionHandler.Selection.CellPosition.ToString();
         menusPos.Add(bubbleGO.name, bubbleGO.GetComponent<RectTransform>().position);
 
         Bubble bubble = bubbleGO.GetComponent<Bubble>();

@@ -4,7 +4,7 @@
 public class BuildingComponent
 {
     public int index; //Indica que componente es en la lista inicial
-    public int life; //Cuanta vida tiene el componente
+    public int life;  //Cuanta vida tiene el componente
 
     public BuildingComponent(ComponentData componentData)
     {

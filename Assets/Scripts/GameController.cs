@@ -26,10 +26,7 @@ public class GameController : MonoBehaviour
     [SerializeField] private Tilemap roadTilemap;
     [SerializeField] private Tilemap groundTilemap;
     [SerializeField] private UIController ui;
-    [HideInInspector]
-    [SerializeField] private List<BuildingData> buildings;
-    [HideInInspector]
-    [SerializeField] private List<ComponentData> components;
+    [SerializeField] private SelectionHandler selectionHandler;
     [Header("Juego Activo")]
     [SerializeField] private Building[] activeBuildings;
     [SerializeField] private PlayerState state = PlayerState.GAME;
@@ -37,19 +34,19 @@ public class GameController : MonoBehaviour
     [SerializeField] private GameObject buildingAnimationPrefab;
     [SerializeField] private List<GameObject> spawnedBuildingAnims;
     [Header("--------- REFERENCE DATA ----------")]
+    [HideInInspector]
+    [SerializeField] private List<BuildingData> buildings;
+    [HideInInspector]
+    [SerializeField] private List<ComponentData> components;
     [Min(0)]
-    [Tooltip("Todos los edificios menores o iguales a este indice no podran ser construidos/listados")]
+    [Tooltip("Todos los edificios cuyo indice sea menor o igual a este numero no podra ser construidos/listados")]
     [SerializeField] private int nonAllowedToBuildMaxIndex = 3;
 
-    private Vector3Int selectedTile = -Vector3Int.one;
     private bool limited = false;
     private Vector3Int limitedToTile = -Vector3Int.one;
     private Action OnLimitedCleared;
     private List<Vector3Int> lockedCells;
 
-    private Building selectedBuilding;
-    private Building tempSel = null;
-    private bool selected = false;
     private float tPassed = 0;
     private uint totalPassed = uint.MinValue;
     private bool squishing = false;
@@ -60,7 +57,6 @@ public class GameController : MonoBehaviour
     public List<BuildingData> Buildings { get => buildings; }
     public List<ComponentData> Components { get => components; }
     public Building[] ActiveBuildings { get => activeBuildings; }
-    public Vector3Int SelectedTile { get => selectedTile; }
     public int Width { get => width; }
     public int Height { get => height; }
     public PlayerState State { get => state; }
@@ -216,21 +212,6 @@ public class GameController : MonoBehaviour
         Debug.Log("Limit selection of tiles active... Can only select" + cell);
     }
 
-
-    public Vector3 TryGetActiveBuildingWorldPos(BuildingData buildingData)
-    {
-        Building b = activeBuildings.First(val => val.ListIndex == buildingData.Index);
-        if(b != null)
-        {
-            Vector3Int cell = Utils.IndexToTilePos(b.PositionIndex, width);
-            return groundTilemap.CellToWorld(cell);
-        }
-        else
-        {
-            return -Vector3.one;
-        }
-    }
-
     public void AddMoney(int money)
     {
         if(currentGameSessionData != null)
@@ -254,9 +235,10 @@ public class GameController : MonoBehaviour
 
     public Building GetSelectedBuildingData()
     {
-        if(selected)
+        if(selectionHandler.HasSelection())
         {
-            return activeBuildings[Utils.TilePosToIndex(selectedTile.x, selectedTile.y, width)];
+            return selectionHandler.Selection.Building;
+            //return activeBuildings[Utils.TilePosToIndex(selectedTile.x, selectedTile.y, width)];
         }
         else
         {
@@ -296,72 +278,51 @@ public class GameController : MonoBehaviour
     /// <param name="index"></param>
     public void TryAddBuildingComponent(int index)
     {
-        if (selected)
+        if(!selectionHandler.HasSelection())
         {
-            if (currentGameSessionData != null)
-            {
-                ComponentData componentData = components[index]; //Datos del componente a añadir
-                Building building = activeBuildings[Utils.TilePosToIndex(selectedTile.x, selectedTile.y, width)]; // Edificio a modificar
-                BuildingData buildingData = buildings[building.ListIndex]; // Data para referencias del edificio
-
-                ComponentLimit currentAmount = building.currentCompAmounts.Find(amount => amount.category == componentData.category);// Trata de obtener la cantidad de esos dispositivos
-                int currentDeviceAmount = 0;
-                if (currentAmount != null)
-                {
-                    currentDeviceAmount = currentAmount.val;
-                } 
-                int maxDeviceAllowed = -1; // Trata de obtener la cantidad maxima permitida de esos dispositivos
-                foreach (ComponentLimit c in buildingData.limits)
-                {
-                    if (c.category == components[index].category)
-                    {
-                        maxDeviceAllowed = c.val;
-                        break;
-                    }
-                }
-                if(maxDeviceAllowed > 0)
-                {
-                    if(currentDeviceAmount >= maxDeviceAllowed)
-                    {
-                        Debug.Log("No more slots available");
-                        GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(6);
-                        return;
-                    }
-                    if (currentGameSessionData.money >= components[index].cost)
-                    {
-                        AddComponent(index);
-                    }
-                    else
-                    {
-                        GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(6);
-                        Debug.Log(" NA MANEY !!");
-                    }
-                }
-                else
-                {
-                    Debug.LogWarning(" No Limit set for "+ components[index].displayName);
-                    if (currentGameSessionData.money >= components[index].cost)
-                    {
-                        AddComponent(index);
-                    }
-                    else
-                    {
-                        GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(6);
-                        Debug.Log(" NA MANEY !!");
-                    }
-                }
-            }
-            else
-            {
-                Debug.LogError("No session Data!!");
-                GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(6);
-            }
-        }
-        else
-        {
-            Debug.Log("No tile selected");
+            Debug.Log("No selection");
             GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(6);
+            return;
         }
+        if(currentGameSessionData == null)
+        {
+            Debug.Log("No session data");
+            GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(6);
+            return;
+        }
+        if(currentGameSessionData.money < components[index].cost)
+        {
+            GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(6);
+            Debug.Log("Na money");
+            return;
+        }
+
+        ComponentData componentData = components[index]; //Datos del componente a añadir
+        Building building = selectionHandler.Selection.Building;
+        BuildingData buildingData = buildings[building.ListIndex]; // Data para referencias del edificio
+
+        ComponentLimit currentAmount = building.currentCompAmounts.Find(amount => amount.category == componentData.category);// Trata de obtener la cantidad de esos dispositivos
+        int currentDeviceAmount = 0;
+        if (currentAmount != null)
+        {
+            currentDeviceAmount = currentAmount.val;
+        }
+        int maxDeviceAllowed = -1; // Trata de obtener la cantidad maxima permitida de esos dispositivos
+        foreach (ComponentLimit c in buildingData.limits)
+        {
+            if (c.category == components[index].category)
+            {
+                maxDeviceAllowed = c.val;
+                break;
+            }
+        }
+        if (maxDeviceAllowed > 0 && currentDeviceAmount >= maxDeviceAllowed) //Si hay un limite de componentes
+        {
+            Debug.Log("No more slots available");
+            GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(6);
+            return;
+        }
+        AddComponent(index);
     }
 
     /// <summary>
@@ -370,10 +331,12 @@ public class GameController : MonoBehaviour
     /// <param name="index"></param>
     private void AddComponent(int index)
     {
-        Building targetBuilding = activeBuildings[Utils.TilePosToIndex(selectedTile.x, selectedTile.y, width)];
+        //Building targetBuilding = activeBuildings[Utils.TilePosToIndex(selectedTile.x, selectedTile.y, width)];
+        Building targetBuilding = selectionHandler.Selection.Building;
+        Vector3Int cell = selectionHandler.Selection.CellPosition;
 
         targetBuilding.AddBuildingComponent(components[index]);
-        SetBuildingElectricVisibility(true, new Vector3Int(selectedTile.x, selectedTile.y, 0), buildings[targetBuilding.ListIndex]);
+        SetBuildingElectricVisibility(true, new Vector3Int(cell.x, cell.y, 0), buildings[targetBuilding.ListIndex]);
         currentGameSessionData.money -= components[index].cost;
         ui.UpdateUI(currentGameSessionData.money);
         ComponentAdded?.Invoke(components[index]);
@@ -396,36 +359,31 @@ public class GameController : MonoBehaviour
         }
         Debug.LogWarning("TryBuild has commited to " + indexSelected);
 
-        if (selected)
-        {
-            if(currentGameSessionData != null)
-            {
-                if(currentGameSessionData.money >= buildings[indexSelected].buildingCost)
-                {
-                    Build(selectedTile, indexSelected);
-                    builded = true;
-                    currentGameSessionData.money -= buildings[indexSelected].buildingCost;
-                    ui.UpdateUI(currentGameSessionData.money);
-                    DeselectTile();
-                    GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(8);
-                }
-                else
-                {
-                    Debug.Log(" NA MANEY !!");
-                    GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(6);
-                }
-            }
-            else
-            {
-                Debug.LogError("No session Data!!");
-            }
-        }
-        else
+        if(!selectionHandler.HasSelection())
         {
             Debug.Log("No tile selected");
+            return;
         }
-        BuildActionInfo info = new BuildActionInfo(CellToWorldPosition(selectedTile), selectedTile, buildings[indexSelected], builded);
+        if(currentGameSessionData == null)
+        {
+            Debug.Log("No Session data");
+            return;
+        }
+        if(currentGameSessionData.money < buildings[indexSelected].buildingCost)
+        {
+            Debug.Log(" NA MANEY !!");
+            GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(6);
+            return;
+        }
+
+        Build(selectionHandler.Selection.CellPosition, indexSelected);
+        builded = true;
+        currentGameSessionData.money -= buildings[indexSelected].buildingCost;
+        ui.UpdateUI(currentGameSessionData.money);
+        GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(8);
+        BuildActionInfo info = new BuildActionInfo(CellToWorldPosition(selectionHandler.Selection.CellPosition), selectionHandler.Selection.CellPosition, buildings[indexSelected], builded);
         BuildingContructed?.Invoke(info);
+        DeselectTile();
     }
 
     public void Build(Vector3Int tilePos, int buildingIndex)
@@ -616,19 +574,21 @@ public class GameController : MonoBehaviour
             Debug.Log("Using Menus!!");
             return;
         }
-        if (selected)
+        if (selectionHandler.HasSelection())
         {
             DeselectTile();
         }
         else
         {
             SelectTile(worldPos);
+            /*
             if(selected)
             {
                 int selBuildingIndex = activeBuildings[Utils.TilePosToIndex(selectedTile.x, selectedTile.y, width)].ListIndex;
                 Debug.Log("Sending info of " + selectedTile + " index " + selBuildingIndex);
                 ui.SetSelectedTileMenu(true, buildings[selBuildingIndex]);
             }
+            */
         }
     }
 
@@ -639,7 +599,7 @@ public class GameController : MonoBehaviour
     private void SelectTile(Vector3 worldPos)
     {
         //Calculate new selected pos
-        Vector3Int newSelectedPos = overlayTilemap.WorldToCell(new Vector3(worldPos.x, worldPos.y, 0));
+        Vector3Int newSelectedPos = overlayTilemap.WorldToCell(new Vector3(worldPos.x, worldPos.y, 0)); //cell position
         bool isThisCellSelectable = CheckForActiveLimitedSelection(newSelectedPos);
         if (!isThisCellSelectable) return;
         bool isThisCellLocked = CheckForActiveCellLocks(newSelectedPos);
@@ -651,15 +611,18 @@ public class GameController : MonoBehaviour
         overlayTilemap.SetTile(newSelectedPos, highlightTile);
         overlayTilemap.RefreshTile(newSelectedPos);
         //Set selected tile;
-        selectedTile = newSelectedPos;
-        tempSel = activeBuildings[Utils.TilePosToIndex(selectedTile.x, selectedTile.y, width)];
-        Debug.Log("Selected tile position index = " + tempSel.ListIndex);
+        //selectedTile = newSelectedPos;
+        Building buildingSelected = activeBuildings[Utils.TilePosToIndex(newSelectedPos.x, newSelectedPos.y, width)];
+        //New Selection
+        selectionHandler.Select(newSelectedPos, buildingSelected);
+        ui.SetSelectedTileMenu(true, buildings[buildingSelected.ListIndex]);
+
+        Debug.Log("Selected tile position index = " + buildingSelected.ListIndex);
         //SquishTest
-        if (tempSel.ListIndex > nonAllowedToBuildMaxIndex)
+        if (buildingSelected.ListIndex > nonAllowedToBuildMaxIndex)
         {
             SquishTile(newSelectedPos);
         }
-        selected = true;
     }
 
     /// <summary>
@@ -718,10 +681,12 @@ public class GameController : MonoBehaviour
     public void DeselectTile()
     {
         //Clear previous selection
-        overlayTilemap.SetTile(selectedTile, null);
-        overlayTilemap.RefreshTile(selectedTile);
-        selected = false;
+        overlayTilemap.SetTile(selectionHandler.Selection.CellPosition, null);
+        overlayTilemap.RefreshTile(selectionHandler.Selection.CellPosition);
+        //selected = false;
         ui.SetSelectedTileMenu(false, null);
+
+        selectionHandler.Deselect();
     }
 
     private void OnDestroy()
@@ -730,22 +695,9 @@ public class GameController : MonoBehaviour
         Debug.Log("Cleaned Events");
     }
 
-    /*
-    public int TilePosToIndex(int x, int y)
-    {
-        int index = x + y * width;
-        return index;
-    }
-    public Vector3Int IndexToTilePos(int indx)
-    {
-        int y = (int)(indx / width);
-        int x = indx - (y * width);
-        return new Vector3Int(x, y, 0);
-    }
-    */
     public Vector3 SelectedToWorldPosition()
     {
-        return groundTilemap.CellToWorld(selectedTile);
+        return groundTilemap.CellToWorld(selectionHandler.Selection.CellPosition);
     }
 
     public Vector3 CellToWorldPosition(Vector3Int cell)

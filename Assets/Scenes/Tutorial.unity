@@ -9703,6 +9703,7 @@ MonoBehaviour:
   - {fileID: 1839315998}
   game: {fileID: 1994174127}
   cc: {fileID: 1165729320}
+  selectionHandler: {fileID: 1994174130}
   powerSlider: {fileID: 1700967829}
   power: {fileID: 791093946}
   money: {fileID: 1920660893}
@@ -14856,6 +14857,7 @@ GameObject:
   - component: {fileID: 1994174127}
   - component: {fileID: 1994174129}
   - component: {fileID: 1994174128}
+  - component: {fileID: 1994174130}
   m_Layer: 0
   m_Name: Game
   m_TagString: GameController
@@ -14917,6 +14919,11 @@ MonoBehaviour:
   roadTilemap: {fileID: 1543499730}
   groundTilemap: {fileID: 108015606}
   ui: {fileID: 1165729319}
+  selectionHandler: {fileID: 1994174130}
+  activeBuildings: []
+  state: 0
+  buildingAnimationPrefab: {fileID: 3782275413214175199, guid: 9c649b17787243247b5c8c51e5688573, type: 3}
+  spawnedBuildingAnims: []
   buildings:
   - {fileID: 11400000, guid: e1fc79c9e9d9c2e42a6e9c8e823fafa4, type: 2}
   - {fileID: 11400000, guid: fa7f7bd7c8eb42445882beb0953f6dc6, type: 2}
@@ -14937,10 +14944,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: f3a7911865089fa428dfa2081271d4bb, type: 2}
   - {fileID: 11400000, guid: 1d6bc1e4974847c46ae7eabf322109f2, type: 2}
   - {fileID: 11400000, guid: 795f5c43a4dc5f14084b37a88e3291d5, type: 2}
-  activeBuildings: []
-  state: 0
-  buildingAnimationPrefab: {fileID: 3782275413214175199, guid: 9c649b17787243247b5c8c51e5688573, type: 3}
-  spawnedBuildingAnims: []
   nonAllowedToBuildMaxIndex: 3
 --- !u!114 &1994174128
 MonoBehaviour:
@@ -14979,6 +14982,25 @@ MonoBehaviour:
   - {fileID: 1684655843302091259, guid: af5922b18870bd5418aae98f3a728461, type: 3}
   trafficAmount: 10
   trafficParent: {fileID: 931424163}
+--- !u!114 &1994174130
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1994174124}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 65c5e12287cb83740b17a973886168f9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  selection:
+    cellPosition: {x: 0, y: 0, z: 0}
+    building:
+      components: []
+      currentCompAmounts: []
+      totalPowerConsumption: 0
+  selected: 0
 --- !u!1 &1994580297
 GameObject:
   m_ObjectHideFlags: 0
