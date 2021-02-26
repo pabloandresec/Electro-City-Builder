@@ -33,17 +33,17 @@ public class Building
     /// </summary>
     /// <param name="gc"></param>
     /// <param name="timePassed"></param>
-    public void UpdateComponentsLife(GameController gc, float timePassed)
+    public void UpdateComponentsLife(GameController gc, MapDrawController map, float timePassed)
     {
         CalculateOnlyFirstComponentByCategory(gc.Components, timePassed);
-        CheckForActiveComponents(gc);
+        CheckForActiveComponents(gc, map);
     }
 
     /// <summary>
     /// Determina si hay componetes activos en el edificio y actuliza la sprite de ser necesario
     /// </summary>
     /// <param name="gc"></param>
-    private void CheckForActiveComponents(GameController gc)
+    private void CheckForActiveComponents(GameController gc, MapDrawController map)
     {
         if (components == null)
         {
@@ -51,11 +51,11 @@ public class Building
         }
         if (components.Count == 0)
         {
-            gc.SetBuildingElectricVisibility(false, Utils.IndexToTilePos(positionIndex,GameController.currentWidth), gc.Buildings[listIndex]);
+            map.SetBuildingElectricVisibility(false, Utils.IndexToTilePos(positionIndex, gc.Width), gc.Buildings[listIndex]);
         }
         else
         {
-            gc.SetBuildingElectricVisibility(true, Utils.IndexToTilePos(positionIndex, GameController.currentWidth), gc.Buildings[listIndex]);
+            map.SetBuildingElectricVisibility(true , Utils.IndexToTilePos(positionIndex, gc.Width), gc.Buildings[listIndex]);
         }
     }
 

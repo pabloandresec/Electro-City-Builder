@@ -20,19 +20,13 @@ public class GameController : MonoBehaviour
     [SerializeField] private bool randomBuilds = false;
     [SerializeField] private GameSession currentGameSessionData;
     [Header("References")]
-    [SerializeField] private Tile highlightTile;
-    [SerializeField] private Tilemap overlayTilemap;
-    [SerializeField] private Tilemap buildTilemap;
-    [SerializeField] private Tilemap roadTilemap;
-    [SerializeField] private Tilemap groundTilemap;
+    [SerializeField] private MapDrawController map;
     [SerializeField] private UIController ui;
     [SerializeField] private SelectionHandler selectionHandler;
     [Header("Juego Activo")]
     [SerializeField] private Building[] activeBuildings;
     [SerializeField] private PlayerState state = PlayerState.GAME;
-    [Header("Squish animation")]
-    [SerializeField] private GameObject buildingAnimationPrefab;
-    [SerializeField] private List<GameObject> spawnedBuildingAnims;
+
     [Header("--------- REFERENCE DATA ----------")]
     [HideInInspector]
     [SerializeField] private List<BuildingData> buildings;
@@ -45,11 +39,10 @@ public class GameController : MonoBehaviour
     private bool limited = false;
     private Vector3Int limitedToTile = -Vector3Int.one;
     private Action OnLimitedCleared;
-    private List<Vector3Int> lockedCells;
 
     private float tPassed = 0;
     private uint totalPassed = uint.MinValue;
-    private bool squishing = false;
+    
 
     public static int currentWidth { get => GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>().width; }
     public static int currentHeight { get => GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>().height; }
@@ -74,20 +67,10 @@ public class GameController : MonoBehaviour
         InitDataIndexation(); //Indexa los datos para facilitar su acceso y ahorrar memoria
         PopulatingActiveBuildings(); //Crear los datos de edificios activos en los que se 
 
-        //Scan Roads
-        for (int y = 0; y < height; y++)
-        {
-            for (int x = 0; x < width; x++)
-            {
-                if (roadTilemap.HasTile(new Vector3Int(x, y, 0)))
-                {
-                    activeBuildings[Utils.TilePosToIndex(x, y, width)] = new Building(buildings[3], Utils.TilePosToIndex(x, y, width));
-                }
-            }
-        }
+        map.ScanRoads();
 
         activeBuildings[Utils.TilePosToIndex(8, 7, width)] = new Building(buildings[2], Utils.TilePosToIndex(8, 7, width));
-        LockCell(new Vector3Int(9, 7, 0));
+        map.LockCell(new Vector3Int(9, 7, 0));
         activeBuildings[Utils.TilePosToIndex(7, 5, width)] = new Building(buildings[4], Utils.TilePosToIndex(7, 5, width));
 
         DrawMap();
@@ -99,20 +82,11 @@ public class GameController : MonoBehaviour
         OnMainScriptReady?.Invoke();
     }
 
-    public void SetBuildingElectricVisibility(bool state, Vector3Int cell, BuildingData data)
-    {
-        TileBase tb = null;
-        tb = state ? data.tile : data.tileOff;
-        buildTilemap.SetTile(cell, tb);
-        //Debug.Log("building electricity in " + cell + " is now " + state);
-    }
-
     private void Update()
     {
         RefreshGame();
         if (Input.GetKeyDown(KeyCode.T))
         {
-            //TileTapped(new Vector3(0.999f, 3.209f, 0));
             SpawnMoneyBubbles();
         }
     }
@@ -138,9 +112,18 @@ public class GameController : MonoBehaviour
     {
         foreach (Building b in activeBuildings)
         {
-            if(b.ListIndex > 3)
+            BuildingData bd = Buildings[b.ListIndex];
+
+            if(bd.rent > 0)
             {
-                ui.AddMoneyBubble(b.PositionIndex.ToString(), Utils.IndexToTilePos(b.PositionIndex, width), b, -1);
+                if(b.components == null || b.components.Count == 0)
+                {
+                    Debug.Log(b.PositionIndex + " has no components");
+                }
+                else
+                {
+                    ui.AddMoneyBubble(b.PositionIndex.ToString(), Utils.IndexToTilePos(b.PositionIndex, width), b, -1);
+                }
             }
         }
     }
@@ -151,7 +134,7 @@ public class GameController : MonoBehaviour
         int totalPow = 0;
         for (int i = 0; i < activeBuildings.Length; i++)
         {
-            activeBuildings[i].UpdateComponentsLife(this, timePassed);
+            activeBuildings[i].UpdateComponentsLife(this, map, timePassed);
             totalPow += activeBuildings[i].totalPowerConsumption;
         }
         ui.UpdateUI(currentGameSessionData.money, totalPow, 1000);
@@ -172,32 +155,7 @@ public class GameController : MonoBehaviour
         Debug.Log("Limit selection of tiles disabled");
     }
 
-    /// <summary>
-    /// Will lock the cell so cannot be selected
-    /// </summary>
-    public void LockCell(Vector3Int cell)
-    {
-        if(lockedCells == null)
-        {
-            lockedCells = new List<Vector3Int>();
-        }
-        lockedCells.Add(cell);
-        Debug.Log("Cell "+cell+" locked!");
-    }
-    /// <summary>
-    /// Unlocks a cell is it exists
-    /// </summary>
-    /// <param name="cell"></param>
-    public void UnlockCell(Vector3Int cell)
-    {
-        if (lockedCells == null)
-        {
-            Debug.Log("No locked cells");
-            return;
-        }
-        lockedCells.Remove(cell);
-        Debug.Log("Cell " + cell + " lock REMOVED!");
-    }
+    
 
     /// <summary>
     /// Limita la seleccion de tiles a una unica casilla
@@ -238,7 +196,6 @@ public class GameController : MonoBehaviour
         if(selectionHandler.HasSelection())
         {
             return selectionHandler.Selection.Building;
-            //return activeBuildings[Utils.TilePosToIndex(selectedTile.x, selectedTile.y, width)];
         }
         else
         {
@@ -336,7 +293,7 @@ public class GameController : MonoBehaviour
         Vector3Int cell = selectionHandler.Selection.CellPosition;
 
         targetBuilding.AddBuildingComponent(components[index]);
-        SetBuildingElectricVisibility(true, new Vector3Int(cell.x, cell.y, 0), buildings[targetBuilding.ListIndex]);
+        map.SetBuildingElectricVisibility(true, new Vector3Int(cell.x, cell.y, 0), buildings[targetBuilding.ListIndex]);
         currentGameSessionData.money -= components[index].cost;
         ui.UpdateUI(currentGameSessionData.money);
         ComponentAdded?.Invoke(components[index]);
@@ -381,7 +338,7 @@ public class GameController : MonoBehaviour
         currentGameSessionData.money -= buildings[indexSelected].buildingCost;
         ui.UpdateUI(currentGameSessionData.money);
         GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioController>().PlaySFX(8);
-        BuildActionInfo info = new BuildActionInfo(CellToWorldPosition(selectionHandler.Selection.CellPosition), selectionHandler.Selection.CellPosition, buildings[indexSelected], builded);
+        BuildActionInfo info = new BuildActionInfo(map.CellToWorldPosition(selectionHandler.Selection.CellPosition), selectionHandler.Selection.CellPosition, buildings[indexSelected], builded);
         BuildingContructed?.Invoke(info);
         DeselectTile();
     }
@@ -391,67 +348,8 @@ public class GameController : MonoBehaviour
         BuildingData selectedBuildingData = buildings[buildingIndex];
         int buildGridIndex = Utils.TilePosToIndex(tilePos.x, tilePos.y, width);
         activeBuildings[buildGridIndex] = new Building(selectedBuildingData, buildGridIndex);
-        DrawTile(tilePos);
+        RefreshCell(tilePos);
         Debug.Log("Building constructed");
-    }
-
-    public void SquishTile(Vector3Int cell)
-    {
-        if(cell.x < 0 || cell.x >= width || cell.y < 0 || cell.y >= height)
-        {
-            Debug.Log("Cell outside of bounds");
-            return;
-        }
-        squishing = true;
-        Debug.Log("Squishing " + cell);
-        GameObject animBuilding = Instantiate(buildingAnimationPrefab, buildTilemap.CellToWorld(cell), Quaternion.identity); // Spawn anim prefab
-        animBuilding.transform.name = cell + "_anim";
-        SpriteRenderer sr = animBuilding.transform.GetChild(0).GetComponent<SpriteRenderer>();
-
-        Building actBuilding = activeBuildings[Utils.TilePosToIndex(cell.x, cell.y, width)];
-        BuildingData buildingData = buildings[actBuilding.ListIndex];
-        Sprite s = buildTilemap.GetSprite(cell);
-
-        sr.sprite = s;
-
-        buildTilemap.SetTile(cell, null);
-        buildTilemap.RefreshTile(cell);
-        DrawLockedTiles();
-
-        if (spawnedBuildingAnims == null)
-        {
-            spawnedBuildingAnims = new List<GameObject>();
-            spawnedBuildingAnims.Add(animBuilding);
-            return;
-        }
-        if (spawnedBuildingAnims.Contains(animBuilding))
-        {
-            Debug.Log(animBuilding.transform.name + " already exist");
-            return;
-        }
-
-        spawnedBuildingAnims.Add(animBuilding);
-        Debug.Log("Spawned buiding for anim " + animBuilding);
-
-        Action onEnd = () =>
-        {
-            spawnedBuildingAnims.Remove(animBuilding);
-            Debug.Log("Despawned " + animBuilding);
-            int index = Utils.TilePosToIndex(cell.x, cell.y, width);
-            TileBase tile = actBuilding.components.Count == 0 ? buildingData.tileOff : buildingData.tile;
-            buildTilemap.SetTile(cell, tile);
-            buildTilemap.RefreshTile(cell);
-            DrawLockedTiles();
-            Destroy(animBuilding);
-            squishing = false;
-        };
-        LeanTween.scale(animBuilding, new Vector3(0.9f, 0.9f, 1f), 0.2f).setEaseInOutBounce().setOnComplete(() =>
-        {
-            LeanTween.scale(animBuilding, new Vector3(1f, 1f, 1f), 0.2f).setEaseInOutBounce().setOnComplete(() =>
-            {
-                onEnd?.Invoke();
-            });
-        });
     }
 
     /// <summary>
@@ -469,30 +367,29 @@ public class GameController : MonoBehaviour
     }
 
     /// <summary>
-    /// Dibuja solo alrededor de la celda en cuestion
+    /// Refresca la celda en cuestion de acuerdo
     /// </summary>
     /// <param name="cell"></param>
-    private void DrawTile(Vector3Int cell)
+    private void RefreshCell(Vector3Int cell)
     {
         Building b = activeBuildings[Utils.TilePosToIndex(cell.x, cell.y, width)];
         BuildingData bd = buildings[b.ListIndex];
-        if (bd.Index != nonAllowedToBuildMaxIndex)
+        if (bd.Index != 3) //Refactorizar
         {
             if (b.components == null || b.components.Count == 0)
             {
-                buildTilemap.SetTile(cell, bd.tileOff);
+                map.DrawTile(cell, bd.tileOff);
             }
             else
             {
-                buildTilemap.SetTile(cell, bd.tile);
+                map.DrawTile(cell, bd.tile);
             }
         }
-        buildTilemap.RefreshTile(cell);
-        DrawLockedTiles();
+        map.DrawLockedTiles();
     }
 
     /// <summary>
-    /// De acuerdo a los edificios dibuja el mapa correspondiente
+    /// De acuerdo a los edificios dibuja el mapa correspondiente(HARCODED IGNORE STREET)
     /// </summary>
     private void DrawMap()
     {
@@ -503,32 +400,21 @@ public class GameController : MonoBehaviour
                 Building b = activeBuildings[Utils.TilePosToIndex(x, y, width)];
                 BuildingData bd = buildings[b.ListIndex];
                 Vector3Int cell = new Vector3Int(x, y, 0);
-                if (bd.Index != 3)
+                if (bd.Index != 3) //Esto indica que no se dibujara la calle en la capa de edificios
                 {
-                    if(b.components == null || b.components.Count == 0)
+                    if (b.components == null || b.components.Count == 0)
                     {
-                        buildTilemap.SetTile(cell, bd.tileOff);
+                        map.DrawTile(cell, bd.tileOff);
                     }
                     else
                     {
-                        buildTilemap.SetTile(cell, bd.tile);
+                        map.DrawTile(cell, bd.tile);
                     }
                 }
-                buildTilemap.RefreshTile(cell);
             }
         }
-        DrawLockedTiles();
+        map.DrawLockedTiles();
         Debug.Log("Map Drawed");
-    }
-
-    public void DrawLockedTiles()
-    {
-        foreach (Vector3Int l in lockedCells)
-        {
-            buildTilemap.SetTile(l, null);
-            buildTilemap.RefreshTile(l);
-        }
-        Debug.Log("Lock tiles Drawed");
     }
 
     #region Cambio de estados
@@ -564,7 +450,7 @@ public class GameController : MonoBehaviour
     #endregion
 
     /// <summary>
-    /// Cuando el jugador presiona en una celda
+    /// Cuando el jugador hace un tap o click...
     /// </summary>
     /// <param name="worldPos"></param>
     public void TileTapped(Vector3 worldPos)
@@ -581,14 +467,6 @@ public class GameController : MonoBehaviour
         else
         {
             SelectTile(worldPos);
-            /*
-            if(selected)
-            {
-                int selBuildingIndex = activeBuildings[Utils.TilePosToIndex(selectedTile.x, selectedTile.y, width)].ListIndex;
-                Debug.Log("Sending info of " + selectedTile + " index " + selBuildingIndex);
-                ui.SetSelectedTileMenu(true, buildings[selBuildingIndex]);
-            }
-            */
         }
     }
 
@@ -599,19 +477,17 @@ public class GameController : MonoBehaviour
     private void SelectTile(Vector3 worldPos)
     {
         //Calculate new selected pos
-        Vector3Int newSelectedPos = overlayTilemap.WorldToCell(new Vector3(worldPos.x, worldPos.y, 0)); //cell position
+        Vector3Int newSelectedPos = map.WorldPosToCellPos(worldPos);
         bool isThisCellSelectable = CheckForActiveLimitedSelection(newSelectedPos);
         if (!isThisCellSelectable) return;
-        bool isThisCellLocked = CheckForActiveCellLocks(newSelectedPos);
+        bool isThisCellLocked = map.CheckForActiveCellLocks(newSelectedPos);
         if (!isThisCellLocked) return;
 
         //Clamping the new selected pos;
         newSelectedPos = new Vector3Int(Mathf.Clamp(newSelectedPos.x, 0, width - 1), Mathf.Clamp(newSelectedPos.y, 0, height - 1), 0);
         //Updating view;
-        overlayTilemap.SetTile(newSelectedPos, highlightTile);
-        overlayTilemap.RefreshTile(newSelectedPos);
-        //Set selected tile;
-        //selectedTile = newSelectedPos;
+        map.DrawSelectOverlay(newSelectedPos);
+        //Getting active data
         Building buildingSelected = activeBuildings[Utils.TilePosToIndex(newSelectedPos.x, newSelectedPos.y, width)];
         //New Selection
         selectionHandler.Select(newSelectedPos, buildingSelected);
@@ -621,34 +497,11 @@ public class GameController : MonoBehaviour
         //SquishTest
         if (buildingSelected.ListIndex > nonAllowedToBuildMaxIndex)
         {
-            SquishTile(newSelectedPos);
+            map.SquishTile(newSelectedPos);
         }
     }
 
-    /// <summary>
-    /// Se fija si la casilla suminstrada esta bloqueada
-    /// </summary>
-    /// <param name="newSelectedPos"></param>
-    /// <returns></returns>
-    private bool CheckForActiveCellLocks(Vector3Int _cell)
-    {
-        if(lockedCells == null)
-        {
-            return true;
-        }
-        bool allowed = true;
-        foreach(Vector3Int cell in lockedCells)
-        {
-            if(cell == _cell)
-            {
-                Debug.Log("cell " + cell + " is locked");
-                allowed = false;
-                break;
-            }
-        }
-        Debug.Log("Cell " + _cell + " lock is " + allowed);
-        return allowed;
-    }
+    
 
     /// <summary>
     /// Se fija si la sellecion esta limitada a cierta casilla
@@ -680,13 +533,9 @@ public class GameController : MonoBehaviour
     /// </summary>
     public void DeselectTile()
     {
-        //Clear previous selection
-        overlayTilemap.SetTile(selectionHandler.Selection.CellPosition, null);
-        overlayTilemap.RefreshTile(selectionHandler.Selection.CellPosition);
-        //selected = false;
-        ui.SetSelectedTileMenu(false, null);
-
-        selectionHandler.Deselect();
+        map.ClearSelectOverlay(selectionHandler.Selection.CellPosition);//Clear previous selection
+        ui.SetSelectedTileMenu(false, null);//Refresh UI
+        selectionHandler.Deselect();//Deselect
     }
 
     private void OnDestroy()
@@ -694,15 +543,4 @@ public class GameController : MonoBehaviour
         InputController.OnTap -= TileTapped;
         Debug.Log("Cleaned Events");
     }
-
-    public Vector3 SelectedToWorldPosition()
-    {
-        return groundTilemap.CellToWorld(selectionHandler.Selection.CellPosition);
-    }
-
-    public Vector3 CellToWorldPosition(Vector3Int cell)
-    {
-        return groundTilemap.CellToWorld(cell);
-    }
-
 }

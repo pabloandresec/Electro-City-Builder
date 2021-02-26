@@ -18,7 +18,7 @@ MonoBehaviour:
   description: Parcela vacia
   buildingCost: 3000
   essential: 0
-  rent: 100
+  rent: 0
   upgradeCost: 0
   upgradeBuildingName: 
   hasComponents: 0

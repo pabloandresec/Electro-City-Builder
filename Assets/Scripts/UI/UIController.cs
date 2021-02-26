@@ -11,6 +11,7 @@ public class UIController : MonoBehaviour
     [Header("References")]
     [SerializeField] private GameObject[] mainMenus;
     [SerializeField] private GameController game;
+    [SerializeField] private MapDrawController map;
     [SerializeField] private CharController cc;
     [SerializeField] private SelectionHandler selectionHandler;
     [Space(5)]
@@ -528,7 +529,7 @@ public class UIController : MonoBehaviour
             Debug.Log("Menu already existed");
             return;
         }
-        GameObject bubbleGO = Instantiate(popUpPrefab, game.CellToWorldPosition(tilePos) + new Vector3(0, 0.75f, 0), Quaternion.identity); //Crea la burbuja
+        GameObject bubbleGO = Instantiate(popUpPrefab, map.CellToWorldPosition(tilePos) + new Vector3(0, 0.75f, 0), Quaternion.identity); //Crea la burbuja
         bubbleGO.transform.SetParent(popUpHolder);
         bubbleGO.name = n;
 
@@ -560,7 +561,7 @@ public class UIController : MonoBehaviour
             //Debug.Log("Menu already existed");
             return;
         }
-        GameObject bubbleGO = Instantiate(popUpPrefab, game.CellToWorldPosition(tilePos) + new Vector3(0, 0.75f, 0), Quaternion.identity); //Crea la burbuja
+        GameObject bubbleGO = Instantiate(popUpPrefab, map.CellToWorldPosition(tilePos) + new Vector3(0, 0.75f, 0), Quaternion.identity); //Crea la burbuja
         bubbleGO.transform.SetParent(popUpHolder);
         bubbleGO.name = n;
 
@@ -593,7 +594,7 @@ public class UIController : MonoBehaviour
             Debug.LogWarning("Bubble "+ n +" already existed! ignoring");
             return;
         }
-        GameObject bubbleGO = Instantiate(popUpPrefab, game.CellToWorldPosition(tilePos) + new Vector3(0, 0.75f, 0), Quaternion.identity); //Crea la burbuja
+        GameObject bubbleGO = Instantiate(popUpPrefab, map.CellToWorldPosition(tilePos) + new Vector3(0, 0.75f, 0), Quaternion.identity); //Crea la burbuja
         bubbleGO.transform.SetParent(popUpHolder); //setea el padre
         bubbleGO.name = n; // setea el nombre
 
@@ -667,7 +668,7 @@ public class UIController : MonoBehaviour
             return;
         }
 
-        GameObject bubbleGO = Instantiate(popUpPrefab, game.SelectedToWorldPosition() + new Vector3(0, 0.75f, 0), Quaternion.identity);
+        GameObject bubbleGO = Instantiate(popUpPrefab, map.CellToWorldPosition(selectionHandler.Selection.CellPosition) + new Vector3(0, 0.75f, 0), Quaternion.identity);
         bubbleGO.transform.SetParent(popUpHolder);
         bubbleGO.name = selectionHandler.Selection.CellPosition.ToString();
         menusPos.Add(bubbleGO.name, bubbleGO.GetComponent<RectTransform>().position);

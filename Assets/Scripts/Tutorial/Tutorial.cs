@@ -15,6 +15,7 @@ public class Tutorial : MonoBehaviour
     [SerializeField] private GameObject money;
     [Header("References")]
     [SerializeField] private GameController gc;
+    [SerializeField] private MapDrawController map;
     [SerializeField] private UIController ui;
     [SerializeField] private MissionController mc;
     [SerializeField] private InputController ic;
@@ -46,7 +47,7 @@ public class Tutorial : MonoBehaviour
         cc.AssignAnActionAtEndOfDialog(2, () =>
         {
             ic.LockInput(true, true, true);
-            Vector3 tgtPos = gc.CellToWorldPosition(new Vector3Int(7, 5, 0)) + new Vector3(0, 0.5f, 0);
+            Vector3 tgtPos = map.CellToWorldPosition(new Vector3Int(7, 5, 0)) + new Vector3(0, 0.5f, 0);
             ic.MoveCameraToWorldPosition(tgtPos, 2, 1,() =>
             {
                 //gc.SwitchState(1);
@@ -122,7 +123,7 @@ public class Tutorial : MonoBehaviour
                         if (exit == "But_CatExit")
                         {
                             ic.LockInput(true, true, true);
-                            ic.MoveCameraToWorldPosition(gc.CellToWorldPosition(new Vector3Int(8, 8, 0)), 3, 1,() => {
+                            ic.MoveCameraToWorldPosition(map.CellToWorldPosition(new Vector3Int(8, 8, 0)), 3, 1,() => {
                                 cc.ShowDialog(8);
                                 ui.ButtonPressed = null;
                             });
@@ -136,7 +137,7 @@ public class Tutorial : MonoBehaviour
             gc.LimitSelectionOfTiles(new Vector3Int(8, 8, 0), () => {
                 cc.ShowDialog(10);
             });
-            ic.MoveCameraToWorldPosition(gc.CellToWorldPosition(new Vector3Int(8, 8, 0)) + new Vector3(0, 0.5f, 0), 1f, 1 ,() => {
+            ic.MoveCameraToWorldPosition(map.CellToWorldPosition(new Vector3Int(8, 8, 0)) + new Vector3(0, 0.5f, 0), 1f, 1 ,() => {
                 cc.ShowDialog(9);
                 ui.ButtonPressed = null;
             });
@@ -196,7 +197,7 @@ public class Tutorial : MonoBehaviour
         });
         cc.AssignAnActionAtEndOfDialog(13, () =>
         {
-            ic.MoveCameraToWorldPosition(gc.CellToWorldPosition(new Vector3Int(7,5,0)), 3, 1, () =>
+            ic.MoveCameraToWorldPosition(map.CellToWorldPosition(new Vector3Int(7,5,0)), 3, 1, () =>
             {
                 cc.ShowDialog(14);
             });

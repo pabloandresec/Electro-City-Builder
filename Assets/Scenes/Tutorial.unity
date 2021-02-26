@@ -9702,6 +9702,7 @@ MonoBehaviour:
   - {fileID: 582722198}
   - {fileID: 1839315998}
   game: {fileID: 1994174127}
+  map: {fileID: 1994174131}
   cc: {fileID: 1165729320}
   selectionHandler: {fileID: 1994174130}
   powerSlider: {fileID: 1700967829}
@@ -11335,6 +11336,7 @@ MonoBehaviour:
   cover: {fileID: 1432086074}
   money: {fileID: 590215835}
   gc: {fileID: 1994174127}
+  map: {fileID: 0}
   ui: {fileID: 1165729319}
   mc: {fileID: 966173386}
   ic: {fileID: 1390440861}
@@ -14858,6 +14860,7 @@ GameObject:
   - component: {fileID: 1994174129}
   - component: {fileID: 1994174128}
   - component: {fileID: 1994174130}
+  - component: {fileID: 1994174131}
   m_Layer: 0
   m_Name: Game
   m_TagString: GameController
@@ -14913,17 +14916,11 @@ MonoBehaviour:
   buildingRefreshRate: 10
   randomBuilds: 1
   currentGameSessionData: {fileID: 11400000, guid: 1dd46890e1cd274419800719c298190f, type: 2}
-  highlightTile: {fileID: 11400000, guid: a3ac7ae6d4a8c99458b012966d19e9e1, type: 2}
-  overlayTilemap: {fileID: 536756827}
-  buildTilemap: {fileID: 118609465}
-  roadTilemap: {fileID: 1543499730}
-  groundTilemap: {fileID: 108015606}
+  map: {fileID: 1994174131}
   ui: {fileID: 1165729319}
   selectionHandler: {fileID: 1994174130}
   activeBuildings: []
   state: 0
-  buildingAnimationPrefab: {fileID: 3782275413214175199, guid: 9c649b17787243247b5c8c51e5688573, type: 3}
-  spawnedBuildingAnims: []
   buildings:
   - {fileID: 11400000, guid: e1fc79c9e9d9c2e42a6e9c8e823fafa4, type: 2}
   - {fileID: 11400000, guid: fa7f7bd7c8eb42445882beb0953f6dc6, type: 2}
@@ -14980,7 +14977,7 @@ MonoBehaviour:
   trafficPrefabs:
   - {fileID: 5698333417985759345, guid: b7f79e0afe61e9349a48e7dbcf485d49, type: 3}
   - {fileID: 1684655843302091259, guid: af5922b18870bd5418aae98f3a728461, type: 3}
-  trafficAmount: 10
+  trafficAmount: 20
   trafficParent: {fileID: 931424163}
 --- !u!114 &1994174130
 MonoBehaviour:
@@ -15001,6 +14998,26 @@ MonoBehaviour:
       currentCompAmounts: []
       totalPowerConsumption: 0
   selected: 0
+--- !u!114 &1994174131
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1994174124}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: adb324a8bdcc2df4daccc40b48cfeda7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gc: {fileID: 1994174127}
+  highlightTile: {fileID: 11400000, guid: a3ac7ae6d4a8c99458b012966d19e9e1, type: 2}
+  overlayTilemap: {fileID: 536756827}
+  buildTilemap: {fileID: 118609465}
+  roadTilemap: {fileID: 1543499730}
+  groundTilemap: {fileID: 108015606}
+  buildingAnimationPrefab: {fileID: 3782275413214175199, guid: 9c649b17787243247b5c8c51e5688573, type: 3}
+  spawnedBuildingAnims: []
 --- !u!1 &1994580297
 GameObject:
   m_ObjectHideFlags: 0

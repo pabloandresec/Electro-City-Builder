@@ -18,7 +18,7 @@ MonoBehaviour:
   description: 
   buildingCost: 500
   essential: 0
-  rent: 100
+  rent: 0
   upgradeCost: 0
   upgradeBuildingName: 
   hasComponents: 0

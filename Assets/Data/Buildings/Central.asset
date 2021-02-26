@@ -18,7 +18,7 @@ MonoBehaviour:
   description: Provee de energia a la ciudad
   buildingCost: 999999
   essential: 1
-  rent: 100
+  rent: 0
   upgradeCost: 999999
   upgradeBuildingName: 
   hasComponents: 0
